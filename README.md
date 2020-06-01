@@ -1,2 +1,2 @@
 # emu
-emu-synth
+Elizabeth's minimalist universal synthesis engine
