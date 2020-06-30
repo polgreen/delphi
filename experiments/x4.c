@@ -8,9 +8,38 @@ double f(double x)
   return fabs(midpoint-x);
 }
 
-double delta_f(double x)
+double delta_f(double x, double gamma)
 {
-  return x >= midpoint ? 1 : -1;
+  double xdiff = 1 * gamma;
+
+  while(1)
+  {
+    double value = f(x);
+
+    if(value == 0)
+      return 0;
+
+    double delta_x_pos = f(x + xdiff)-value;
+    double delta_x_neg = f(x - xdiff)-value;
+
+    if(delta_x_pos == 0 && delta_x_neg == 0)
+      return 0;
+
+    if(delta_x_pos > 0 && delta_x_neg > 0)
+    {
+      // getting worse in both directions, reduce xdiff,
+      // and do another iteration
+      xdiff *= 0.1;
+    }
+    else
+    {
+      // pick direction
+      if(delta_x_pos < delta_x_neg)
+        return delta_x_pos * (1/xdiff);
+      else
+        return - delta_x_neg * (1/xdiff);
+    }
+  }
 }
 
 int sign(double x)
@@ -30,7 +59,7 @@ void gradient_descent()
     double value = f(x);
 
     // differentiate
-    double delta = delta_f(x);
+    double delta = delta_f(x, gamma);
 
     printf("step = %u, gamma = %lf, x = %lf, f(x) = %lf, delta = %lf\n", step, gamma, x, value, delta);
 
@@ -47,7 +76,7 @@ void gradient_descent()
       gamma *= 1.1;
 
     // step
-    x -= delta * gamma;
+    x -= value * delta * gamma;
 
     previous_delta = delta;
 

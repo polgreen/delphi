@@ -28,13 +28,14 @@ void gradient_descent()
   while(1)
   {
     double value = f(x);
-    printf("step = %u, gamma = %lf, x = %lf, f(x) = %lf\n", step, gamma, x, value);
-
-    if(value >= -0.00001 && value <= 0.00001)
-      break;
 
     // differentiate
     double delta = delta_f(x);
+
+    printf("step = %u, gamma = %lf, x = %lf, f(x) = %lf, delta = %lf\n", step, gamma, x, value, delta);
+
+    if(value >= -0.00001 && value <= 0.00001)
+      break;
 
     if(delta == 0)
       break;
