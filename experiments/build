@@ -1,0 +1,4 @@
+gcc x0.c -o x0
+gcc x1.c -o x1
+gcc x2.c -o x2
+gcc x3.c -o x3
