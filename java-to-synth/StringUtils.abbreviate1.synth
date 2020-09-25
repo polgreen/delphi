@@ -3,22 +3,10 @@
 
 (set-logic QF_ABV)
 
-; signature
+; inputs
 (declare-var |str.size| (_ BitVec 32))
 (declare-var |str| (Array (_ BitVec 32) (_ BitVec 16)))
 (declare-var |maxWidth| (_ BitVec 32))
-(declare-var |return.size| (_ BitVec 32))
-(declare-var |return| (Array (_ BitVec 32) (_ BitVec 16)))
-(declare-var pre Bool)
-
-; precondition
-(constraint (= pre (bvsge |maxWidth| (_ bv4 32))))
-
-; postcondition
-(constraint (=> (and pre (bvsgt |str.size| |maxWidth|)) (= |return.size| |maxWidth|)))
-(constraint (=> (and pre (bvsle |str.size| |maxWidth|)) (= |return.size| |str.size|)))
-;(constraint (=> (bvsgt |str.size| |maxWidth|)
-;  (forall ((i (_ BitVec 32))) (bvsgt ))))
 
 ; sketch
 (synth-fun |hole-char| (
@@ -27,15 +15,32 @@
   (|maxWidth| (_ BitVec 32)))
   (_ BitVec 16))
 
-(constraint (forall ((|i| (_ BitVec 32)))
-  (= (select |return| |i|) (|hole-char| |i| |str| |maxWidth|))))
-
 (synth-fun |hole-size| (
   (|str.size| (_ BitVec 32))
   (|str| (Array (_ BitVec 32) (_ BitVec 16)))
   (|maxWidth| (_ BitVec 32)))
   (_ BitVec 32))
 
-(constraint (= |return.size| (|hole-size| |str.size| |str| |maxWidth|)))
+(define-fun |return.size|
+  (
+    (|str.size| (_ BitVec 32))
+    (|str| (Array (_ BitVec 32) (_ BitVec 16)))
+    (|maxWidth| (_ BitVec 32))
+  )
+  (|hole-size| |str.size| |str| |maxWidth|))
+
+; precondition
+(define-fun pre 
+  (
+    (|str.size| (_ BitVec 32))
+    (|str| (Array (_ BitVec 32) (_ BitVec 16)))
+    (|maxWidth| (_ BitVec 32))
+  )
+  Bool
+  (bvsge |maxWidth| (_ bv4 32)))
+
+; postcondition
+(constraint (=> (and pre (bvsgt |str.size| |maxWidth|)) (= (|return.size| |str.size| |str| |maxWidth|) |maxWidth|)))
+(constraint (=> (and pre (bvsle |str.size| |maxWidth|)) (= (|return.size| |str.size| |str| |maxWidth|) |str.size|)))
 
 (check-synth)
