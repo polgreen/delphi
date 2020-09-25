@@ -16,6 +16,7 @@
 
 ; postcondition
 (constraint (=> (and pre (bvsgt |str.size| |maxWidth|)) (= |return.size| |maxWidth|)))
+(constraint (=> (and pre (bvsle |str.size| |maxWidth|)) (= |return.size| |str.size|)))
 ;(constraint (=> (bvsgt |str.size| |maxWidth|)
 ;  (forall ((i (_ BitVec 32))) (bvsgt ))))
 
