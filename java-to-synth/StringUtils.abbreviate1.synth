@@ -69,4 +69,9 @@
   (and (pre |str.size| |str| |maxWidth|) (> |str.size| |maxWidth|))
   (= (|return.size| |str.size| |str| |maxWidth|) |maxWidth|)))
 
+(constraint (=>
+  (and (pre |str.size| |str| |maxWidth|) (<= |str.size| |maxWidth|))
+  (forall ((index Int)) (= (|return| index |str.size| |str| |maxWidth|)
+    (ite (le index (- |str.size| 4)) (select |str| index) 46)))))
+
 (check-synth)
