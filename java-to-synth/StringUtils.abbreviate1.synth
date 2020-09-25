@@ -27,6 +27,7 @@
     (|str| (Array (_ BitVec 32) (_ BitVec 16)))
     (|maxWidth| (_ BitVec 32))
   )
+  (_ BitVec 32)
   (|hole-size| |str.size| |str| |maxWidth|))
 
 ; precondition
@@ -40,7 +41,7 @@
   (bvsge |maxWidth| (_ bv4 32)))
 
 ; postcondition
-(constraint (=> (and pre (bvsgt |str.size| |maxWidth|)) (= (|return.size| |str.size| |str| |maxWidth|) |maxWidth|)))
-(constraint (=> (and pre (bvsle |str.size| |maxWidth|)) (= (|return.size| |str.size| |str| |maxWidth|) |str.size|)))
+(constraint (=> (and (pre |str.size| |str| |maxWidth|) (bvsgt |str.size| |maxWidth|)) (= (|return.size| |str.size| |str| |maxWidth|) |maxWidth|)))
+(constraint (=> (and (pre |str.size| |str| |maxWidth|) (bvsle |str.size| |maxWidth|)) (= (|return.size| |str.size| |str| |maxWidth|) |str.size|)))
 
 (check-synth)
