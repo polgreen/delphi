@@ -4,49 +4,66 @@
 (set-logic QF_ABV)
 
 ; inputs
-(declare-var |str.size| (_ BitVec 32))
-(declare-var |str| (Array (_ BitVec 32) (_ BitVec 16)))
-(declare-var |maxWidth| (_ BitVec 32))
+(declare-var |str.size| Int)
+(declare-var |str| (Array Int Int))
+(declare-var |maxWidth| Int)
 
 ; sketch
 (synth-fun |hole-char| (
-  (|i| (_ BitVec 32))
-  (|str| (Array (_ BitVec 32) (_ BitVec 16)))
-  (|maxWidth| (_ BitVec 32)))
-  (_ BitVec 16))
+  (|i| Int)
+  (|str| (Array Int Int))
+  (|maxWidth| Int))
+  Int)
+
+(define-fun |return|
+  (
+    (|i| Int)
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|maxWidth| Int)
+  )
+  Int
+  (|hole-char| |i| |str.size| |str| |maxWidth|))
 
 (synth-fun |hole-size| (
-  (|str.size| (_ BitVec 32))
-  (|str| (Array (_ BitVec 32) (_ BitVec 16)))
-  (|maxWidth| (_ BitVec 32)))
-  (_ BitVec 32))
+  (|str.size| Int)
+  (|str| (Array Int Int))
+  (|maxWidth| Int))
+  Int)
 
 (define-fun |return.size|
   (
-    (|str.size| (_ BitVec 32))
-    (|str| (Array (_ BitVec 32) (_ BitVec 16)))
-    (|maxWidth| (_ BitVec 32))
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|maxWidth| Int)
   )
-  (_ BitVec 32)
+  Int
   (|hole-size| |str.size| |str| |maxWidth|))
 
 ; precondition
 (define-fun pre 
   (
-    (|str.size| (_ BitVec 32))
-    (|str| (Array (_ BitVec 32) (_ BitVec 16)))
-    (|maxWidth| (_ BitVec 32))
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|maxWidth| Int)
   )
   Bool
-  (bvsge |maxWidth| (_ bv4 32)))
+  (>= |maxWidth| 4))
 
-; postcondition
-(constraint (=>
-  (and (pre |str.size| |str| |maxWidth|) (bvsgt |str.size| |maxWidth|))
-  (= (|return.size| |str.size| |str| |maxWidth|) |maxWidth|)))
+; postcondition when string is short
 
 (constraint (=>
-  (and (pre |str.size| |str| |maxWidth|) (bvsle |str.size| |maxWidth|))
+  (and (pre |str.size| |str| |maxWidth|) (<= |str.size| |maxWidth|))
   (= (|return.size| |str.size| |str| |maxWidth|) |str.size|)))
+
+(constraint (=>
+  (and (pre |str.size| |str| |maxWidth|) (<= |str.size| |maxWidth|))
+  (forall ((index Int)) (= (|return| index |str.size| |str| |maxWidth|) |str.size|))))
+
+; postcondition when string is long
+
+(constraint (=>
+  (and (pre |str.size| |str| |maxWidth|) (> |str.size| |maxWidth|))
+  (= (|return.size| |str.size| |str| |maxWidth|) |maxWidth|)))
 
 (check-synth)
