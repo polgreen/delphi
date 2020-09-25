@@ -1,18 +1,21 @@
 ; org.apache.commons.lang3.StringUtils
 ; public static String abbreviate(final String str, final int maxWidth)
 
+(set-logic QF_ABV)
+
 ; signature
 (declare-var |str.size| (_ BitVec 32))
 (declare-var |str| (Array (_ BitVec 32) (_ BitVec 16)))
 (declare-var |maxWidth| (_ BitVec 32))
 (declare-var |return.size| (_ BitVec 32))
 (declare-var |return| (Array (_ BitVec 32) (_ BitVec 16)))
+(declare-var precondition Bool)
 
 ; precondition
-(constraint (bvsge |maxWidth| (_ bv4 32)))
+(= pre (bvsge |maxWidth| (_ bv4 32)))
 
 ; postcondition
-(constraint (=> (bvsgt |str.size| |maxWidth|) (= |return.size| |maxWidth|)))
+(constraint (=> (and pre (bvsgt |str.size| |maxWidth|)) (= |return.size| |maxWidth|)))
 ;(constraint (=> (bvsgt |str.size| |maxWidth|)
 ;  (forall ((i (_ BitVec 32))) (bvsgt ))))
 
