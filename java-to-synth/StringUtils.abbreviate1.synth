@@ -9,7 +9,7 @@
 (declare-var |maxWidth| (_ BitVec 32))
 (declare-var |return.size| (_ BitVec 32))
 (declare-var |return| (Array (_ BitVec 32) (_ BitVec 16)))
-(declare-var precondition Bool)
+(declare-var pre Bool)
 
 ; precondition
 (constraint (= pre (bvsge |maxWidth| (_ bv4 32))))
@@ -27,13 +27,13 @@
   (_ BitVec 16))
 
 (constraint (forall ((|i| (_ BitVec 32)))
-  (= (select |return| |i|) (|hole-char| (|i| |str| |maxWidth|)))))
+  (= (select |return| |i|) (|hole-char| |i| |str| |maxWidth|))))
 
 (synth-fun |hole-size| (
   (|str| (Array (_ BitVec 32) (_ BitVec 16)))
   (|maxWidth| (_ BitVec 32)))
   (_ BitVec 32))
 
-(constraint (= |return.size| (|hole-size| (|str| |maxWidth|))))
+(constraint (= |return.size| (|hole-size| |str| |maxWidth|)))
 
 (check-synth)
