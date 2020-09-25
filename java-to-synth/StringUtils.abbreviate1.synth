@@ -23,8 +23,8 @@
   (|maxWidth| (_ BitVec 32))
   (_ BitVec 16))
 
-(constraint (forall ((i (_ BitVec 32)))
-  (index |return| (|hole-char| |i| |str| |maxWidth|))))
+(constraint (forall ((|i| (_ BitVec 32)))
+  (= (select |return| |i|) (|hole-char| |i| |str| |maxWidth|))))
 
 (synth-fun |hole-size| (
   (|str| (Array (_ BitVec 32) (_ BitVec 16)))
