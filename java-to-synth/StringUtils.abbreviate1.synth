@@ -31,10 +31,11 @@
   (= (select |return| |i|) (|hole-char| |i| |str| |maxWidth|))))
 
 (synth-fun |hole-size| (
+  (|str.size| (_ BitVec 32))
   (|str| (Array (_ BitVec 32) (_ BitVec 16)))
   (|maxWidth| (_ BitVec 32)))
   (_ BitVec 32))
 
-(constraint (= |return.size| (|hole-size| |str| |maxWidth|)))
+(constraint (= |return.size| (|hole-size| |str.size| |str| |maxWidth|)))
 
 (check-synth)
