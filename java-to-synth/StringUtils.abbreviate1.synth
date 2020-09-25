@@ -1,18 +1,19 @@
 ; org.apache.commons.lang3.StringUtils
 ; public static String abbreviate(final String str, final int maxWidth)
 
-(set-logic QF_ABV)
-
 ; inputs
 (declare-var |str.size| Int)
 (declare-var |str| (Array Int Int))
 (declare-var |maxWidth| Int)
 
 ; sketch
-(synth-fun |hole-char| (
-  (|i| Int)
-  (|str| (Array Int Int))
-  (|maxWidth| Int))
+(synth-fun |hole-char|
+  (
+    (|i| Int)
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|maxWidth| Int)
+  )
   Int)
 
 (define-fun |return|
@@ -25,10 +26,12 @@
   Int
   (|hole-char| |i| |str.size| |str| |maxWidth|))
 
-(synth-fun |hole-size| (
-  (|str.size| Int)
-  (|str| (Array Int Int))
-  (|maxWidth| Int))
+(synth-fun |hole-size|
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|maxWidth| Int)
+  )
   Int)
 
 (define-fun |return.size|
@@ -58,7 +61,7 @@
 
 (constraint (=>
   (and (pre |str.size| |str| |maxWidth|) (<= |str.size| |maxWidth|))
-  (forall ((index Int)) (= (|return| index |str.size| |str| |maxWidth|) |str.size|))))
+  (forall ((index Int)) (= (|return| index |str.size| |str| |maxWidth|) (select |str| index)))))
 
 ; postcondition when string is long
 
