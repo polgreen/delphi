@@ -41,7 +41,12 @@
   (bvsge |maxWidth| (_ bv4 32)))
 
 ; postcondition
-(constraint (=> (and (pre |str.size| |str| |maxWidth|) (bvsgt |str.size| |maxWidth|)) (= (|return.size| |str.size| |str| |maxWidth|) |maxWidth|)))
-(constraint (=> (and (pre |str.size| |str| |maxWidth|) (bvsle |str.size| |maxWidth|)) (= (|return.size| |str.size| |str| |maxWidth|) |str.size|)))
+(constraint (=>
+  (and (pre |str.size| |str| |maxWidth|) (bvsgt |str.size| |maxWidth|))
+  (= (|return.size| |str.size| |str| |maxWidth|) |maxWidth|)))
+
+(constraint (=>
+  (and (pre |str.size| |str| |maxWidth|) (bvsle |str.size| |maxWidth|))
+  (= (|return.size| |str.size| |str| |maxWidth|) |str.size|)))
 
 (check-synth)
