@@ -12,7 +12,7 @@
 (declare-var precondition Bool)
 
 ; precondition
-(= pre (bvsge |maxWidth| (_ bv4 32)))
+(constraint (= pre (bvsge |maxWidth| (_ bv4 32))))
 
 ; postcondition
 (constraint (=> (and pre (bvsgt |str.size| |maxWidth|)) (= |return.size| |maxWidth|)))
