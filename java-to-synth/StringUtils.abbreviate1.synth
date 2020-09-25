@@ -1,0 +1,36 @@
+; org.apache.commons.lang3.StringUtils
+; public static String abbreviate(final String str, final int maxWidth)
+
+; signature
+(declare-var |str.size| (_ BitVec 32))
+(declare-var |str| (Array (_ BitVec 32) (_ BitVec 16)))
+(declare-var |maxWidth| (_ BitVec 32))
+(declare-var |return.size| (_ BitVec 32))
+(declare-var |return| (Array (_ BitVec 32) (_ BitVec 16)))
+
+; precondition
+(constraint (bvsge |maxWidth| (_ bv4 32)))
+
+; postcondition
+(constraint (=> (bvsgt |str.size| |maxWidth|) (= |return.size| |maxWidth|)))
+;(constraint (=> (bvsgt |str.size| |maxWidth|)
+;  (forall ((i (_ BitVec 32))) (bvsgt ))))
+
+; sketch
+(synth-fun |hole-char| (
+  (|i| (_ BitVec 32))
+  (|str| (Array (_ BitVec 32) (_ BitVec 16)))
+  (|maxWidth| (_ BitVec 32))
+  (_ BitVec 16))
+
+(constraint (forall ((i (_ BitVec 32)))
+  (index |return| (|hole-char| |i| |str| |maxWidth|))))
+
+(synth-fun |hole-size| (
+  (|str| (Array (_ BitVec 32) (_ BitVec 16)))
+  (|maxWidth| (_ BitVec 32))
+  (_ BitVec 32))
+
+(constraint (= |return.size| (|hole-size| |str| |maxWidth|)))
+
+(check-synth)
