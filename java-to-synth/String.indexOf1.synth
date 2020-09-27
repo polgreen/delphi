@@ -1,0 +1,70 @@
+; java.lang.String.indexOf
+; public int indexOf(int)
+
+; inputs
+(declare-var |str.size| Int)
+(declare-var |str| (Array Int Int))
+(declare-var |ch| Int)
+
+; sketch
+(synth-fun |hole|
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|ch| Int)
+    (i Int)
+  )
+  Int)
+
+(define-fun |return|
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|ch| Int)
+  )
+  Int
+  (|hole| |str.size| |str| |ch| 0))
+
+; precondition
+(define-fun pre 
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|ch| Int)
+  )
+  Bool
+  true)
+
+; postcondition when |ch| is found
+
+(constraint
+  (=>
+    (and
+      (pre |str.size| |str| |ch|)
+      (exists (i Int) (= (select |str| i) |ch|))
+    )
+    (and
+      (= (select |str| (|return| |str.size| |str| |ch|)) |ch|)
+      (not (exists (i Int)
+        (and
+          (< i (|return| |str.size| |str| |ch|))  
+          (= (select |str| i) |ch|)
+        )
+      ))
+    )
+  )
+)
+
+; postcondition when |ch| is not found
+
+(constraint
+  (=>
+    (and
+      (pre |str.size| |str| |ch|)
+      (forall (i Int) (not (= (select |str| i) |ch|)))
+    )
+    (= (|return| |str.size| |str| |ch|) (- 1))
+  )
+)
+
+(check-synth)
