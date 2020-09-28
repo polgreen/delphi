@@ -41,11 +41,11 @@
   (=>
     (and
       (pre |str.size| |str| |ch|)
-      (exists (i Int) (= (select |str| i) |ch|))
+      (exists ((i Int)) (= (select |str| i) |ch|))
     )
     (and
       (= (select |str| (|return| |str.size| |str| |ch|)) |ch|)
-      (not (exists (i Int)
+      (not (exists ((i Int))
         (and
           (< i (|return| |str.size| |str| |ch|))  
           (= (select |str| i) |ch|)
@@ -61,7 +61,7 @@
   (=>
     (and
       (pre |str.size| |str| |ch|)
-      (forall (i Int) (not (= (select |str| i) |ch|)))
+      (forall ((i Int)) (not (= (select |str| i) |ch|)))
     )
     (= (|return| |str.size| |str| |ch|) (- 1))
   )
