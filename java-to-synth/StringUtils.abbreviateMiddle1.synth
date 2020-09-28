@@ -1,0 +1,89 @@
+; org.apache.commons.lang3.StringUtils
+; public static String abbreviateMiddle(final String str, final String middle, final int length)
+
+; inputs
+(declare-var |str.size| Int)
+(declare-var |str| (Array Int Int))
+(declare-var |middle.size| Int)
+(declare-var |middle| (Array Int Int))
+(declare-var |length| Int)
+
+; sketch
+(synth-fun |hole-char|
+  (
+    (|i| Int)
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|middle.size| Int)
+    (|middle| (Array Int Int))
+    (|length| Int)
+  )
+  Int)
+
+(define-fun |return|
+  (
+    (|i| Int)
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|middle.size| Int)
+    (|middle| (Array Int Int))
+    (|length| Int)
+  )
+  Int
+  (|hole-char| |i| |str.size| |str| |length|))
+
+(synth-fun |hole-size|
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|middle.size| Int)
+    (|middle| (Array Int Int))
+    (|length| Int)
+  )
+  Int)
+
+(define-fun |return.size|
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|middle.size| Int)
+    (|middle| (Array Int Int))
+    (|length| Int)
+  )
+  Int
+  (|hole-size| |str.size| |str| |length|))
+
+; precondition
+(define-fun pre 
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+    (|middle.size| Int)
+    (|middle| (Array Int Int))
+    (|length| Int)
+  )
+  Bool
+  (and (>= |str.size| 0) (>= |middle.size| 0)))
+
+; postcondition when string is short
+
+(constraint (=>
+  (and (pre |str.size| |str| |length|) (<= |str.size| |length|))
+  (= (|return.size| |str.size| |str| |length|) |str.size|)))
+
+(constraint (=>
+  (and (pre |str.size| |str| |length|) (<= |str.size| |length|))
+  (forall ((index Int)) (= (|return| index |str.size| |str| |length|) (select |str| index)))))
+
+; postcondition when string is long
+
+(constraint (=>
+  (and (pre |str.size| |str| |length|) (> |str.size| |length|))
+  (= (|return.size| |str.size| |str| |length|) |length|)))
+
+(constraint (=>
+  (and (pre |str.size| |str| |length|) (<= |str.size| |length|))
+  (forall ((index Int)) (= (|return| index |str.size| |str| |length|)
+    (ite (<= index (- |str.size| 4)) (select |str| index) 46)))))
+
+(check-synth)
