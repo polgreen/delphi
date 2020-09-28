@@ -68,22 +68,22 @@
 ; postcondition when string is short
 
 (constraint (=>
-  (and (pre |str.size| |str| |length|) (<= |str.size| |length|))
-  (= (|return.size| |str.size| |str| |length|) |str.size|)))
+  (and (pre |str.size| |str| |length|) (or (<= |str.size| |length|) (<= |length| (+ |middle.length| 2))))
+  (= (|return.size| |str.size| |str| |middle.size| |middle| |length|) |str.size|)))
 
 (constraint (=>
-  (and (pre |str.size| |str| |length|) (<= |str.size| |length|))
-  (forall ((index Int)) (= (|return| index |str.size| |str| |length|) (select |str| index)))))
+  (and (pre |str.size| |str| |length|) (or (<= |str.size| |length|) (<= |length| (+ |middle.length| 2))))
+  (forall ((index Int)) (= (|return| index |str.size| |middle.size| |middle| |str| |length|) (select |str| index)))))
 
 ; postcondition when string is long
 
 (constraint (=>
-  (and (pre |str.size| |str| |length|) (> |str.size| |length|))
-  (= (|return.size| |str.size| |str| |length|) |length|)))
+  (and (pre |str.size| |str| |length|) (and (> |str.size| |length|) (> |length| (+ |middle.length| 2))))
+  (= (|return.size| |str.size| |str| |middle.size| |middle| |length|) |length|)))
 
 (constraint (=>
-  (and (pre |str.size| |str| |length|) (<= |str.size| |length|))
-  (forall ((index Int)) (= (|return| index |str.size| |str| |length|)
+  (and (pre |str.size| |str| |length|) (and (> |str.size| |length|) (> |length| (+ |middle.length| 2))))
+  (forall ((index Int)) (= (|return| index |str.size| |str| |middle.size| |middle| |length|)
     (ite (<= index (- |str.size| 4)) (select |str| index) 46)))))
 
 (check-synth)
