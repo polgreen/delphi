@@ -1,0 +1,70 @@
+; org.apache.commons.lang3.StringUtils
+; public static String capitalize(final String str)
+
+; inputs
+(declare-var |str.size| Int)
+(declare-var |str| (Array Int Int))
+
+; sketch
+(synth-fun |hole-char|
+  (
+    (|i| Int)
+    (|str.size| Int)
+    (|str| (Array Int Int))
+  )
+  Int)
+
+(define-fun |return|
+  (
+    (|i| Int)
+    (|str.size| Int)
+    (|str| (Array Int Int))
+  )
+  Int
+  (|hole-char| |i| |str.size| |str|))
+
+(synth-fun |hole-size|
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+  )
+  Int)
+
+(define-fun |return.size|
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+  )
+  Int
+  (|hole-size| |str.size| |str|))
+
+; precondition
+(define-fun pre 
+  (
+    (|str.size| Int)
+    (|str| (Array Int Int))
+  )
+  Bool
+  true)
+
+; postcondition
+
+(constraint (=>
+  (pre |str.size| |str|)
+  (= (|return.size| |str.size| |str|) |str.size|)))
+
+(constraint (=>
+  (pre |str.size| |str|)
+  (forall ((index Int)) (= (|return| index |str.size| |str|)
+    (=>
+      (and (>= index 0) (< index (|return.size| |str.size| |str|)))
+      (ite
+        (and (= index 0) (>= (select |str| 0) 97) (<= (select |str| 0) 122))
+        (- (select |str| 0) 32)
+        (select |str| 0)
+      )
+    )
+  ))
+))
+
+(check-synth)
