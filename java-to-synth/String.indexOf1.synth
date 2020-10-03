@@ -2,69 +2,64 @@
 ; public int indexOf(int)
 
 ; inputs
-(declare-var |str.size| Int)
-(declare-var |str| (Array Int Int))
-(declare-var |ch| Int)
+(declare-var index Int)
+(declare-var index! Int)
+(declare-var str (Array Int Int))
+(declare-var ch Int)
+(declare-var loc Int)
+(declare-var loc! Int)
 
 ; sketch
 (synth-fun |hole|
   (
-    (|str.size| Int)
-    (|str| (Array Int Int))
-    (|ch| Int)
-    (i Int)
-  )
-  Int)
-
-(define-fun |return|
-  (
-    (|str.size| Int)
-    (|str| (Array Int Int))
-    (|ch| Int)
+    (index Int)
+    (str (Array Int Int))
+    (ch Int)
   )
   Int
-  (|hole| |str.size| |str| |ch| 0))
+((I Int) (B Bool) (C Bool))
+((I Int (0 1 (- 1) (ite B I I)
+(+ I I) (- I)
+index
+(select str 0)
+(select str 1)
+(select str index)
+ch
+))
+(B Bool ((and B B) (or B B) (not B) (and C C) (or C C)))
+(C Bool ((= I I) (<= I I) (>= I I)
+))
+))
+
+
+(define-fun trans ((index Int) (str (Array Int Int))(ch Int)(loc Int)(index! Int)(loc! Int) ) Bool
+(and
+  (= index! (+ index 1))
+  (ite (> loc (- 1)) (= loc! loc)
+    (= loc! (hole index str ch)))))
+
 
 ; precondition
 (define-fun pre 
   (
-    (|str.size| Int)
-    (|str| (Array Int Int))
-    (|ch| Int)
+    (index Int)
+    (loc Int)
   )
   Bool
-  true)
+  (and (= index 0) (= loc (- 1))(= loc! (- 1))))
 
-; postcondition when |ch| is found
+; postcondition when ch is found
 
-(constraint
-  (=>
-    (and
-      (pre |str.size| |str| |ch|)
-      (exists ((i Int)) (= (select |str| i) |ch|))
-    )
-    (and
-      (= (select |str| (|return| |str.size| |str| |ch|)) |ch|)
-      (not (exists ((i Int))
-        (and
-          (< i (|return| |str.size| |str| |ch|))  
-          (= (select |str| i) |ch|)
-        )
-      ))
-    )
-  )
-)
+(define-fun post ((index Int) (str (Array Int Int))(ch Int)(loc Int)) Bool
+  (and (>= index 0)
+  (ite (forall ((i Int)) (=> (and (< i index)(>= i 0)) (not (= (select str i) ch))))
+    (= loc (- 1))
+    (= loc 1))))
 
-; postcondition when |ch| is not found
+; postcondition when ch is not found
 
-(constraint
-  (=>
-    (and
-      (pre |str.size| |str| |ch|)
-      (forall ((i Int)) (not (= (select |str| i) |ch|)))
-    )
-    (= (|return| |str.size| |str| |ch|) (- 1))
-  )
-)
+(constraint (=> (pre index loc)(post index str ch loc )))
+;(constraint (=> (and (post index loc)(trans index str ch loc index! loc!))(post index! str ch loc!)))
+(constraint (=> (< index 2)(=> (and (post index str ch loc) (trans index str ch loc index! loc!)) (post index! str ch loc!))))
 
 (check-synth)
