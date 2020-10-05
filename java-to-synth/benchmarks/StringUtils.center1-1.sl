@@ -7,27 +7,27 @@
 (declare-var |size| Int)
 (declare-var |padChar| Int)
 
-; sketch
-(synth-fun |hole-char|
-  (
-    (|i| Int)
-    (|str.size| Int)
-    (|str| (Array Int Int))
-    (|size| Int)
-    (|padChar| Int)
-  )
-  Int)
+; ; sketch
+; (synth-fun |hole-char|
+;   (
+;     (|i| Int)
+;     (|str.size| Int)
+;     (|str| (Array Int Int))
+;     (|size| Int)
+;     (|padChar| Int)
+;   )
+;   Int)
 
-(define-fun |return|
-  (
-    (|i| Int)
-    (|str.size| Int)
-    (|str| (Array Int Int))
-    (|size| Int)
-    (|padChar| Int)
-  )
-  Int
-  (|hole-char| |i| |str.size| |str| |size| |padChar|))
+; (define-fun |return|
+;   (
+;     (|i| Int)
+;     (|str.size| Int)
+;     (|str| (Array Int Int))
+;     (|size| Int)
+;     (|padChar| Int)
+;   )
+;   Int
+;   (|hole-char| |i| |str.size| |str| |size| |padChar|))
 
 (synth-fun |hole-size|
   (
