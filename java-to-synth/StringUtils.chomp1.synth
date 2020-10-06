@@ -4,8 +4,35 @@
 ; inputs
 (declare-var |str.size| Int)
 (declare-var |str| (Array Int Int))
+(declare-var index Int)
 
-; sketch
+; helper
+(define-fun ends_on_cr_or_lf
+  (
+    (|str| (Array Int Int))
+    (|str.size| Int)
+
+  ) Bool
+  (or
+    (and (>= |str.size| 1) (= (select |str| (- |str.size| 1)) 13))
+    (and (>= |str.size| 1) (= (select |str| (- |str.size| 1)) 10))
+  )
+)
+
+(define-fun ends_on_crlf
+  (
+    (|str| (Array Int Int))
+    (|str.size| Int)
+
+  ) Bool
+  (and
+    (>= |str.size| 2)
+    (= (select |str| (- |str.size| 2)) 13)
+    (= (select |str| (- |str.size| 1)) 10)
+  )
+)
+
+
 (synth-fun |hole-char|
   (
     (|i| Int)
@@ -23,12 +50,15 @@
   Int
   (|hole-char| |i| |str.size| |str|))
 
-(synth-fun |hole-size|
+
+(define-fun |hole-size|
   (
     (|str.size| Int)
     (|str| (Array Int Int))
   )
-  Int)
+  Int
+(+ (- (ite (ends_on_crlf str str.size) 2 1)) str.size))
+
 
 (define-fun |return.size|
   (
@@ -47,6 +77,7 @@
   Bool
   true)
 
+<<<<<<< HEAD
 ; helper
 (define-fun ends_on_cr_or_lf
   (
@@ -99,5 +130,6 @@
 (constraint (=>
   (and (pre |str.size| |str|) (not (ends_on_cr_or_lf |str| |str.size|)))
   (forall ((index Int)) (= (|return| index |str.size| |str|) (select |str| index)))))
+
 
 (check-synth)
