@@ -1,0 +1,50 @@
+; org.apache.commons.lang3.StringUtils
+; public static boolean contains(final CharSequence seq, final int searchChar)
+
+; inputs
+(declare-var |seq.size| Int)
+(declare-var |seq| (Array Int Int))
+(declare-var |searchChar| Int)
+
+; sketch
+(synth-fun |hole|
+  (
+    (|seq.size| Int)
+    (|seq| (Array Int Int))
+    (|searchChar| Int)
+  )
+  Int
+)
+
+; return value
+(define-fun |return|
+  (
+    (|seq.size| Int)
+    (|seq| (Array Int Int))
+    (|searchChar| Int)
+  )
+  Bool
+  (|hole| (|seq.size| |seq| |searchChar|))
+)
+
+; precondition
+(define-fun pre 
+  (
+    (|seq.size| Int)
+    (|seq| (Array Int Int))
+    (|searchChar| Int)
+  )
+  Bool
+  (>= |seq.size| 0)
+)
+
+; postcondition
+(constaint (iff
+  (and
+    (pre |seq.size| |seq| |searchChar|)
+    (exists ((index Int)) (and (>= index 0) (< index |seq.size|) (= (select |seq| index) |searchChar|)))
+  )
+  (|return| |seq.size| |seq| |searchChar|)
+))
+
+(check-synth)
