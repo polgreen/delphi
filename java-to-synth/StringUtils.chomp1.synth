@@ -74,14 +74,14 @@
 ; postcondition when string ends on newline
 
 (constraint (=>
-  (and (pre |str.size| |str| |maxWidth|) (ends_on_cr_or_lf |str| |str.size|))
+  (and (pre |str.size| |str|) (ends_on_cr_or_lf |str| |str.size|))
   (= (|return.size| |str.size| |str|)
     (- |str.size|
       (ite (ends_on_crlf |str.size| |str|) 2 1)
     ))))
 
 (constraint (=>
-  (and (pre |str.size| |str| |maxWidth|) (ends_on_cr_or_lf |str| |str.size|))
+  (and (pre |str.size| |str|) (ends_on_cr_or_lf |str| |str.size|))
   (forall ((index Int))
     (=>
       (and (>= index 0) (< index (|return.size| |str.size| |str|)))
@@ -93,11 +93,11 @@
 ; postcondition when string does not end on newline
 
 (constraint (=>
-  (and (pre |str.size| |str| |maxWidth|) (not (ends_on_cr_or_lf |str| |str.size|)))
+  (and (pre |str.size| |str|) (not (ends_on_cr_or_lf |str| |str.size|)))
   (= (|return.size| |str.size| |str|) |str.size|)))
 
 (constraint (=>
-  (and (pre |str.size| |str| |maxWidth|) (not (ends_on_cr_or_lf |str| |str.size|)))
+  (and (pre |str.size| |str|) (not (ends_on_cr_or_lf |str| |str.size|)))
   (forall ((index Int)) (= (|return| index |str.size| |str|) (select |str| index)))))
 
 (check-synth)
