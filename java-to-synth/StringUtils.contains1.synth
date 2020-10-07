@@ -13,7 +13,7 @@
     (|seq| (Array Int Int))
     (|searchChar| Int)
   )
-  Int
+  Bool
 )
 
 ; return value
