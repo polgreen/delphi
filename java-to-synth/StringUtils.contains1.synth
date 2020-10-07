@@ -39,12 +39,14 @@
 )
 
 ; postcondition
-(constaint (iff
-  (and
+(constaint
+  (=>
     (pre |seq.size| |seq| |searchChar|)
-    (exists ((index Int)) (and (>= index 0) (< index |seq.size|) (= (select |seq| index) |searchChar|)))
+    (iff 
+      (exists ((index Int)) (and (>= index 0) (< index |seq.size|) (= (select |seq| index) |searchChar|)))
+      (|return| |seq.size| |seq| |searchChar|)
+    )
   )
-  (|return| |seq.size| |seq| |searchChar|)
-))
+)
 
 (check-synth)
