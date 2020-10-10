@@ -54,21 +54,21 @@
     (|str.size| Int)
     (|str| (Array Int Int))
   )
-  Int
-((I Int) (B Bool)(C Bool))
-((I Int (0 2 1 (ite B I I)
-(- I)
-(+ I I)
-str.size 
-(select str str.size)
-(select str 0)
-(select str 1)
-))
-(B Bool ((ends_on_cr_or_lf str str.size) (ends_on_crlf str str.size)
-  (and B B) (or B B) (not B) (and C C) (or C C)))
-(C Bool ((= I I) (<= I I) (>= I I)
-))
-)) 
+  Int)
+; ((I Int) (B Bool)(C Bool))
+; ((I Int (0 2 1 (ite B I I)
+; (- I)
+; (+ I I)
+; str.size 
+; (select str str.size)
+; (select str 0)
+; (select str 1)
+; ))
+; (B Bool ((ends_on_cr_or_lf str str.size) (ends_on_crlf str str.size)
+;   (and B B) (or B B) (not B) (and C C) (or C C)))
+; (C Bool ((= I I) (<= I I) (>= I I)
+; ))
+; )) 
 
 
 

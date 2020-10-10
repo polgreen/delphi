@@ -10,7 +10,7 @@
 
 
 
-(define-fun |return.size|
+(synth-fun |return.size|
   (
     (|str.size| Int)
     (|str| (Array Int Int))
@@ -18,8 +18,7 @@
     (|middle| (Array Int Int))
     (|length| Int)
   )
-  Int
-  (|hole-size| |str.size| |str| |middle.size| |middle| |length|))
+  Int)
 
 ; precondition
 (define-fun pre 
