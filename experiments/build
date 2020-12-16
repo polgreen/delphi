@@ -1,5 +1,0 @@
-gcc gd0.c -o gd0
-gcc gd1.c -o gd1
-gcc gd2.c -o gd2
-gcc gd3.c -o gd3
-gcc gd4.c -o gd4
