@@ -1,0 +1,6 @@
+
+*.d
+*.o
+.vscode/c_cpp_properties.json
+
+
