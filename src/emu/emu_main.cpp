@@ -19,6 +19,7 @@
 
 #include <util/cmdline.h>
 #include <util/suffix.h>
+#include "sygus_frontend.h"
 
 #include <iostream>
 
@@ -85,7 +86,7 @@ int main(int argc, const char *argv[])
 
   try
   {
-      // do the stuff
+    return sygus_frontend(cmdline);
   }
   catch(const char *s)
   {

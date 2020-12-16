@@ -1,5 +1,5 @@
 SRC = emu_main.cpp \
-      cegis.cpp synthesizer.cpp
+      ogis.cpp synthesizer.cpp sygus_parser.cpp sygus_frontend.cpp
 
 OBJ+= ../../$(CPROVER_DIR)/src/ansi-c/ansi-c$(LIBEXT) \
       ../../$(CPROVER_DIR)/src/assembler/assembler$(LIBEXT) \
@@ -24,9 +24,9 @@ include ../../$(CPROVER_DIR)/src/common
 
 CLEANFILES = fastsynth$(EXEEXT)
 
-all: fastsynth$(EXEEXT)
+all: emu$(EXEEXT)
 
 ###############################################################################
 
-fastsynth$(EXEEXT): $(OBJ)
+emu$(EXEEXT): $(OBJ)
 	$(LINKBIN)

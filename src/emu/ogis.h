@@ -1,14 +1,14 @@
-#ifndef EMU_CEGIS_H_
-#define EMU_CEGIS_H_
+#ifndef EMU_OGIS_H_
+#define EMU_OGIS_H_
 
 #include "synthesizer.h"
 #include <solvers/decision_procedure.h>
-#include "cegis_types.h"
+#include "synthesis_types.h"
 
-class cegist: public decision_proceduret
+class ogist: public decision_proceduret
 {
 public:
-  cegist(
+  ogist(
     synthesizert &synthesizer,
     decision_proceduret &verifier,
     const problemt &problem);
@@ -17,4 +17,4 @@ public:
     decision_proceduret &verifier, const problemt &problem);
 }; 
 
-#endif /*EMU_CEGIS_H_*/
+#endif /*EMU_OGIS_H_*/
