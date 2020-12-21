@@ -10,6 +10,49 @@
 #include <cassert>
 #include <fstream>
 
+smt2_parsert::signature_with_parameter_idst
+sygus_parsert::oracle_signature()
+{
+  if(next_token() != smt2_tokenizert::OPEN)
+    throw error("expected '(' at beginning of signature");
+
+  if(smt2_tokenizer.peek() == smt2_tokenizert::CLOSE)
+  {
+    // no parameters
+    next_token(); // eat the ')'
+    return signature_with_parameter_idst(sort());
+  }
+
+  mathematical_function_typet::domaint domain;
+  std::vector<irep_idt> parameters;
+
+  while(smt2_tokenizer.peek() != smt2_tokenizert::CLOSE)
+  {
+    if(next_token() != smt2_tokenizert::OPEN)
+      throw error("expected '(' at beginning of parameter");
+
+    if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error("expected symbol in parameter");
+
+    irep_idt id = smt2_tokenizer.get_buffer();
+    domain.push_back(sort());
+
+    parameters.push_back(
+      add_fresh_id(id, idt::PARAMETER, exprt(ID_nil, domain.back())));
+
+    if(next_token() != smt2_tokenizert::CLOSE)
+      throw error("expected ')' at end of parameter");
+  }
+
+  next_token(); // eat the ')'
+
+  typet codomain = sort();
+
+  return signature_with_parameter_idst(
+    mathematical_function_typet(domain, codomain), parameters);
+}
+}
+
 void sygus_parsert::setup_commands()
 {
   commands["set-logic"] = [this] {
@@ -25,7 +68,6 @@ void sygus_parsert::setup_commands()
 
     // save the renaming map
     renaming_mapt old_renaming_map = renaming_map;
-
     irep_idt id=smt2_tokenizer.get_buffer();
 
     if(id_map.find(id)!=id_map.end())
@@ -87,6 +129,22 @@ void sygus_parsert::setup_commands()
   commands["constraint"] = [this] {
     constraints.push_back(expression());
   };
+
+  commands["assume"] = [this] {
+    assumptions.push_back(expression());
+  };
+
+  commands["oracle-constraint"]=[this]{
+      // get signature
+
+      // get expression
+      
+      
+  }
+
+  commands["oracle-assumption"]=[this]{
+      
+  }
 
   commands["inv-constraint"] = [this] {
     ignore_command();

@@ -16,10 +16,37 @@ public:
 
   using smt2_errort = smt2_tokenizert::smt2_errort;
 
+  struct oracle_constraint_gent
+  {
+    std::vector<irep_idt> input_parameters;
+    std::vector<irep_idt> return_parameters;
+    
+
+
+    explicit oracle_s(const typet &_type) : type(_type)
+    {
+    }
+
+    oracle_signaturet(
+      const typet &_type,
+      const std::vector<irep_idt> &_parameters)
+      : type(_type), parameters(_parameters)
+    {
+      PRECONDITION(
+        (_type.id() == ID_mathematical_function &&
+         to_mathematical_function_type(_type).domain().size() ==
+           _parameters.size()) ||
+        (_type.id() != ID_mathematical_function && _parameters.empty()));
+    }
+  };
+
   enum invariant_variablet { PRIMED, UNPRIMED };
   enum invariant_constraint_functiont { PRE, INV, TRANS, POST };
 
   exprt::operandst constraints;
+  exprt::operandst assumptions;
+  std::vector<std::pair<mathematical_function_typet,exprt> oracle_assumption_gen;
+  std::vector<std::pair<mathematical_function_typet,exprt> oracle_constraint_gen;
   std::string logic, action;
 
   std::set<irep_idt> synth_fun_set;
