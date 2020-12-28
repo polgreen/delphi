@@ -10,21 +10,25 @@
 #include <cassert>
 #include <fstream>
 
-smt2_parsert::signature_with_parameter_idst
+sygus_parsert::oracle_constraint_gent
 sygus_parsert::oracle_signature()
 {
+  if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error("expected a symbol after define-fun");
+
+  const irep_idt binary_name = smt2_tokenizer.get_buffer();
+  std::vector<exprt> inputs;
+  std::vector<exprt> outputs;
+
+  // get input symbols
   if(next_token() != smt2_tokenizert::OPEN)
-    throw error("expected '(' at beginning of signature");
+    throw error("expected '(' at beginning of oracle input symbols");
 
   if(smt2_tokenizer.peek() == smt2_tokenizert::CLOSE)
   {
-    // no parameters
+    // no inputs
     next_token(); // eat the ')'
-    return signature_with_parameter_idst(sort());
   }
-
-  mathematical_function_typet::domaint domain;
-  std::vector<irep_idt> parameters;
 
   while(smt2_tokenizer.peek() != smt2_tokenizert::CLOSE)
   {
@@ -35,22 +39,44 @@ sygus_parsert::oracle_signature()
       throw error("expected symbol in parameter");
 
     irep_idt id = smt2_tokenizer.get_buffer();
-    domain.push_back(sort());
-
-    parameters.push_back(
-      add_fresh_id(id, idt::PARAMETER, exprt(ID_nil, domain.back())));
+    typet param_sort = sort();
+    inputs.push_back(exprt(add_fresh_id(id, idt::PARAMETER, exprt(ID_nil, param_sort)), param_sort));
 
     if(next_token() != smt2_tokenizert::CLOSE)
-      throw error("expected ')' at end of parameter");
+      throw error("expected ')' at end of input parameter");
   }
 
   next_token(); // eat the ')'
+  // get output symbols
+  if(next_token() != smt2_tokenizert::OPEN)
+    throw error("expected '(' at beginning of oracle output symbols");
 
-  typet codomain = sort();
+  if(smt2_tokenizer.peek() == smt2_tokenizert::CLOSE)
+  {
+    // no outputs
+    next_token(); // eat the ')'
+  }
 
-  return signature_with_parameter_idst(
-    mathematical_function_typet(domain, codomain), parameters);
-}
+  while(smt2_tokenizer.peek() != smt2_tokenizert::CLOSE)
+  {
+    if(next_token() != smt2_tokenizert::OPEN)
+      throw error("expected '(' at beginning of parameter");
+
+    if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error("expected symbol in parameter");
+
+    irep_idt id = smt2_tokenizer.get_buffer();
+    typet param_sort = sort();
+    outputs.push_back(exprt(add_fresh_id(id, idt::PARAMETER, exprt(ID_nil, param_sort)), param_sort));
+
+    if(next_token() != smt2_tokenizert::CLOSE)
+      throw error("expected ')' at end of input parameter");
+  }
+  next_token(); // eat the ')'
+
+  // get constraint
+  exprt constraint = expression();
+  return oracle_constraint_gent(binary_name,inputs, outputs, constraint);
 }
 
 void sygus_parsert::setup_commands()
@@ -135,16 +161,23 @@ void sygus_parsert::setup_commands()
   };
 
   commands["oracle-constraint"]=[this]{
-      // get signature
-
-      // get expression
-      
-      
-  }
+  
+    // save the renaming map
+    renaming_mapt old_renaming_map = renaming_map;
+    // get constraint
+    oracle_constraint_gent constraint = oracle_signature();
+    oracle_constraint_gens.push_back(constraint);
+    renaming_map = old_renaming_map;    
+  };
 
   commands["oracle-assumption"]=[this]{
-      
-  }
+        // save the renaming map
+    renaming_mapt old_renaming_map = renaming_map;
+    // get constraint
+    oracle_constraint_gent assumption = oracle_signature();
+    oracle_assumption_gens.push_back(assumption);
+    renaming_map = old_renaming_map;    
+  };
 
   commands["inv-constraint"] = [this] {
     ignore_command();
@@ -284,15 +317,27 @@ void sygus_parsert::generate_invariant_constraints()
 void sygus_parsert::NTDef_seq()
 {
   // it is not necessary to give a syntactic template
-  if(smt2_tokenizer.peek()!=smt2_tokenizert::OPEN)
-    return;
-
-  while(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE)
+  uint8_t openCount = 0u;
+  while(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE || openCount)
   {
-    NTDef();
+    switch(smt2_tokenizer.next_token())
+    {
+      case smt2_tokenizert::OPEN:
+      ++openCount;
+      break;
+      case smt2_tokenizert::CLOSE:
+      --openCount;
+      break;
+      case smt2_tokenizert::END_OF_FILE:
+      case smt2_tokenizert::KEYWORD:
+      case smt2_tokenizert::NONE:
+      case smt2_tokenizert::NUMERAL:
+      case smt2_tokenizert::STRING_LITERAL:
+      case smt2_tokenizert::SYMBOL:
+      // Ignore grammar.
+      break;
+    }
   }
-
-  smt2_tokenizer.next_token(); // eat the ')'
 }
 
 void sygus_parsert::GTerm_seq()

@@ -18,25 +18,21 @@ public:
 
   struct oracle_constraint_gent
   {
-    std::vector<irep_idt> input_parameters;
-    std::vector<irep_idt> return_parameters;
-    
+    irep_idt binary_name;
+    std::vector<exprt> input_parameters;
+    std::vector<exprt> return_parameters;
+    exprt constraint;
 
-
-    explicit oracle_s(const typet &_type) : type(_type)
+    oracle_constraint_gent(
+      const irep_idt _binary_name,
+      const std::vector<exprt> & _input_parameters,
+      const std::vector<exprt> & _output_parameters,
+      const exprt &_constraint)
+      : binary_name(_binary_name), 
+      input_parameters(_input_parameters), 
+      return_parameters(_output_parameters), 
+      constraint(_constraint)
     {
-    }
-
-    oracle_signaturet(
-      const typet &_type,
-      const std::vector<irep_idt> &_parameters)
-      : type(_type), parameters(_parameters)
-    {
-      PRECONDITION(
-        (_type.id() == ID_mathematical_function &&
-         to_mathematical_function_type(_type).domain().size() ==
-           _parameters.size()) ||
-        (_type.id() != ID_mathematical_function && _parameters.empty()));
     }
   };
 
@@ -45,8 +41,8 @@ public:
 
   exprt::operandst constraints;
   exprt::operandst assumptions;
-  std::vector<std::pair<mathematical_function_typet,exprt> oracle_assumption_gen;
-  std::vector<std::pair<mathematical_function_typet,exprt> oracle_constraint_gen;
+  std::vector<oracle_constraint_gent> oracle_assumption_gens;
+  std::vector<oracle_constraint_gent> oracle_constraint_gens;
   std::string logic, action;
 
   std::set<irep_idt> synth_fun_set;
@@ -55,6 +51,8 @@ public:
   signature_with_parameter_idst inv_function_signature();
   void expand_function_applications(exprt &);
   void generate_invariant_constraints();
+
+  oracle_constraint_gent oracle_signature();
 
   function_application_exprt apply_function_to_variables(
     invariant_constraint_functiont id,
