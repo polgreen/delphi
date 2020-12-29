@@ -1,6 +1,7 @@
 #include "sygus_frontend.h"
 #include "sygus_parser.h"
 #include "expr2sygus.h"
+#include "problem.h"
 
 #include <util/cout_message.h>
 #include <util/expr_initializer.h>
@@ -63,7 +64,7 @@ int sygus_frontend(const cmdlinet &cmdline)
     return 20;
   }
 
-  // output problem
+  // output problem from parser
   for (const auto & c: parser.constraints)
   {
     message.status()<<"constraint "<< expr2sygus(c)<<messaget::eom;
@@ -81,6 +82,16 @@ int sygus_frontend(const cmdlinet &cmdline)
     message.status()<<"constraint gen "<< expr2sygus(c.constraint)<<messaget::eom;
   }
 
+  // build problem
+  problemt problem;
+  for(const auto &c: parser.constraints)
+    problem.constraints.push_back(c);
+  for(const auto &c: parser.assumptions)
+    problem.assumptions.push_back(c);
+  for(const auto &c: parser.oracle_constraint_gens)
+    problem.oracle_constraint_gens.push_back(c);   
+  for(const auto &c: parser.oracle_assumption_gens)
+    problem.oracle_assumption_gens.push_back(c);  
 
  
   return 0;

@@ -1,5 +1,7 @@
-#include <set>
+#ifndef _EMU_SYGUS_PARSER_H_
+#define _EMU_SYGUS_PARSER_H_
 
+#include <set>
 #include <solvers/smt2/smt2_parser.h>
 
 #include <util/mathematical_expr.h>
@@ -68,3 +70,5 @@ protected:
   void NTDef();
   void GTerm();
 };
+
+#endif /*_EMU_SYGUS_PARSER_H_*/
