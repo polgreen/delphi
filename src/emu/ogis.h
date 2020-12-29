@@ -3,7 +3,7 @@
 
 #include "synthesizer.h"
 #include <solvers/decision_procedure.h>
-#include "synthesis_types.h"
+#include "problem.h"
 
 class ogist: public decision_proceduret
 {
