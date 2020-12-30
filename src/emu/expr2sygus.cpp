@@ -1,6 +1,7 @@
 #include "expr2sygus.h"
 
 #include <util/mathematical_expr.h>
+#include <util/mathematical_types.h>
 #include <util/arith_tools.h>
 
 // TODO: add operators for non-bitvectors
@@ -23,6 +24,14 @@ std::string type2sygus(const typet &type)
   {
     array_typet array = to_array_type(type);
     result += "(Array " + type2sygus(array.size().type()) + " " + type2sygus(array.subtype()) + ")";
+  }
+  else if (type.id()==ID_mathematical_function)
+  {
+    result +="(-> ";
+    for (const auto &t: to_mathematical_function_type(type).domain())
+      result += type2sygus(t)+ " ";
+    result += type2sygus(to_mathematical_function_type(type).codomain());
+    result+=")";
   }
   else
   {
