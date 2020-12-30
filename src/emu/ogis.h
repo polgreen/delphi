@@ -4,17 +4,25 @@
 #include "synthesizer.h"
 #include <solvers/decision_procedure.h>
 #include "problem.h"
+#include "verify.h"
 
 class ogist: public decision_proceduret
 {
 public:
   ogist(
     synthesizert &synthesizer,
-    decision_proceduret &verifier,
+    verifyt &verifier,
     const problemt &problem);
  
-  resultt doit(synthesizert &synthesizer,
-    decision_proceduret &verifier, const problemt &problem);
+  resultt doit();
+
+  void set_to(const exprt &expr, bool value);  
+  exprt handle(const exprt &expr);
+  exprt get(const exprt &expr) const;
+  void print_assignment(std::ostream &out) const;
+  std::size_t get_number_of_solver_calls() const;
+  resultt dec_solve();
+  std::string decision_procedure_text() const;
 }; 
 
 #endif /*EMU_OGIS_H_*/

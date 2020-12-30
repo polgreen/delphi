@@ -20,7 +20,7 @@
 #include "ogis.h"
 
 ogist::ogist(synthesizert &synthesizer,
-    decision_proceduret &verifier,
+    verifyt &verifier,
     const problemt &problem)
     {
         // get base problem
@@ -31,11 +31,11 @@ ogist::ogist(synthesizert &synthesizer,
     }
 
 // problem is dynamic
-ogist::resultt ogist::doit(synthesizert &synthesizer,
-    decision_proceduret &verifier, const problemt &problem)
+ogist::resultt ogist::doit()
     {
       // the actual synthesis loop:
       // synthesiser synthesise solution to problem so far
+      
 
       // verifier: Check correctness. If correct return solution
 
@@ -48,3 +48,31 @@ ogist::resultt ogist::doit(synthesizert &synthesizer,
       return ogist::resultt::D_ERROR;
     } 
 
+  void ogist::set_to(const exprt &expr, bool value) { }
+
+  exprt ogist::handle(const exprt &expr)
+  {
+    return expr;
+  }
+
+  exprt ogist::get(const exprt &expr) const
+  {
+    return expr;
+  }
+
+  void ogist::print_assignment(std::ostream &out) const { }
+
+  std::size_t ogist::get_number_of_solver_calls() const
+  {
+    return 0;
+  }
+
+  ogist::resultt ogist::dec_solve()
+  {
+    return ogist::resultt::D_ERROR;
+  }
+
+  std::string ogist::decision_procedure_text() const
+  {
+    return "ogis";
+  }

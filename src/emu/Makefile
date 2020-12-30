@@ -1,4 +1,4 @@
-SRC = emu_main.cpp expr2sygus.cpp \
+SRC = emu_main.cpp expr2sygus.cpp simple_synth.cpp oracle_interface.cpp \
       ogis.cpp synthesizer.cpp sygus_parser.cpp sygus_frontend.cpp 
 
 OBJ+= ../../$(CPROVER_DIR)/src/ansi-c/ansi-c$(LIBEXT) \

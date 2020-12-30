@@ -1,4 +1,7 @@
 #include "sygus_frontend.h"
+#include "simple_synth.h"
+#include "oracle_interface.h"
+#include "ogis.h"
 #include "sygus_parser.h"
 #include "expr2sygus.h"
 #include "problem.h"
@@ -17,6 +20,7 @@
 #include <langapi/mode.h>
 
 #include <fstream>
+
 
 
 int sygus_frontend(const cmdlinet &cmdline)
@@ -64,24 +68,6 @@ int sygus_frontend(const cmdlinet &cmdline)
     return 20;
   }
 
-  // output problem from parser
-  for (const auto & c: parser.constraints)
-  {
-    message.status()<<"constraint "<< expr2sygus(c)<<messaget::eom;
-  }
-  for (const auto & c: parser.assumptions)
-  {
-    message.status()<<"assumption "<< expr2sygus(c)<<messaget::eom;
-  }
-  for (const auto & c: parser.oracle_assumption_gens)
-  {
-    message.status()<<"assumption gen "<< expr2sygus(c.constraint)<<messaget::eom;
-  }
-    for (const auto & c: parser.oracle_constraint_gens)
-  {
-    message.status()<<"constraint gen "<< expr2sygus(c.constraint)<<messaget::eom;
-  }
-
   // build problem
   problemt problem;
   for(const auto &c: parser.constraints)
@@ -92,6 +78,13 @@ int sygus_frontend(const cmdlinet &cmdline)
     problem.oracle_constraint_gens.push_back(c);   
   for(const auto &c: parser.oracle_assumption_gens)
     problem.oracle_assumption_gens.push_back(c);  
+
+  // get synthesiser
+  simple_syntht synthesizer;
+  oracle_interfacet verifier;
+
+  ogist ogis(synthesizer, verifier, problem);
+  ogis.doit();  
 
  
   return 0;
