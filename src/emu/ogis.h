@@ -1,10 +1,10 @@
 #ifndef EMU_OGIS_H_
 #define EMU_OGIS_H_
 
-#include "synthesizer.h"
+#include "synthesis/synthesizer.h"
 #include <solvers/decision_procedure.h>
 #include "problem.h"
-#include "verify.h"
+#include "verification/verify.h"
 
 class ogist: public decision_proceduret
 {

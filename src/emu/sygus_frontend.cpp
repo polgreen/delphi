@@ -1,6 +1,6 @@
 #include "sygus_frontend.h"
-#include "simple_synth.h"
-#include "oracle_interface.h"
+#include "synthesis/simple_synth.h"
+#include "verification/oracle_interface.h"
 #include "ogis.h"
 #include "sygus_parser.h"
 #include "expr2sygus.h"

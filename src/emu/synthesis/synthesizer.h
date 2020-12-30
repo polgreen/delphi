@@ -3,7 +3,7 @@
 
 #include <functional>
 
-#include "problem.h"
+#include "../problem.h"
 
 class synthesizert
 {
