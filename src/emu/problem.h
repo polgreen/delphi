@@ -18,8 +18,18 @@ public:
 
   using oracle_constraint_gent = sygus_parsert::oracle_constraint_gent;
   // We only ever add assumptions and constraints, we never remove them.
-  std::vector<exprt> assumptions, constraints;
+  // assumptions and constraints come from the original spec, and are used for verification
+  // Oracle assumption gen and constraint gen may add to the assumptions and constraints
+  // Synthesis assumptions are only used by the synthesis phase, and never by the verification phase
+  // synthesis assumptions contain the counterexamples obtained so far
+  std::vector<exprt> assumptions, constraints, synthesis_assumptions;
   std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens;
+};
+
+class solutiont
+{
+  public:
+  std::map<symbol_exprt, exprt> functions;
 };
 
 #endif /*EMU_PROBLEM_H*/
