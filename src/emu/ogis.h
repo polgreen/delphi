@@ -10,19 +10,19 @@ class ogist: public decision_proceduret
 {
 public:
   ogist(
-    synthesizert &synthesizer,
-    verifyt &verifier,
-    const problemt &problem);
+    synthesizert &,
+    verifyt &,
+    const problemt &);
  
   resultt doit();
 
-  void set_to(const exprt &expr, bool value);  
-  exprt handle(const exprt &expr);
-  exprt get(const exprt &expr) const;
-  void print_assignment(std::ostream &out) const;
-  std::size_t get_number_of_solver_calls() const;
-  resultt dec_solve();
-  std::string decision_procedure_text() const;
+  void set_to(const exprt &expr, bool value) override;
+  exprt handle(const exprt &expr) override;
+  exprt get(const exprt &expr) const override;
+  void print_assignment(std::ostream &out) const override;
+  std::size_t get_number_of_solver_calls() const override;
+  resultt dec_solve() override;
+  std::string decision_procedure_text() const override;
 }; 
 
 #endif /*EMU_OGIS_H_*/

@@ -19,9 +19,10 @@
 
 #include "ogis.h"
 
-ogist::ogist(synthesizert &synthesizer,
-    verifyt &verifier,
-    const problemt &problem)
+ogist::ogist(
+  synthesizert &synthesizer,
+  verifyt &verifier,
+  const problemt &problem)
 {
     // get base problem
     // find correctness requirement, add to verifier
