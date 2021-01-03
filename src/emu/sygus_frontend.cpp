@@ -21,8 +21,6 @@
 
 #include <fstream>
 
-
-
 int sygus_frontend(const cmdlinet &cmdline)
 {
   assert(cmdline.args.size()==1);
@@ -85,9 +83,6 @@ int sygus_frontend(const cmdlinet &cmdline)
 
   ogist ogis(synthesizer, verifier, problem);
   ogis.doit();  
-
  
   return 0;
 }
-
-

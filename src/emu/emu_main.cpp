@@ -39,7 +39,6 @@
 /// shall be used.
 #define SYGUS_FILE_ENDING ".sl"
 
-
 void help(std::ostream &out)
 {
   // clang-format off
@@ -52,14 +51,12 @@ void help(std::ostream &out)
      "\n"
      "Usage:                       Purpose:\n"
      "\n"
-     " emu [-?] [-h] [--help]      show help\n"
+     " emu [-?] [-h] [--help]       show help\n"
      " emu file.sl ...              source file names\n"
      "\n"
      "\n";
     // clang-format on
 }
-
-
 
 int main(int argc, const char *argv[])
 {
