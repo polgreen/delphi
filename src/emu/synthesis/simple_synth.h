@@ -16,9 +16,7 @@ class simple_syntht:public synthesizert
  public: 
   resultt operator()(const problemt &) override;
 
-  solutiont model(exprt) const override;
-
-
+  exprt model(exprt) const override;
 
   /// program size
 

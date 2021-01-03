@@ -12,7 +12,7 @@ public:
   ogist(
     synthesizert &,
     verifyt &,
-    const problemt &);
+    problemt &);
  
   resultt doit();
 
@@ -23,6 +23,11 @@ public:
   std::size_t get_number_of_solver_calls() const override;
   resultt dec_solve() override;
   std::string decision_procedure_text() const override;
+
+protected:
+  synthesizert &synthesizer;
+  verifyt &verify;
+  problemt &problem;
 }; 
 
 #endif /*EMU_OGIS_H_*/

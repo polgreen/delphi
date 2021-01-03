@@ -20,33 +20,54 @@
 #include "ogis.h"
 
 ogist::ogist(
-  synthesizert &synthesizer,
-  verifyt &verifier,
-  const problemt &problem)
+  synthesizert &__synthesizer,
+  verifyt &__verify,
+  problemt &__problem) :
+  synthesizer(__synthesizer),
+  verify(__verify),
+  problem(__problem)
 {
-    // get base problem
-    // find correctness requirement, add to verifier
-    // add orcle assumptions and constraints to verifier
-    // set oracle selection strategy in verifier
-    // set synthesis strategy
+  // get base problem
+  // find correctness requirement, add to verifier
+  // add orcle assumptions and constraints to verifier
+  // set oracle selection strategy in verifier
+  // set synthesis strategy
 }
 
 // problem is dynamic
 ogist::resultt ogist::doit()
 {
-  // the actual synthesis loop:
-  // synthesiser synthesise solution to problem so far
-  
+  // the actual synthesis loop
 
-  // verifier: Check correctness. If correct return solution
+  while(true)
+  {
+    // synthesiser synthesise solution to problem so far
 
-  // If not correct, are there other oracles to call? If yes, call some
-  // and add oracle constraints/assumptions to problem
+    switch(synthesizer(problem))
+    {
+    case synthesizert::CANDIDATE:
+      break;
 
-  // loop. 
+    case synthesizert::NO_SOLUTION:
+      return ogist::resultt::D_UNSATISFIABLE;
+    }
 
+    // verifier: Check correctness. If correct return solution,
+    // otherwise 'verify' adds constraints to the problem
+    auto model = [this](exprt src) -> exprt { return synthesizer.model(src); };
 
-  return ogist::resultt::D_ERROR;
+    switch(verify(problem, model))
+    {
+    case verifyt::PASS:
+      return ogist::resultt::D_SATISFIABLE;
+
+    case verifyt::FAIL:
+      break;
+    }
+
+    // If not correct, are there other oracles to call? If yes, call some
+    // and add oracle constraints/assumptions to problem
+  }
 } 
 
 void ogist::set_to(const exprt &expr, bool value) { }

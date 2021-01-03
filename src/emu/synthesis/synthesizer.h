@@ -13,7 +13,7 @@ public:
   using resultt = enum { CANDIDATE, NO_SOLUTION };
   virtual resultt operator()(const problemt &) = 0;
 
-  virtual solutiont model(exprt) const = 0;
+  virtual exprt model(exprt) const = 0;
 };
 
 #endif /*EMU_SYNTHESIZER_H*/
