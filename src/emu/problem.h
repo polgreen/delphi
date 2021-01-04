@@ -23,7 +23,7 @@ public:
   // Synthesis assumptions are only used by the synthesis phase, and never by the verification phase
   // synthesis assumptions contain the counterexamples obtained so far
   std::vector<exprt> assumptions, constraints, synthesis_assumptions;
-  std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens;
+  std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens, correctness_oracles;
 };
 
 class solutiont

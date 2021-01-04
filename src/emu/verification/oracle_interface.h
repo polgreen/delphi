@@ -8,6 +8,10 @@ class oracle_interfacet:public verifyt
   protected:
   // initialisation
 
+  // call oracles
+  void call_oracle_constraint(const problemt::oracle_constraint_gent &oracle, const std::function<exprt(exprt)> &model);
+  void call_oracle_assumption(const problemt::oracle_constraint_gent &oracle, const std::function<exprt(exprt)> &model);
+  void call_correctness_oracles(problemt &problem, const std::function<exprt(exprt)> &model);
   
   /// Namespace passed on to decision procedure.
 
