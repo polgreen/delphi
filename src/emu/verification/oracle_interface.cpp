@@ -1,12 +1,12 @@
 #include "oracle_interface.h"
 
 
-void oracle_interfacet::call_oracle_constraint(const problemt::oracle_constraint_gent &oracle,const std::function<exprt(exprt)> &model)
+void oracle_interfacet::call_oracle_constraint(const oracle_constraint_gent &oracle,const std::function<exprt(exprt)> &model)
 {
 
 }
 
-void oracle_interfacet::call_oracle_assumption(const problemt::oracle_constraint_gent &oracle,const std::function<exprt(exprt)> &model)
+void oracle_interfacet::call_oracle_assumption(const oracle_constraint_gent &oracle,const std::function<exprt(exprt)> &model)
 {
 
 }

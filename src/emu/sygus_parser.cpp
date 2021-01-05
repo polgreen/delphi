@@ -10,7 +10,7 @@
 #include <cassert>
 #include <fstream>
 
-sygus_parsert::oracle_constraint_gent
+oracle_constraint_gent
 sygus_parsert::oracle_signature()
 {
   if(next_token() != smt2_tokenizert::SYMBOL)

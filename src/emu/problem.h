@@ -4,8 +4,6 @@
 #include <util/expr.h>
 #include "sygus_parser.h"
 
-
-
 class problemt
 {
 public:
@@ -16,7 +14,6 @@ public:
   // // This is expected not to change
   // const exprt formula;
 
-  using oracle_constraint_gent = sygus_parsert::oracle_constraint_gent;
   // We only ever add assumptions and constraints, we never remove them.
   // assumptions and constraints come from the original spec, and are used for verification
   // Oracle assumption gen and constraint gen may add to the assumptions and constraints
