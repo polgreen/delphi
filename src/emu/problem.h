@@ -22,6 +22,8 @@ public:
   // std::vector<exprt> assumptions, constraints, synthesis_assumptions;
   exprt constraints, assumptions, synthesis_assumptions;
   std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens, correctness_oracles;
+  // universally quantified variables
+  std::vector<symbol_exprt> synthesis_variables;
 };
 
 class solutiont

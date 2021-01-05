@@ -69,8 +69,24 @@ int sygus_frontend(const cmdlinet &cmdline)
 
   // build problem
   problemt problem;
-  problem.assumptions = and_exprt(parser.assumptions);
-  problem.constraints = and_exprt(parser.constraints);
+  problem.synthesis_assumptions = true_exprt();
+  for(const auto &v: parser.variable_set)
+    problem.synthesis_variables.push_back(v);
+  if(parser.assumptions.size()>1)
+    problem.assumptions = and_exprt(parser.assumptions);
+  else if(parser.assumptions.size()==1)
+    problem.assumptions=parser.assumptions[0];
+  else
+    problem.assumptions=true_exprt();
+    
+
+  if(parser.constraints.size()>1)
+    problem.constraints = and_exprt(parser.constraints);
+  else if (problem.constraints.size()==1)
+    problem.constraints=parser.constraints[0]; 
+  else
+    problem.constraints=true_exprt();
+
   for(const auto &c: parser.oracle_constraint_gens)
     problem.oracle_constraint_gens.push_back(c);   
   for(const auto &c: parser.oracle_assumption_gens)
@@ -78,7 +94,7 @@ int sygus_frontend(const cmdlinet &cmdline)
 
   // get synthesiser
 
-    symbol_tablet symbol_table;
+  symbol_tablet symbol_table;
   namespacet ns(symbol_table);
 
   simple_syntht synthesizer(ns, message_handler);

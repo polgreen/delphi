@@ -1,12 +1,14 @@
 #include "simple_synth.h"
 #include <solvers/smt2/smt2_dec.h>
 #include <util/mathematical_expr.h>
+#include "../expr2sygus.h"
 
 void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem)
 {
   implies_exprt implies_expr(problem.synthesis_assumptions,
                              implies_exprt(problem.assumptions, problem.constraints));
-  quantifier_exprt full_problem(ID_forall, quantified_variables, implies_expr);
+  quantifier_exprt full_problem(ID_forall, problem.synthesis_variables, implies_expr);
+  std::cout<<expr2sygus(full_problem)<<std::endl;
   const exprt encoded = encoding(full_problem);
   solver.set_to_true(encoded);
 }

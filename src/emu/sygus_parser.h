@@ -30,7 +30,7 @@ public:
   std::string logic, action;
 
   std::set<irep_idt> synth_fun_set;
-  std::set<irep_idt> variable_set;
+  std::set<symbol_exprt> variable_set;
 
   signature_with_parameter_idst inv_function_signature();
   void expand_function_applications(exprt &);

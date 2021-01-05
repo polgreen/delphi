@@ -127,6 +127,19 @@ void sygus_parsert::setup_commands()
 
   commands["synth-inv"] = commands["synth-fun"];
 
+  commands["declare-var"]=[this]{
+    const auto s = smt2_tokenizer.get_buffer();
+
+    if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error() << "expected a symbol after " << s;
+
+    irep_idt id = smt2_tokenizer.get_buffer();
+    auto type = sort();
+
+    add_unique_id(id, exprt(ID_nil, type));
+    variable_set.insert(symbol_exprt(id, type));
+  };
+
   commands["declare-primed-var"] = [this] {
     if(smt2_tokenizer.next_token()!=smt2_tokenizert::SYMBOL)
       throw error("expected a symbol after declare-primed-var");

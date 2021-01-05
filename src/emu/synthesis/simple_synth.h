@@ -26,7 +26,6 @@ protected:
   // snthesis encoding
   synth_encodingt synth_encoding;
   void add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem);
-  std::vector<symbol_exprt> quantified_variables;
   solutiont last_solution;
 
   /// Namespace passed on to decision procedure.
