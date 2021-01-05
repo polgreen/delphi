@@ -49,7 +49,7 @@ ogist::resultt ogist::doit()
       break;
 
     case synthesizert::NO_SOLUTION:
-      return ogist::resultt::D_UNSATISFIABLE;
+      return decision_proceduret::resultt::D_UNSATISFIABLE;
     }
 
     // verifier: Check correctness. If correct return solution,
@@ -59,7 +59,7 @@ ogist::resultt ogist::doit()
     switch(verify(problem, model))
     {
     case verifyt::PASS:
-      return ogist::resultt::D_SATISFIABLE;
+      return decision_proceduret::resultt::D_SATISFIABLE;
 
     case verifyt::FAIL:
       break;
@@ -70,31 +70,6 @@ ogist::resultt ogist::doit()
   }
 } 
 
-void ogist::set_to(const exprt &expr, bool value) { }
 
-exprt ogist::handle(const exprt &expr)
-{
-  return expr;
-}
 
-exprt ogist::get(const exprt &expr) const
-{
-  return expr;
-}
 
-void ogist::print_assignment(std::ostream &out) const { }
-
-std::size_t ogist::get_number_of_solver_calls() const
-{
-  return 0;
-}
-
-ogist::resultt ogist::dec_solve()
-{
-  return ogist::resultt::D_ERROR;
-}
-
-std::string ogist::decision_procedure_text() const
-{
-  return "ogis";
-}

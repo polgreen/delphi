@@ -6,7 +6,7 @@
 #include "problem.h"
 #include "verification/verify.h"
 
-class ogist: public decision_proceduret
+class ogist
 {
 public:
   ogist(
@@ -14,15 +14,8 @@ public:
     verifyt &,
     problemt &);
  
-  resultt doit();
+  decision_proceduret::resultt doit();
 
-  void set_to(const exprt &expr, bool value) override;
-  exprt handle(const exprt &expr) override;
-  exprt get(const exprt &expr) const override;
-  void print_assignment(std::ostream &out) const override;
-  std::size_t get_number_of_solver_calls() const override;
-  resultt dec_solve() override;
-  std::string decision_procedure_text() const override;
 
 protected:
   synthesizert &synthesizer;
