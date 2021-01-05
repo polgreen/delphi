@@ -3,17 +3,24 @@
 
 #include "synthesizer.h"
 #include "synth_encoding.h"
+#include <solvers/decision_procedure.h>
+#include <util/namespace.h>
 
 class simple_syntht:public synthesizert
 {
   protected:
-  // initialisation
+  resultt operator()(const problemt &, decision_proceduret &solver);
 
-  
-  /// Namespace passed on to decision procedure.
 
   // snthesis encoding
   synth_encodingt synth_encoding;
+  void add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem);
+  std::vector<symbol_exprt> quantified_variables;
+  solutiont last_solution;
+
+  /// Namespace passed on to decision procedure.
+  namespacet ns;
+  std::string logic="LIA";
 
  public: 
   resultt operator()(const problemt &) override;

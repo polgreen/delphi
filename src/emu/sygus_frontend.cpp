@@ -11,6 +11,7 @@
 #include <util/namespace.h>
 #include <util/symbol_table.h>
 #include <util/config.h>
+#include <util/std_expr.h>
 
 #include <ansi-c/ansi_c_language.h>
 
@@ -68,10 +69,8 @@ int sygus_frontend(const cmdlinet &cmdline)
 
   // build problem
   problemt problem;
-  for(const auto &c: parser.constraints)
-    problem.constraints.push_back(c);
-  for(const auto &c: parser.assumptions)
-    problem.assumptions.push_back(c);
+  problem.assumptions = and_exprt(parser.assumptions);
+  problem.constraints = and_exprt(parser.constraints);
   for(const auto &c: parser.oracle_constraint_gens)
     problem.oracle_constraint_gens.push_back(c);   
   for(const auto &c: parser.oracle_assumption_gens)
