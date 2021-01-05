@@ -5,12 +5,23 @@
 #include "synth_encoding.h"
 #include <solvers/decision_procedure.h>
 #include <util/namespace.h>
+#include <util/message.h>
 
-class simple_syntht:public synthesizert
+class simple_syntht : public synthesizert
 {
-  protected:
-  resultt operator()(const problemt &, decision_proceduret &solver);
 
+public:
+  simple_syntht(namespacet &_namespace, 
+                message_handlert &_ms) :
+                ns(_namespace),
+                message_handler(_ms){};
+
+  resultt operator()(const problemt &) override;
+
+  exprt model(exprt) const override;
+
+protected:
+  resultt operator()(const problemt &, decision_proceduret &solver);
 
   // snthesis encoding
   synth_encodingt synth_encoding;
@@ -20,16 +31,8 @@ class simple_syntht:public synthesizert
 
   /// Namespace passed on to decision procedure.
   namespacet ns;
-  std::string logic="LIA";
-
- public: 
-  resultt operator()(const problemt &) override;
-
-  exprt model(exprt) const override;
-
-  /// program size
-
+  std::string logic = "LIA";
+  message_handlert &message_handler;
 };
 
 #endif /* EMU_SIMPLE_SYNTH_H_ */
-

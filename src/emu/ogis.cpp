@@ -37,7 +37,7 @@ ogist::ogist(
 }
 
 // problem is dynamic
-ogist::resultt ogist::doit(namespacet &ns)
+ogist::resultt ogist::doit()
 {
   // the actual synthesis loop
 

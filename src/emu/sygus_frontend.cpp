@@ -77,11 +77,14 @@ int sygus_frontend(const cmdlinet &cmdline)
     problem.oracle_assumption_gens.push_back(c);  
 
   // get synthesiser
-  simple_syntht synthesizer;
+
+    symbol_tablet symbol_table;
+  namespacet ns(symbol_table);
+
+  simple_syntht synthesizer(ns, message_handler);
   oracle_interfacet verifier;
 
-  symbol_tablet symbol_table;
-  namespacet ns(symbol_table);
+
 
   ogist ogis(synthesizer, verifier, problem, ns);
   ogis.doit();  
