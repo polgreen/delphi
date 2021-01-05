@@ -13,9 +13,10 @@ public:
     synthesizert &,
     verifyt &,
     problemt &);
- 
-  decision_proceduret::resultt doit();
 
+  using resultt = decision_proceduret::resultt;
+
+  resultt doit();
 
 protected:
   synthesizert &synthesizer;
