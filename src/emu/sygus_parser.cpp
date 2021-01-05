@@ -277,8 +277,7 @@ function_application_exprt sygus_parsert::apply_function_to_variables(
 
   return function_application_exprt(
     symbol_exprt(id, f.type),
-    arguments,
-    f_type.codomain());
+    arguments);
 }
 
 void sygus_parsert::generate_invariant_constraints()
