@@ -22,10 +22,12 @@
 ogist::ogist(
   synthesizert &__synthesizer,
   verifyt &__verify,
-  problemt &__problem) :
+  problemt &__problem, 
+  namespacet &_ns) :
   synthesizer(__synthesizer),
   verify(__verify),
-  problem(__problem)
+  problem(__problem),
+  ns(_ns)
 {
   // get base problem
   // find correctness requirement, add to verifier
@@ -35,7 +37,7 @@ ogist::ogist(
 }
 
 // problem is dynamic
-ogist::resultt ogist::doit()
+ogist::resultt ogist::doit(namespacet &ns)
 {
   // the actual synthesis loop
 

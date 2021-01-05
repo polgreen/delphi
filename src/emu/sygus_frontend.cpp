@@ -80,7 +80,10 @@ int sygus_frontend(const cmdlinet &cmdline)
   simple_syntht synthesizer;
   oracle_interfacet verifier;
 
-  ogist ogis(synthesizer, verifier, problem);
+  symbol_tablet symbol_table;
+  namespacet ns(symbol_table);
+
+  ogist ogis(synthesizer, verifier, problem, ns);
   ogis.doit();  
  
   return 0;

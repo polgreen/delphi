@@ -5,6 +5,7 @@
 #include <solvers/decision_procedure.h>
 #include "problem.h"
 #include "verification/verify.h"
+#include <util/namespace.h>
 
 class ogist
 {
@@ -12,16 +13,19 @@ public:
   ogist(
     synthesizert &,
     verifyt &,
-    problemt &);
-
+    problemt &,
+    namespacet &);
+ 
   using resultt = decision_proceduret::resultt;
 
   resultt doit();
+
 
 protected:
   synthesizert &synthesizer;
   verifyt &verify;
   problemt &problem;
+  namespacet ns;
 }; 
 
 #endif /*EMU_OGIS_H_*/
