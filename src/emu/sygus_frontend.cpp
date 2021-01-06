@@ -27,20 +27,11 @@ problemt build_problem(const sygus_parsert &parser)
   problemt problem;
   for (const auto &v : parser.variable_set)
     problem.synthesis_variables.push_back(v);
-  if (parser.assumptions.size() > 1)
-    problem.assumptions = and_exprt(parser.assumptions);
-  else if (parser.assumptions.size() == 1)
-    problem.assumptions = parser.assumptions[0];
-  else
-    problem.assumptions = true_exprt();
-
-  if (parser.constraints.size() > 1)
-    problem.constraints = and_exprt(parser.constraints);
-  else if (problem.constraints.size() == 1)
-    problem.constraints = parser.constraints[0];
-  else
-    problem.constraints = true_exprt();
-
+  for (const auto &c : parser.constraints)
+    problem.constraints.push_back(c);
+  for (const auto &c : parser.assumptions)
+    problem.assumptions.push_back(c);  
+  
   for (const auto &c : parser.oracle_constraint_gens)
     problem.oracle_constraint_gens.push_back(c);
   for (const auto &c : parser.oracle_assumption_gens)

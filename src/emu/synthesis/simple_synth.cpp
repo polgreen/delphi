@@ -5,10 +5,47 @@
 
 void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem)
 {
-  implies_exprt implies_expr(problem.synthesis_assumptions,
-                             implies_exprt(problem.assumptions, problem.constraints));
+  exprt true_expr = true_exprt();
+  exprt& synthesis_assumptions = true_expr;
+  switch (problem.synthesis_assumptions.size())
+  {
+  case 0:
+    break;
+  case 1:
+    synthesis_assumptions = problem.synthesis_assumptions[0];
+    break;
+  default:
+    synthesis_assumptions = or_exprt(problem.synthesis_assumptions);
+  }
+
+  exprt& assumptions = true_expr;
+  switch (problem.assumptions.size())
+  {
+  case 0:
+    break;
+  case 1:
+    assumptions = problem.assumptions[0];
+    break;
+  default:
+    assumptions = and_exprt(problem.assumptions);
+  }
+
+  exprt& constraints = true_expr;
+  switch (problem.constraints.size())
+  {
+  case 0:
+    break;
+  case 1:
+    constraints = problem.constraints[0];
+    break;
+  default:
+    constraints = and_exprt(problem.constraints);
+  }
+
+  implies_exprt implies_expr(synthesis_assumptions,
+                             implies_exprt(assumptions, constraints));
   quantifier_exprt full_problem(ID_forall, problem.synthesis_variables, implies_expr);
-  std::cout<<expr2sygus(full_problem)<<std::endl;
+  std::cout << expr2sygus(full_problem) << std::endl;
   const exprt encoded = encoding(full_problem);
   solver.set_to_true(encoded);
 }
