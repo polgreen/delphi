@@ -14,6 +14,8 @@ public:
   virtual resultt operator()(const problemt &) = 0;
 
   virtual exprt model(exprt) const = 0;
+
+  virtual void add_ce(const counterexamplet &)=0;
 };
 
 #endif /*EMU_SYNTHESIZER_H*/

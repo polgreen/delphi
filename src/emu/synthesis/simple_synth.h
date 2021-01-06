@@ -20,8 +20,17 @@ public:
 
   exprt model(exprt) const override;
 
+  void add_ce(const counterexamplet &cex) override;
+
 protected:
   resultt operator()(const problemt &, decision_proceduret &solver);
+
+  std::vector<counterexamplet> counterexamples;
+
+  void add_counterexample(
+  const counterexamplet &ce,
+  synth_encodingt &synth_encoding,
+  decision_proceduret &solver);
 
   // snthesis encoding
   synth_encodingt synth_encoding;

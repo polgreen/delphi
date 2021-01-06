@@ -592,3 +592,9 @@ solutiont synth_encodingt::get_solution(
 
   return result;
 }
+
+void synth_encodingt::clear()
+{
+  e_data_map.clear();
+  constraints.clear();
+}
