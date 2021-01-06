@@ -147,9 +147,12 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decisi
   }
 }
 
-exprt simple_syntht::model(exprt) const
+exprt simple_syntht::model(exprt expr) const
 {
-  return nil_exprt();
+  assert(expr.id()==ID_symbol);
+  auto iter = last_solution.functions.find(to_symbol_expr(expr));
+  assert(iter!=last_solution.functions.end());
+  return iter->second;
 }
 
 void simple_syntht::add_ce(
