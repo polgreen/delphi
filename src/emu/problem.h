@@ -24,6 +24,7 @@ public:
   std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens;
   // universally quantified variables
   std::vector<symbol_exprt> synthesis_variables;
+  std::set <irep_idt> synthesis_functions;
 };
 
 class solutiont

@@ -3,47 +3,73 @@
 #include <util/mathematical_expr.h>
 #include "../expr2sygus.h"
 
+bool contains_oracle(exprt expr, const problemt &problem)
+{
+  if (expr.type().id() == ID_mathematical_function && 
+      problem.synthesis_functions.find(to_symbol_expr(expr).get_identifier())==
+      problem.synthesis_functions.end())
+  {
+    return true;
+  } 
+  else
+  {
+    forall_operands(it, expr) 
+      if(contains_oracle(*it, problem))
+        return true;
+  }
+  return false;
+}
+
+exprt join_expressions(const std::vector<exprt> &expressions, irep_idt id, const problemt &problem)
+{
+  INVARIANT(id == ID_or || id == ID_and, "expected ID_and or ID_or for join expressions");
+  switch (expressions.size())
+  {
+  case 0:
+    return true_exprt();
+  case 1:
+    return contains_oracle(expressions[0], problem) ? true_exprt() : expressions[0];
+  default:
+    std::set<std::size_t> indices;
+    for (std::size_t i = 0; i < expressions.size(); i++)
+      if (contains_oracle(expressions[i], problem))
+        indices.insert(i);
+
+    if (indices.size() == 0)
+      if (id == ID_or) 
+        return or_exprt(expressions);
+      else
+        return and_exprt(expressions);
+    else
+    {
+      std::vector<exprt> copy_of_expressions;
+      for (std::size_t i = 0; i < expressions.size(); i++)
+      {
+        if(indices.find(i)==indices.end())
+          copy_of_expressions.push_back(expressions[i]);
+      }
+      switch (copy_of_expressions.size())
+      {
+      case 0:
+        return true_exprt();
+      case 1:
+        return copy_of_expressions[0];
+      default:
+        if (id == ID_or) 
+          return or_exprt(copy_of_expressions);
+        else 
+          return and_exprt(copy_of_expressions);
+      }
+    }
+  }
+}
+
 void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem)
 {
-  exprt true_expr = true_exprt();
-  exprt& synthesis_assumptions = true_expr;
-  switch (problem.synthesis_assumptions.size())
-  {
-  case 0:
-    break;
-  case 1:
-    synthesis_assumptions = problem.synthesis_assumptions[0];
-    break;
-  default:
-    synthesis_assumptions = or_exprt(problem.synthesis_assumptions);
-  }
-
-  exprt& assumptions = true_expr;
-  switch (problem.assumptions.size())
-  {
-  case 0:
-    break;
-  case 1:
-    assumptions = problem.assumptions[0];
-    break;
-  default:
-    assumptions = and_exprt(problem.assumptions);
-  }
-
-  exprt& constraints = true_expr;
-  switch (problem.constraints.size())
-  {
-  case 0:
-    break;
-  case 1:
-    constraints = problem.constraints[0];
-    break;
-  default:
-    constraints = and_exprt(problem.constraints);
-  }
-
-  implies_exprt implies_expr(synthesis_assumptions,
-                             implies_exprt(assumptions, constraints));
+  
+  implies_exprt implies_expr(join_expressions(problem.synthesis_assumptions, ID_or, problem),
+                             implies_exprt(join_expressions(problem.assumptions, ID_and, problem), 
+                             join_expressions(problem.constraints, ID_and, problem)));
   quantifier_exprt full_problem(ID_forall, problem.synthesis_variables, implies_expr);
   std::cout << expr2sygus(full_problem) << std::endl;
   const exprt encoded = encoding(full_problem);

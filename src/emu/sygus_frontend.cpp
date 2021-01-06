@@ -25,8 +25,10 @@
 problemt build_problem(const sygus_parsert &parser)
 {
   problemt problem;
+  problem.synthesis_functions = parser.synth_fun_set;
   for (const auto &v : parser.variable_set)
-    problem.synthesis_variables.push_back(v);
+    if(v.type().id()!=ID_mathematical_function)
+      problem.synthesis_variables.push_back(v);
   for (const auto &c : parser.constraints)
     problem.constraints.push_back(c);
   for (const auto &c : parser.assumptions)
