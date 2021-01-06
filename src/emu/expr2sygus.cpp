@@ -132,15 +132,15 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
   }
   else if (expr.id() == ID_and)
   {
-    result += "and ";
+    result += "and";
     for (const auto &op : expr.operands())
-      result += expr2sygus(op, use_integers) + " ";
+      result += " " + expr2sygus(op, use_integers);
   }
   else if (expr.id() == ID_or)
   {
-    result += "or ";
+    result += "or";
     for (const auto &op : expr.operands())
-      result += expr2sygus(op, use_integers) + " ";
+      result += " " + expr2sygus(op, use_integers) ;
   }
   else if (expr.id() == ID_xor)
     result += "xor " + expr2sygus(expr.operands()[0], use_integers) + " " +
@@ -177,9 +177,9 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
   }
   else if (expr.id() == ID_plus)
   {
-    result += (use_integers ? "+ " : "bvadd ");
+    result += (use_integers ? "+" : "bvadd");
     for (const auto &op : expr.operands())
-      result += expr2sygus(op, use_integers) + " ";
+      result += " " + expr2sygus(op, use_integers);
   }
   else if (expr.id() == ID_minus)
     result += (use_integers ? "- "
@@ -191,7 +191,7 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
               expr2sygus(expr.operands()[1], use_integers);
   else if (expr.id() == ID_implies)
   {
-    result += "=> " + expr2sygus(expr.operands()[0], use_integers) + expr2sygus(expr.operands()[1], use_integers);
+    result += "=> " + expr2sygus(expr.operands()[0], use_integers) + " " + expr2sygus(expr.operands()[1], use_integers);
   }
   else if (expr.id() == ID_function_application)
   {
@@ -201,9 +201,9 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
       std::cout << "Unsupported function application " << expr.pretty() << std::endl;
       assert(0);
     }
-    result += clean_id(to_symbol_expr(fapp.function()).get_identifier()) + " ";
+    result += clean_id(to_symbol_expr(fapp.function()).get_identifier());
     for (const auto &arg : fapp.arguments())
-      result += expr2sygus(arg, use_integers) + " ";
+      result += " " + expr2sygus(arg, use_integers);
   }
   else if (expr.id() == ID_symbol)
   {
@@ -310,9 +310,9 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
   }
   else if (id2string(expr.id()) == "distinct")
   {
-    result += "distinct ";
+    result += "distinct";
     for (const auto &op : expr.operands())
-      result += expr2sygus(op) + " ";
+      result += " " + expr2sygus(op);
   }
   else
   {
