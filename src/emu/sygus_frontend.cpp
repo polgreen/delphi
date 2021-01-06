@@ -22,9 +22,35 @@
 
 #include <fstream>
 
+problemt build_problem(const sygus_parsert &parser)
+{
+  problemt problem;
+  for (const auto &v : parser.variable_set)
+    problem.synthesis_variables.push_back(v);
+  if (parser.assumptions.size() > 1)
+    problem.assumptions = and_exprt(parser.assumptions);
+  else if (parser.assumptions.size() == 1)
+    problem.assumptions = parser.assumptions[0];
+  else
+    problem.assumptions = true_exprt();
+
+  if (parser.constraints.size() > 1)
+    problem.constraints = and_exprt(parser.constraints);
+  else if (problem.constraints.size() == 1)
+    problem.constraints = parser.constraints[0];
+  else
+    problem.constraints = true_exprt();
+
+  for (const auto &c : parser.oracle_constraint_gens)
+    problem.oracle_constraint_gens.push_back(c);
+  for (const auto &c : parser.oracle_assumption_gens)
+    problem.oracle_assumption_gens.push_back(c);
+  return problem;
+}
+
 int sygus_frontend(const cmdlinet &cmdline)
 {
-  assert(cmdline.args.size()==1);
+  assert(cmdline.args.size() == 1);
 
   register_language(new_ansi_c_language);
   config.ansi_c.set_32();
@@ -33,21 +59,22 @@ int sygus_frontend(const cmdlinet &cmdline)
   messaget message(message_handler);
 
   // this is our default verbosity
-  unsigned int v=messaget::M_STATISTICS;
+  unsigned int v = messaget::M_STATISTICS;
 
-  if(cmdline.isset("verbosity"))
+  if (cmdline.isset("verbosity"))
   {
-    v=std::stol(
-        cmdline.get_value("verbosity"));;
-    if(v>10)
-      v=10;
+    v = std::stol(
+        cmdline.get_value("verbosity"));
+    ;
+    if (v > 10)
+      v = 10;
   }
 
   message_handler.set_verbosity(v);
 
   std::ifstream in(cmdline.args.front());
 
-  if(!in)
+  if (!in)
   {
     message.error() << "Failed to open input file" << messaget::eom;
     return 10;
@@ -60,7 +87,7 @@ int sygus_frontend(const cmdlinet &cmdline)
   {
     parser.parse();
   }
-  catch(const sygus_parsert::smt2_errort &e)
+  catch (const sygus_parsert::smt2_errort &e)
   {
     message.error() << e.get_line_no() << ": "
                     << e.what() << messaget::eom;
@@ -68,29 +95,7 @@ int sygus_frontend(const cmdlinet &cmdline)
   }
 
   // build problem
-  problemt problem;
-  problem.synthesis_assumptions = true_exprt();
-  for(const auto &v: parser.variable_set)
-    problem.synthesis_variables.push_back(v);
-  if(parser.assumptions.size()>1)
-    problem.assumptions = and_exprt(parser.assumptions);
-  else if(parser.assumptions.size()==1)
-    problem.assumptions=parser.assumptions[0];
-  else
-    problem.assumptions=true_exprt();
-    
-
-  if(parser.constraints.size()>1)
-    problem.constraints = and_exprt(parser.constraints);
-  else if (problem.constraints.size()==1)
-    problem.constraints=parser.constraints[0]; 
-  else
-    problem.constraints=true_exprt();
-
-  for(const auto &c: parser.oracle_constraint_gens)
-    problem.oracle_constraint_gens.push_back(c);   
-  for(const auto &c: parser.oracle_assumption_gens)
-    problem.oracle_assumption_gens.push_back(c);  
+  problemt problem = build_problem(parser);
 
   // get synthesiser
 
@@ -100,10 +105,8 @@ int sygus_frontend(const cmdlinet &cmdline)
   simple_syntht synthesizer(ns, message_handler);
   oracle_interfacet verifier;
 
-
-
   ogist ogis(synthesizer, verifier, problem, ns);
-  ogis.doit();  
- 
+  ogis.doit();
+
   return 0;
 }
