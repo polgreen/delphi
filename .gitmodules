@@ -1,3 +1,6 @@
 [submodule "lib/cbmc"]
 	path = lib/cbmc
 	url = git@github.com:diffblue/cbmc.git
+[submodule "regression/oracles"]
+	path = regression/oracles
+	url = git@github.com:polgreen/oracles.git

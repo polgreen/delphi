@@ -252,7 +252,6 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
     else
     {
       std::cout << "Unsupported constant type" << expr.pretty() << std::endl;
-      assert(0);
     }
   }
   else if (expr.id() == ID_with)
