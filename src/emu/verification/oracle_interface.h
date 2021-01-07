@@ -2,27 +2,42 @@
 #define EMU_ORACLE_INTERFACE_H_
 
 #include "verify.h"
+#include "verify_encoding.h"
+#include <solvers/decision_procedure.h>
+#include <util/namespace.h>
+#include <util/message.h>
 
-class oracle_interfacet:public verifyt
+class oracle_interfacet : public verifyt
 {
-  protected:
-  // initialisation
+ public:
+  oracle_interfacet(namespacet &_namespace, 
+                message_handlert &_ms) :
+                ns(_namespace),
+                message_handler(_ms){};
 
-  // call oracles
-  void call_oracle_constraint(const oracle_constraint_gent &oracle, const std::function<exprt(exprt)> &model);
-  void call_oracle_assumption(const oracle_constraint_gent &oracle, const std::function<exprt(exprt)> &model);
-  void call_correctness_oracles(problemt &problem, const std::function<exprt(exprt)> &model);
-  
-  /// Namespace passed on to decision procedure.
-
-  // snthesis encoding
-
- public: 
   resultt operator()( problemt &problem,
-    const std::function<exprt(exprt)> &model) override;
+    const solutiont &solution) override;
 
 
-  /// program size
+  resultt operator()(problemt &problem,
+    const solutiont &solution,
+    decision_proceduret &solver);
+  
+  counterexamplet counterexample;
+
+  counterexamplet get_counterexample() override;
+
+
+  protected:
+
+  namespacet ns;
+  message_handlert &message_handler;
+  /// Encoding for the verification decision procedure call.
+  verify_encodingt verify_encoding;
+
+  void call_oracles(problemt &problem);
+
+  void add_problem(const problemt &problem, const solutiont &solution, decision_proceduret &solver );
 
 };
 

@@ -26,6 +26,7 @@ protected:
   verifyt &verify;
   problemt &problem;
   namespacet ns;
+  solutiont solution;
 }; 
 
 #endif /*EMU_OGIS_H_*/

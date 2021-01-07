@@ -14,13 +14,16 @@ public:
   simple_syntht(namespacet &_namespace, 
                 message_handlert &_ms) :
                 ns(_namespace),
-                message_handler(_ms){};
+                message_handler(_ms),
+                program_size(0){};
 
   resultt operator()(const problemt &) override;
 
   exprt model(exprt) const override;
 
   void add_ce(const counterexamplet &cex) override;
+  solutiont get_solution() const override;
+  void set_program_size(std::size_t size) override;
 
 protected:
   resultt operator()(const problemt &, decision_proceduret &solver);
@@ -41,6 +44,7 @@ protected:
   namespacet ns;
   std::string logic = "LIA";
   message_handlert &message_handler;
+  std::size_t program_size;
 };
 
 #endif /* EMU_SIMPLE_SYNTH_H_ */

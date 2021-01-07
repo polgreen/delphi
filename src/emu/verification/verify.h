@@ -14,7 +14,8 @@ public:
   using resultt = enum { PASS, FAIL };
   virtual resultt operator()(
     problemt &problem,
-    const std::function<exprt(exprt)> &model) = 0;
+    const solutiont &solution) = 0;
+  virtual counterexamplet get_counterexample()=0;  
 };
 
 #endif /*EMU_VERIFY_H*/

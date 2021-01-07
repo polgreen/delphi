@@ -25,17 +25,23 @@
 problemt build_problem(const sygus_parsert &parser)
 {
   problemt problem;
+  for(const auto &v : parser.variable_set)
+    problem.free_variables.insert(v);
+
+  // for(const auto &v: parser.full_let_variable_map)
+  //   problem.free_variables.insert(symbol_exprt(v.first, v.second));
+
   problem.synthesis_functions = parser.synth_fun_set;
-  for (const auto &v : parser.variable_set)
-    if(v.type().id()!=ID_mathematical_function)
-      problem.synthesis_variables.push_back(v);
+
   for (const auto &c : parser.constraints)
     problem.constraints.push_back(c);
+
   for (const auto &c : parser.assumptions)
     problem.assumptions.push_back(c);  
   
   for (const auto &c : parser.oracle_constraint_gens)
     problem.oracle_constraint_gens.push_back(c);
+
   for (const auto &c : parser.oracle_assumption_gens)
     problem.oracle_assumption_gens.push_back(c);
   return problem;
@@ -90,13 +96,13 @@ int sygus_frontend(const cmdlinet &cmdline)
   // build problem
   problemt problem = build_problem(parser);
 
-  // get synthesiser
+  // get synthesiser and verifier
 
   symbol_tablet symbol_table;
   namespacet ns(symbol_table);
 
   simple_syntht synthesizer(ns, message_handler);
-  oracle_interfacet verifier;
+  oracle_interfacet verifier(ns, message_handler);
 
   ogist ogis(synthesizer, verifier, problem, ns);
   ogis.doit();

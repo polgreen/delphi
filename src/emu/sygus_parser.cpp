@@ -137,7 +137,8 @@ void sygus_parsert::setup_commands()
     auto type = sort();
 
     add_unique_id(id, exprt(ID_nil, type));
-    variable_set.insert(symbol_exprt(id, type));
+    if(type.id()!=ID_mathematical_function)
+      variable_set.insert(symbol_exprt(id, type));
   };
 
   commands["declare-primed-var"] = [this] {
