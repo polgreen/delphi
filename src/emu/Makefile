@@ -1,6 +1,7 @@
 SRC = emu_main.cpp expr2sygus.cpp ogis.cpp sygus_parser.cpp sygus_frontend.cpp \
 synthesis/simple_synth.cpp synthesis/synth_encoding.cpp \
 verification/oracle_interface.cpp \
+verification/oracle_solver.cpp \
 synthesis/synthesizer.cpp verification/verify_encoding.cpp
 
 OBJ+= ../../$(CPROVER_DIR)/src/ansi-c/ansi-c$(LIBEXT) \
