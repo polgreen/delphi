@@ -3,5 +3,7 @@
 #include <iosfwd>
 #include <map>
 
-std::map<std::string, exprt> oracle_response_parser(std::istream &);
+class symbol_exprt;
+
+std::map<symbol_exprt, exprt> oracle_response_parser(std::istream &);
 

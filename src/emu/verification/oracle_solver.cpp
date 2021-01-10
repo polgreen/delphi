@@ -118,28 +118,43 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(std::size_t oracle_in
   std::istringstream oracle_response_istream(stdout_stream.str());
   auto response = oracle_response_parser(oracle_response_istream);
 
-  (void)response;
+  exprt::operandst return_constraints;
 
-#if 0
-  // parse these lines into expressions
-  std::vector<exprt> return_values;
-  return_values.reserve(lines.size());
-
-  for(auto &line : lines)
-    return_values.push_back(parse(line));
-
-  if(oracle.return_parameters.size() != return_values.size())
+  // iterate over return parameters
+  for(auto &return_parameter : oracle.return_parameters)
   {
-    log.error() << "oracle " << oracle.binary_name << " has returned "
-                << return_values.size() << " values, but " << oracle.return_parameters.size()
-                << " are expected" << messaget::eom;
-    return ERROR;
+    if(return_parameter.id() != ID_symbol)
+      continue;
+
+    // find it
+    auto r_it = response.find(to_symbol_expr(return_parameter));
+    if(r_it != response.end())
+    {
+      // add constraint
+      return_constraints.push_back(equal_exprt(r_it->first, r_it->second));
+    }
   }
-#endif
 
-  // check whether the constraint is satisfied
+  // check whether the constraint is already satisfied
+  bool all_satisfied =
+    std::find_if(return_constraints.begin(), return_constraints.end(),
+      [this](const exprt &expr) { return !get(expr).is_true(); }) == return_constraints.end();
 
-  return CONSISTENT;
+  if(all_satisfied)
+    return CONSISTENT; // done, SAT
+
+  // add a constraint
+  exprt::operandst input_constraints;
+
+  for(auto &input_parameter : oracle.input_parameters)
+    input_constraints.push_back(equal_exprt(input_parameter, get(input_parameter)));
+
+  // add inputs equal => return parameters equal
+  set_to_true(implies_exprt(
+    conjunction(input_constraints),
+    conjunction(return_constraints)));
+
+  return INCONSISTENT;
 }
 
 exprt oracle_solvert::parse(const std::string &text) const

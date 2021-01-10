@@ -9,16 +9,16 @@ public:
   {
   }
 
-  std::map<std::string, exprt> model();
+  std::map<symbol_exprt, exprt> model();
 };
 
-std::map<std::string, exprt> smt2_model_parsert::model()
+std::map<symbol_exprt, exprt> smt2_model_parsert::model()
 {
   // ( (define-fun x () Int 8) (define-fun y () Int 6) )
   if(next_token() != smt2_tokenizert::OPEN)
     throw error("expected '('");
 
-  std::map<std::string, exprt> result;
+  std::map<symbol_exprt, exprt> result;
 
   while(smt2_tokenizer.peek() == smt2_tokenizert::OPEN)
   {
@@ -38,7 +38,8 @@ std::map<std::string, exprt> smt2_model_parsert::model()
       const auto body = expression();
 
       // store
-      result[identifier] = body;
+      auto symbol = symbol_exprt(identifier, body.type());
+      result[symbol] = body;
     }
     else
       throw error() << smt2_tokenizer.get_buffer() << " unexpected in model";
@@ -53,7 +54,7 @@ std::map<std::string, exprt> smt2_model_parsert::model()
   return result;
 }
 
-std::map<std::string, exprt> oracle_response_parser(std::istream &in)
+std::map<symbol_exprt, exprt> oracle_response_parser(std::istream &in)
 {
   return smt2_model_parsert(in).model();
 }
