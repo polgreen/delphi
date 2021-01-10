@@ -1,10 +1,14 @@
 #include "oracle_solver.h"
 
+#include "oracle_response_parser.h"
+
 #include <util/expr.h>
 #include <util/format_expr.h>
 #include <util/run.h>
 #include <util/std_expr.h>
 #include <util/string_utils.h>
+
+#include <sstream>
 
 oracle_solvert::oracle_solvert(
   decision_proceduret &__sub_solver,
@@ -111,8 +115,12 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(std::size_t oracle_in
   }
 
   // we assume that the oracle returns the result in SMT-LIB format
-  auto lines = split_string(stdout_stream.str(), '\n', false, false);
+  std::istringstream oracle_response_istream(stdout_stream.str());
+  auto response = oracle_response_parser(oracle_response_istream);
 
+  (void)response;
+
+#if 0
   // parse these lines into expressions
   std::vector<exprt> return_values;
   return_values.reserve(lines.size());
@@ -127,6 +135,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(std::size_t oracle_in
                 << " are expected" << messaget::eom;
     return ERROR;
   }
+#endif
 
   // check whether the constraint is satisfied
 
