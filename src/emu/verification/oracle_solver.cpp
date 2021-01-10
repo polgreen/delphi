@@ -110,7 +110,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(std::size_t oracle_in
     return ERROR;
   }
 
-  // we assume that the oracle returns one result per line
+  // we assume that the oracle returns the result in SMT-LIB format
   auto lines = split_string(stdout_stream.str(), '\n', false, false);
 
   // parse these lines into expressions
