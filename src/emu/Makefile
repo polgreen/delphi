@@ -1,5 +1,5 @@
 SRC = emu_main.cpp expr2sygus.cpp ogis.cpp sygus_parser.cpp sygus_frontend.cpp \
-synthesis/simple_synth.cpp synthesis/synth_encoding.cpp \
+synthesis/simple_synth.cpp synthesis/synth_encoding.cpp smt2_frontend.cpp \
 verification/oracle_interface.cpp \
 verification/oracle_solver.cpp \
 verification/oracle_response_parser.cpp \
