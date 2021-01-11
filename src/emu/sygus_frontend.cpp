@@ -33,6 +33,8 @@ problemt build_problem(const sygus_parsert &parser)
 
   problem.synthesis_functions = parser.synth_fun_set;
 
+  problem.oracle_symbols = parser.oracle_symbols;
+
   for (const auto &c : parser.constraints)
     problem.constraints.push_back(c);
 

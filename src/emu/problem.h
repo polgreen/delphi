@@ -25,6 +25,8 @@ public:
   // universally quantified variables
   std::set<exprt> free_variables;
   std::set <irep_idt> synthesis_functions;
+  // functions with an external oracle implementation
+  smt2_parsert::oracle_fun_mapt oracle_symbols;
 };
 
 class solutiont
