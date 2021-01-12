@@ -420,8 +420,6 @@ int solver(std::istream &in)
     return 0;
 }
 
-
-
 int smt2_frontend(const cmdlinet &cmdline)
 {
   assert(cmdline.args.size()==1);
