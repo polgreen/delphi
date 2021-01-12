@@ -12,16 +12,32 @@
 
 oracle_solvert::oracle_solvert(
   decision_proceduret &__sub_solver,
-  const std::vector<oracle_constraint_gent> &__oracles,
+  const oracle_fun_mapt &__oracle_fun_map,
   message_handlert &__message_handler) :
   sub_solver(__sub_solver),
-  oracles(__oracles),
+  oracle_fun_map(__oracle_fun_map),
   log(__message_handler)
 {
 }
 
 void oracle_solvert::set_to(const exprt &expr, bool value)
 {
+  // find any oracle function applications
+  expr.visit_pre([this](const exprt &src) {
+    if(src.id() == ID_function_application)
+    {
+      const auto &application = to_function_application_expr(src);
+      if(application.function().id() == ID_symbol)
+      {
+        // look up whether it is an oracle
+        auto identifier = to_symbol_expr(application.function()).get_identifier();
+        auto oracle_fun_map_it = oracle_fun_map.find(identifier);
+        if(oracle_fun_map_it != oracle_fun_map.end())
+          applications.insert(application); // yes
+      }
+    }
+  });
+
   sub_solver.set_to(expr, value);
 }
 
@@ -49,9 +65,9 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 {
   oracle_solvert::check_resultt result = CONSISTENT;
 
-  for(std::size_t oracle_index = 0; oracle_index < oracles.size(); oracle_index++)
+  for(const auto &application : applications)
   {
-    switch(check_oracle(oracle_index))
+    switch(check_oracle(application))
     {
     case INCONSISTENT:
       result = INCONSISTENT;
@@ -68,25 +84,31 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
   return result;
 }
 
-oracle_solvert::check_resultt oracle_solvert::check_oracle(std::size_t oracle_index)
+oracle_solvert::check_resultt oracle_solvert::check_oracle(
+  const function_application_exprt &application)
 {
-  const oracle_constraint_gent &oracle = oracles[oracle_index];
+  PRECONDITION(application.function().id() == ID_symbol);
 
-  // evaluate the input vector
+  auto &type = to_mathematical_function_type(application.function().type());
+
+  // evaluate the arguments to get inputs
   std::vector<exprt> inputs;
-  inputs.reserve(oracle.input_parameters.size());
+  inputs.reserve(type.domain().size());
 
-  for(std::size_t input_index = 0; input_index < oracle.input_parameters.size(); input_index++)
-  {
-    const auto &input = oracle.input_parameters[input_index];
-    std::string identifier = "oracle_"+std::to_string(oracle_index)+"_input_"+std::to_string(input_index);
-    inputs.push_back(get(symbol_exprt(identifier, input.type())));
-  }
+  for(auto &argument : application.arguments())
+    inputs.push_back(get(argument));
+
+  // look up the oracle
+  auto identifier = to_symbol_expr(application.function()).get_identifier();
+  auto oracle_fun_map_it = oracle_fun_map.find(identifier);
+  DATA_INVARIANT(oracle_fun_map_it != oracle_fun_map.end(), "oracle not found");
+
+  const auto &oracle = oracle_fun_map_it->second;
 
   std::vector<std::string> argv;
   argv.push_back(id2string(oracle.binary_name));
 
-  for(auto &input : inputs)
+  for(const auto &input : inputs)
   {
     std::ostringstream stream;
     stream << format(input);
@@ -118,41 +140,22 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(std::size_t oracle_in
   std::istringstream oracle_response_istream(stdout_stream.str());
   auto response = oracle_response_parser(oracle_response_istream);
 
-  exprt::operandst return_constraints;
-
-  // iterate over return parameters
-  for(auto &return_parameter : oracle.return_parameters)
-  {
-    if(return_parameter.id() != ID_symbol)
-      continue;
-
-    // find it
-    auto r_it = response.find(to_symbol_expr(return_parameter));
-    if(r_it != response.end())
-    {
-      // add constraint
-      return_constraints.push_back(equal_exprt(r_it->first, r_it->second));
-    }
-  }
-
   // check whether the constraint is already satisfied
-  bool all_satisfied =
-    std::find_if(return_constraints.begin(), return_constraints.end(),
-      [this](const exprt &expr) { return !get(expr).is_true(); }) == return_constraints.end();
+  auto response_equality = equal_exprt(application, response);
 
-  if(all_satisfied)
+  if(get(response_equality).is_true())
     return CONSISTENT; // done, SAT
 
   // add a constraint
   exprt::operandst input_constraints;
 
-  for(auto &input_parameter : oracle.input_parameters)
-    input_constraints.push_back(equal_exprt(input_parameter, get(input_parameter)));
+  for(auto &argument : application.arguments())
+    input_constraints.push_back(equal_exprt(argument, get(argument)));
 
-  // add inputs equal => return parameters equal
+  // add 'all inputs equal' => 'return value equal'
   set_to_true(implies_exprt(
     conjunction(input_constraints),
-    conjunction(return_constraints)));
+    response_equality));
 
   return INCONSISTENT;
 }
@@ -162,36 +165,9 @@ exprt oracle_solvert::parse(const std::string &text) const
   return true_exprt();
 }
 
-void oracle_solvert::setup_oracle_equalities()
-{
-  for(std::size_t oracle_index = 0; oracle_index < oracles.size(); oracle_index++)
-  {
-    auto &oracle = oracles[oracle_index];
-
-    for(std::size_t input_index = 0; input_index < oracle.input_parameters.size(); input_index++)
-    {
-      const auto &input = oracle.input_parameters[input_index];
-      std::string identifier = "oracle_"+std::to_string(oracle_index)+"_input_"+std::to_string(input_index);
-      set_to_true(equal_exprt(symbol_exprt(identifier, input.type()), input));
-    }
-
-    for(std::size_t return_index = 0; return_index < oracle.return_parameters.size(); return_index++)
-    {
-      const auto &output = oracle.return_parameters[return_index];
-      std::string identifier = "oracle_"+std::to_string(oracle_index)+"_return_"+std::to_string(return_index);
-      set_to_true(equal_exprt(symbol_exprt(identifier, output.type()), output));
-    }
-
-    std::string identifier = "oracle_"+std::to_string(oracle_index)+"_constraint";
-    set_to_true(equal_exprt(symbol_exprt(identifier, oracle.constraint.type()), oracle.constraint));
-  }
-}
-
 decision_proceduret::resultt oracle_solvert::dec_solve()
 {
   number_of_solver_calls++;
-
-  setup_oracle_equalities();
 
   while(true)
   {
