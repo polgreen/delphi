@@ -35,10 +35,11 @@ class oracle_interfacet : public verifyt
   /// Encoding for the verification decision procedure call.
   verify_encodingt verify_encoding;
 
-  std::map<irep_idt, std::size_t> synthfun_to_oracle_map;
-  
+  std::map<irep_idt, std::size_t> synthfun_to_constraint_map;
+  std::map<irep_idt, std::size_t> synthfun_to_assume_map;
 
-  void call_oracles(problemt &problem);
+
+  void call_oracles(problemt &problem, const solutiont &solution, const counterexamplet &counterexample);
   std::set<irep_idt> find_synth_funs (const exprt &expr, const problemt &problem);
 
   void add_problem(const problemt &problem, const solutiont &solution, decision_proceduret &solver );

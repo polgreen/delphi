@@ -12,12 +12,17 @@
 
 oracle_solvert::oracle_solvert(
   decision_proceduret &__sub_solver,
-  const oracle_fun_mapt &__oracle_fun_map,
+  oracle_fun_mapt &__oracle_fun_map,
   message_handlert &__message_handler) :
   sub_solver(__sub_solver),
   oracle_fun_map(__oracle_fun_map),
   log(__message_handler)
 {
+}
+
+void oracle_solvert::replace_oracle_fun_map(oracle_fun_mapt &new_oracle_fun_map)
+{
+  oracle_fun_map = new_oracle_fun_map;
 }
 
 void oracle_solvert::set_to(const exprt &expr, bool value)

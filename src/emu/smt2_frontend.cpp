@@ -28,14 +28,14 @@ Author: Daniel Kroening, kroening@kroening.com
 class smt2_solvert:public smt2_parsert
 {
 public:
-  smt2_solvert(std::istream &_in, decision_proceduret &_solver)
+  smt2_solvert(std::istream &_in, oracle_solvert &_solver)
     : smt2_parsert(_in), solver(_solver), status(NOT_SOLVED)
   {
     setup_commands();
   }
 
 protected:
-  decision_proceduret &solver;
+  oracle_solvert &solver;
 
   void setup_commands();
   void define_constants();
@@ -142,6 +142,7 @@ void smt2_solvert::setup_commands()
     commands["check-sat"] = [this]() {
       // add constant definitions as constraints
       define_constants();
+      solver.replace_oracle_fun_map(oracle_symbols);
 
       switch(solver())
       {
@@ -391,9 +392,11 @@ int solver(std::istream &in)
   satcheckt satcheck(message_handler);
   boolbvt solver(ns, satcheck, message_handler);    
 
-  // oracle_solvert oraclesolver(subsolver, message_handler;  
+  smt2_parsert::oracle_fun_mapt oracle_symbols; 
+  oracle_solvert oraclesolver(subsolver, oracle_symbols, message_handler);  
+  
 
-  smt2_solvert smt2_solver{in, solver};
+  smt2_solvert smt2_solver{in, oraclesolver};
   bool error_found = false;
 
   while(!smt2_solver.exit)
