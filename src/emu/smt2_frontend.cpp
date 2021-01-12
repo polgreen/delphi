@@ -94,6 +94,11 @@ void smt2_solvert::expand_function_applications(exprt &expr)
       if(f_it != id_map.end())
       {
         const auto &f = f_it->second;
+        if(f.parameters.size()==0)
+        {
+          // this was UF
+          return;
+        }
 
         DATA_INVARIANT(
           f.type.id() == ID_mathematical_function,
