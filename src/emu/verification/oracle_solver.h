@@ -17,9 +17,10 @@ public:
   using oracle_funt = smt2_parsert::oracle_funt;
   using oracle_fun_mapt = smt2_parsert::oracle_fun_mapt; 
 
+  const oracle_fun_mapt *oracle_fun_map = nullptr;
+
   oracle_solvert(
     decision_proceduret &sub_solver,
-    const oracle_fun_mapt &,
     message_handlert &);
 
   // overloads
@@ -38,7 +39,6 @@ protected:
   resultt dec_solve() override;
 
   decision_proceduret &sub_solver;
-  const oracle_fun_mapt &oracle_fun_map;
   messaget log;
   std::size_t number_of_solver_calls = 0;
 
