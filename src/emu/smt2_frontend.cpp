@@ -134,6 +134,7 @@ void smt2_solvert::setup_commands()
       exprt e = expression();
       if(e.is_not_nil())
       {
+        solver.oracle_fun_map=&oracle_symbols;
         expand_function_applications(e);
         solver.set_to_true(e);
       }
@@ -142,7 +143,7 @@ void smt2_solvert::setup_commands()
     commands["check-sat"] = [this]() {
       // add constant definitions as constraints
       define_constants();
-      solver.replace_oracle_fun_map(oracle_symbols);
+      solver.oracle_fun_map=&oracle_symbols;
 
       switch(solver())
       {
@@ -393,7 +394,7 @@ int solver(std::istream &in)
   boolbvt solver(ns, satcheck, message_handler);    
 
   smt2_parsert::oracle_fun_mapt oracle_symbols; 
-  oracle_solvert oraclesolver(subsolver, oracle_symbols, message_handler);  
+  oracle_solvert oraclesolver(subsolver, message_handler);  
   
 
   smt2_solvert smt2_solver{in, oraclesolver};

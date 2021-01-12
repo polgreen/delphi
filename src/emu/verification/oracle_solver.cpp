@@ -12,21 +12,16 @@
 
 oracle_solvert::oracle_solvert(
   decision_proceduret &__sub_solver,
-  oracle_fun_mapt &__oracle_fun_map,
   message_handlert &__message_handler) :
   sub_solver(__sub_solver),
-  oracle_fun_map(__oracle_fun_map),
   log(__message_handler)
 {
 }
 
-void oracle_solvert::replace_oracle_fun_map(oracle_fun_mapt &new_oracle_fun_map)
-{
-  oracle_fun_map = new_oracle_fun_map;
-}
 
 void oracle_solvert::set_to(const exprt &expr, bool value)
 {
+  PRECONDITION(oracle_fun_map != nullptr);
   // find any oracle function applications
   expr.visit_pre([this](const exprt &src) {
     if(src.id() == ID_function_application)
@@ -36,8 +31,8 @@ void oracle_solvert::set_to(const exprt &expr, bool value)
       {
         // look up whether it is an oracle
         auto identifier = to_symbol_expr(application.function()).get_identifier();
-        auto oracle_fun_map_it = oracle_fun_map.find(identifier);
-        if(oracle_fun_map_it != oracle_fun_map.end())
+        auto oracle_fun_map_it = oracle_fun_map->find(identifier);
+        if(oracle_fun_map_it != oracle_fun_map->end())
           applications.insert(application); // yes
       }
     }
@@ -105,8 +100,8 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
 
   // look up the oracle
   auto identifier = to_symbol_expr(application.function()).get_identifier();
-  auto oracle_fun_map_it = oracle_fun_map.find(identifier);
-  DATA_INVARIANT(oracle_fun_map_it != oracle_fun_map.end(), "oracle not found");
+  auto oracle_fun_map_it = oracle_fun_map->find(identifier);
+  DATA_INVARIANT(oracle_fun_map_it != oracle_fun_map->end(), "oracle not found");
 
   const auto &oracle = oracle_fun_map_it->second;
 
@@ -172,6 +167,7 @@ exprt oracle_solvert::parse(const std::string &text) const
 
 decision_proceduret::resultt oracle_solvert::dec_solve()
 {
+  PRECONDITION(oracle_fun_map != nullptr);
   number_of_solver_calls++;
 
   while(true)

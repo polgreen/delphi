@@ -19,8 +19,9 @@ public:
 
   oracle_solvert(
     decision_proceduret &sub_solver,
-    oracle_fun_mapt &,
     message_handlert &);
+
+  const oracle_fun_mapt *oracle_fun_map = nullptr;  
 
   // overloads
   void set_to(const exprt &expr, bool value) override;
@@ -34,14 +35,11 @@ public:
     return number_of_solver_calls;
   }
 
-  void replace_oracle_fun_map(oracle_fun_mapt &new_oracle_fun_map);
-
 
 protected:
   resultt dec_solve() override;
 
   decision_proceduret &sub_solver;
-  oracle_fun_mapt &oracle_fun_map;
   messaget log;
   std::size_t number_of_solver_calls = 0;
 
