@@ -35,6 +35,7 @@ public:
     return number_of_solver_calls;
   }
 
+
 protected:
   resultt dec_solve() override;
 

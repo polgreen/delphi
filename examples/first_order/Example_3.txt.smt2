@@ -15,7 +15,7 @@
 ; ==== Temporal Requirements ====
 ;
 ;
-(declare-oracle-fun bitsumhelper |bitsumhelperbinary 17| ((_ BitVec 17)) (_ BitVec 17))
+(declare-oracle-fun bitsumhelper bitsumhelperbinary17 ((_ BitVec 17)) (_ BitVec 17))
 ;
 (assert (not (= (_ bv0 17)  (bitsumhelper  (bitsumhelper  (concat ((_ extract 0 0) shift1)  (concat ((_ extract 7 7) shift1)  (concat ((_ extract 14 14) shift1)  (concat ((_ extract 21 21) shift1)  (concat ((_ extract 28 28) shift1)  (concat ((_ extract 35 35) shift1)  (concat ((_ extract 42 42) shift1)  (concat ((_ extract 49 49) shift1)  (concat ((_ extract 56 56) shift1)  (concat ((_ extract 63 63) shift1)  (concat ((_ extract 70 70) shift1)  (concat ((_ extract 77 77) shift1)  (concat ((_ extract 84 84) shift1)  (concat ((_ extract 91 91) shift1)  (concat ((_ extract 98 98) shift1)  (concat ((_ extract 105 105) shift1)  ((_ extract 112 112) shift1)  ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )))
 (assert (= (_ bv0 17)  (bitsumhelper  (bitsumhelper  (bitsumhelper  (concat ((_ extract 0 0) shift1)  (concat ((_ extract 7 7) shift1)  (concat ((_ extract 14 14) shift1)  (concat ((_ extract 21 21) shift1)  (concat ((_ extract 28 28) shift1)  (concat ((_ extract 35 35) shift1)  (concat ((_ extract 42 42) shift1)  (concat ((_ extract 49 49) shift1)  (concat ((_ extract 56 56) shift1)  (concat ((_ extract 63 63) shift1)  (concat ((_ extract 70 70) shift1)  (concat ((_ extract 77 77) shift1)  (concat ((_ extract 84 84) shift1)  (concat ((_ extract 91 91) shift1)  (concat ((_ extract 98 98) shift1)  (concat ((_ extract 105 105) shift1)  ((_ extract 112 112) shift1)  ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ))

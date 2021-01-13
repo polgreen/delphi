@@ -2,7 +2,7 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
-#define WIDTH 9
+#define WIDTH 27
 
 //(bvand x (bvsub x (_ bv1 9))))
 

@@ -15,7 +15,7 @@
 ; ==== Temporal Requirements ====
 ;
 ;
-(declare-oracle-fun bitsumhelper |bitsumhelperbinary 9| ((_ BitVec 9)) (_ BitVec 9))
+(declare-oracle-fun bitsumhelper bitsumhelperbinary9 ((_ BitVec 9)) (_ BitVec 9))
 ;(declare-oracle-fun bitsumhelper2 bitsumhelperbinary ((_ BitVec 9))  Bool) 
 
 ;

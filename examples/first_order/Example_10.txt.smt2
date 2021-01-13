@@ -15,7 +15,7 @@
 ; ==== Temporal Requirements ====
 ;
 ;
-(declare-oracle-fun bitsumhelper |bitsumhelperbinary 27| ((_ BitVec 27)) (_ BitVec 27))
+(declare-oracle-fun bitsumhelper bitsumhelperbinary27 ((_ BitVec 27)) (_ BitVec 27))
 
 ;(define-fun bitsumhelper ((x (_ BitVec 27))) (_ BitVec 27) (bvand x (bvsub x (_ bv1 27))))
 ;

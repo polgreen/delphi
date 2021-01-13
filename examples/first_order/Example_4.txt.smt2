@@ -15,7 +15,7 @@
 ; ==== Temporal Requirements ====
 ;
 ;
-(declare-oracle-fun bitsumhelper |bitsumhelperbinary 13| ((_ BitVec 13)) (_ BitVec 13))
+(declare-oracle-fun bitsumhelper bitsumhelperbinary13 ((_ BitVec 13)) (_ BitVec 13))
 ;(define-fun bitsumhelper ((x (_ BitVec 13))) (_ BitVec 13) (bvand x (bvsub x (_ bv1 13))))
 ;
 (assert (= (_ bv0 13)  (concat ((_ extract 0 0) shift1)  (concat ((_ extract 7 7) shift1)  (concat ((_ extract 14 14) shift1)  (concat ((_ extract 21 21) shift1)  (concat ((_ extract 28 28) shift1)  (concat ((_ extract 35 35) shift1)  (concat ((_ extract 42 42) shift1)  (concat ((_ extract 49 49) shift1)  (concat ((_ extract 56 56) shift1)  (concat ((_ extract 63 63) shift1)  (concat ((_ extract 70 70) shift1)  (concat ((_ extract 77 77) shift1)  ((_ extract 84 84) shift1)  ) ) ) ) ) ) ) ) ) ) ) ) ))

@@ -1,7 +1,12 @@
-all: bitsumhelperbinary
+all: bitsumhelperbinary7 bitsumhelperbinary9 bitsumhelperbinary11 bitsumhelperbinary13 bitsumhelperbinary17 bitsumhelperbinary27
 
-bitsumhelperbinary: bitsumhelperbinary.cpp
 
+bitsumhelperbinary7: bitsumhelperbinary7.cpp 
+bitsumhelperbinary9: bitsumhelperbinary9.cpp 
+bitsumhelperbinary11: bitsumhelperbinary11.cpp 
+bitsumhelperbinary13: bitsumhelperbinary13.cpp
+bitsumhelperbinary17: bitsumhelperbinary17.cpp
+bitsumhelperbinary27: bitsumhelperbinary27.cpp
 
 clean :
 	rm bitsumhelperbinary

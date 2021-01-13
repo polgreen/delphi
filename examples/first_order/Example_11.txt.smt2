@@ -15,7 +15,7 @@
 ; ==== Temporal Requirements ====
 ;
 ;
-(declare-oracle-fun bitsumhelper |bitsumhelperbinary 30| ((_ BitVec 30)) (_ BitVec 30))
+(declare-oracle-fun bitsumhelper bitsumhelperbinary30 ((_ BitVec 30)) (_ BitVec 30))
 ;(define-fun bitsumhelper ((x (_ BitVec 30))) (_ BitVec 30) (bvand x (bvsub x (_ bv1 30))))
 ;
 (assert (not (= (_ bv0 30)  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (bitsumhelper  (concat ((_ extract 0 0) shift1)  (concat ((_ extract 7 7) shift1)  (concat ((_ extract 14 14) shift1)  (concat ((_ extract 21 21) shift1)  (concat ((_ extract 28 28) shift1)  (concat ((_ extract 35 35) shift1)  (concat ((_ extract 42 42) shift1)  (concat ((_ extract 49 49) shift1)  (concat ((_ extract 56 56) shift1)  (concat ((_ extract 63 63) shift1)  (concat ((_ extract 70 70) shift1)  (concat ((_ extract 77 77) shift1)  (concat ((_ extract 84 84) shift1)  (concat ((_ extract 91 91) shift1)  (concat ((_ extract 98 98) shift1)  (concat ((_ extract 105 105) shift1)  (concat ((_ extract 112 112) shift1)  (concat ((_ extract 119 119) shift1)  (concat ((_ extract 126 126) shift1)  (concat ((_ extract 133 133) shift1)  (concat ((_ extract 140 140) shift1)  (concat ((_ extract 147 147) shift1)  (concat ((_ extract 154 154) shift1)  (concat ((_ extract 161 161) shift1)  (concat ((_ extract 168 168) shift1)  (concat ((_ extract 175 175) shift1)  (concat ((_ extract 182 182) shift1)  (concat ((_ extract 189 189) shift1)  (concat ((_ extract 196 196) shift1)  ((_ extract 203 203) shift1)  ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )))
