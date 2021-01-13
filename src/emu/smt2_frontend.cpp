@@ -394,7 +394,7 @@ int solver(std::istream &in)
   boolbvt solver(ns, satcheck, message_handler);    
 
   smt2_parsert::oracle_fun_mapt oracle_symbols; 
-  oracle_solvert oraclesolver(subsolver, message_handler);  
+  oracle_solvert oraclesolver(solver, message_handler);  
   
 
   smt2_solvert smt2_solver{in, oraclesolver};
