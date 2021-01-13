@@ -57,7 +57,7 @@ void oracle_solvert::set_to(const exprt &expr, bool value)
 
 exprt oracle_solvert::handle(const exprt &expr)
 {
-  if(expr.id() == ID_symbol)
+  if(expr.id() == ID_symbol || expr.is_constant())
     return expr;
   else
   {
