@@ -1,6 +1,6 @@
-all: bitsumhelperbinary7 bitsumhelperbinary9 bitsumhelperbinary11 bitsumhelperbinary13 bitsumhelperbinary17 bitsumhelperbinary27
+all: bitsumhelperbinary7 bitsumhelperbinary9 bitsumhelperbinary11 bitsumhelperbinary13 bitsumhelperbinary17 bitsumhelperbinary27 add10binary
 
-
+add10binary: add10binary.cpp
 bitsumhelperbinary7: bitsumhelperbinary7.cpp 
 bitsumhelperbinary9: bitsumhelperbinary9.cpp 
 bitsumhelperbinary11: bitsumhelperbinary11.cpp 
