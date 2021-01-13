@@ -26,14 +26,28 @@ void oracle_solvert::set_to(const exprt &expr, bool value)
   expr.visit_pre([this](const exprt &src) {
     if(src.id() == ID_function_application)
     {
-      const auto &application = to_function_application_expr(src);
-      if(application.function().id() == ID_symbol)
+      const auto &application_expr = to_function_application_expr(src);
+      if(application_expr.function().id() == ID_symbol)
       {
         // look up whether it is an oracle
-        auto identifier = to_symbol_expr(application.function()).get_identifier();
+        auto identifier = to_symbol_expr(application_expr.function()).get_identifier();
         auto oracle_fun_map_it = oracle_fun_map->find(identifier);
         if(oracle_fun_map_it != oracle_fun_map->end())
-          applications.insert(application); // yes
+        {
+          // yes
+          if(applications.find(application_expr) == applications.end())
+          {
+            // not seen before
+            auto &application = applications[application_expr];
+            application.binary_name = oracle_fun_map_it->second.binary_name;
+            application.handle = handle(application_expr);
+
+            application.argument_handles.reserve(application_expr.arguments().size());
+
+            for(auto &argument : application_expr.arguments())
+              application.argument_handles.push_back(handle(argument));
+          }
+        }
       }
     }
   });
@@ -67,7 +81,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 
   for(const auto &application : applications)
   {
-    switch(check_oracle(application))
+    switch(check_oracle(application.first, application.second))
     {
     case INCONSISTENT:
       result = INCONSISTENT;
@@ -85,28 +99,18 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 }
 
 oracle_solvert::check_resultt oracle_solvert::check_oracle(
-  const function_application_exprt &application)
+  const function_application_exprt &application_expr,
+  const applicationt &application)
 {
-  PRECONDITION(application.function().id() == ID_symbol);
-
-  auto &type = to_mathematical_function_type(application.function().type());
-
-  // evaluate the arguments to get inputs
+  // evaluate the argument handles to get concrete inputs
   std::vector<exprt> inputs;
-  inputs.reserve(type.domain().size());
+  inputs.reserve(application.argument_handles.size());
 
-  for(auto &argument : application.arguments())
-    inputs.push_back(get(argument));
-
-  // look up the oracle
-  auto identifier = to_symbol_expr(application.function()).get_identifier();
-  auto oracle_fun_map_it = oracle_fun_map->find(identifier);
-  DATA_INVARIANT(oracle_fun_map_it != oracle_fun_map->end(), "oracle not found");
-
-  const auto &oracle = oracle_fun_map_it->second;
+  for(auto &argument_handle : application.argument_handles)
+    inputs.push_back(get(argument_handle));
 
   std::vector<std::string> argv;
-  argv.push_back(id2string(oracle.binary_name));
+  argv.push_back(application.binary_name);
 
   for(const auto &input : inputs)
   {
@@ -124,7 +128,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   std::ostringstream stdout_stream;
   
   auto run_result = run(
-    id2string(oracle.binary_name),
+    id2string(application.binary_name),
     argv,
     "",
     stdout_stream,
@@ -132,7 +136,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
 
   if(run_result != 0)
   {
-    log.error() << "oracle " << oracle.binary_name << " has failed" << messaget::eom;
+    log.error() << "oracle " << application.binary_name << " has failed" << messaget::eom;
     return ERROR;
   }
 
@@ -141,7 +145,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   auto response = oracle_response_parser(oracle_response_istream);
 
   // check whether the constraint is already satisfied
-  auto response_equality = equal_exprt(application, response);
+  auto response_equality = equal_exprt(application.handle, response);
 
   if(get(response_equality).is_true())
     return CONSISTENT; // done, SAT
@@ -149,8 +153,8 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   // add a constraint
   exprt::operandst input_constraints;
 
-  for(auto &argument : application.arguments())
-    input_constraints.push_back(equal_exprt(argument, get(argument)));
+  for(auto &argument_handle : application.argument_handles)
+    input_constraints.push_back(equal_exprt(argument_handle, get(argument_handle)));
 
   // add 'all inputs equal' => 'return value equal'
   set_to_true(implies_exprt(

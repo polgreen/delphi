@@ -42,13 +42,20 @@ protected:
   messaget log;
   std::size_t number_of_solver_calls = 0;
 
+  struct applicationt
+  {
+    std::string binary_name;
+    std::vector<exprt> argument_handles; // arguments
+    exprt handle; // result
+  };
+
   using check_resultt = enum { INCONSISTENT, CONSISTENT, ERROR };
   check_resultt check_oracles();
-  check_resultt check_oracle(const function_application_exprt &);
+  check_resultt check_oracle(const function_application_exprt &, const applicationt &);
 
   exprt parse(const std::string &) const;
 
-  using applicationst = std::unordered_set<function_application_exprt, irep_hash>;
+  using applicationst = std::unordered_map<function_application_exprt, applicationt, irep_hash>;
   applicationst applications;
 };
 
