@@ -57,7 +57,14 @@ void oracle_solvert::set_to(const exprt &expr, bool value)
 
 exprt oracle_solvert::handle(const exprt &expr)
 {
-  return sub_solver.handle(expr);
+  if(expr.id() == ID_symbol)
+    return expr;
+  else
+  {
+    symbol_exprt symbol_expr("H"+std::to_string(handle_counter++), expr.type());
+    set_to_true(equal_exprt(symbol_expr, expr));
+    return std::move(symbol_expr);
+  }
 }
 
 exprt oracle_solvert::get(const exprt &expr) const

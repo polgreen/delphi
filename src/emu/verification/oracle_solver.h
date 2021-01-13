@@ -42,6 +42,7 @@ protected:
   decision_proceduret &sub_solver;
   messaget log;
   std::size_t number_of_solver_calls = 0;
+  std::size_t handle_counter = 0;
 
   struct applicationt
   {
