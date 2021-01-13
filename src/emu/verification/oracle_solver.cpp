@@ -164,11 +164,6 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   return INCONSISTENT;
 }
 
-exprt oracle_solvert::parse(const std::string &text) const
-{
-  return true_exprt();
-}
-
 decision_proceduret::resultt oracle_solvert::dec_solve()
 {
   PRECONDITION(oracle_fun_map != nullptr);
