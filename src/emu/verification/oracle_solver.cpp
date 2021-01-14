@@ -62,7 +62,8 @@ exprt oracle_solvert::handle(const exprt &expr)
   else
   {
     symbol_exprt symbol_expr("H"+std::to_string(handle_counter++), expr.type());
-    set_to_true(equal_exprt(symbol_expr, expr));
+    auto equality = equal_exprt(symbol_expr, expr);
+    set_to_true(equality);
     return std::move(symbol_expr);
   }
 }
@@ -164,9 +165,12 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
     input_constraints.push_back(equal_exprt(argument_handle, get(argument_handle)));
 
   // add 'all inputs equal' => 'return value equal'
-  set_to_true(implies_exprt(
-    conjunction(input_constraints),
-    response_equality));
+  auto implication = 
+    implies_exprt(
+      conjunction(input_constraints),
+      response_equality);
+
+  set_to_true(implication);
 
   return INCONSISTENT;
 }
@@ -193,6 +197,7 @@ decision_proceduret::resultt oracle_solvert::dec_solve()
       case ERROR:
         return resultt::D_ERROR;
       }
+      break;
 
     case resultt::D_UNSATISFIABLE:
       return resultt::D_UNSATISFIABLE;
