@@ -15,8 +15,12 @@ jobs:
         sudo apt-get install ccache flex bison
 
     - uses: actions/checkout@v1
-      with:
-        submodules: recursive
+
+    - name: git submodules
+      run: |
+        git config --global url."https://github.com/".insteadOf "git@github.com:"
+        git submodule sync --recursive
+        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" -c protocol.version=2 submodule update --init --force --recursive --depth=1
 
     - name: cache for ccache
       uses: actions/cache@v1
