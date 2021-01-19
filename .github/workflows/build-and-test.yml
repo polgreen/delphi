@@ -12,7 +12,7 @@ jobs:
     - name: Install Packages
       run: |
         sudo sh -c 'echo "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted" >> /etc/apt/sources.lst'
-        sudo apt-get install ccache flex bison
+        sudo apt-get install ccache
 
     - uses: actions/checkout@v2
       with:
