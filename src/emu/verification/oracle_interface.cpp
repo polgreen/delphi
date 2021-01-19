@@ -118,23 +118,24 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
     {
       case decision_proceduret::resultt::D_SATISFIABLE:
       {
-        counterexample=
-        verify_encoding.get_counterexample(solver);
+        counterexample = verify_encoding.get_counterexample(solver);
         call_oracles(problem, solution, counterexample);
         return oracle_interfacet::resultt::FAIL; 
       }
+      case decision_proceduret::resultt::D_UNSATISFIABLE:
+      {
+        counterexample.clear();
+        return oracle_interfacet::resultt::PASS;
+      }
+
       case decision_proceduret::resultt::D_ERROR:
+      default:
       {
         counterexample=
         verify_encoding.get_counterexample(solver);
         call_oracles(problem, solution, counterexample);
         return oracle_interfacet::resultt::FAIL;
       } 
-      case decision_proceduret::resultt::D_UNSATISFIABLE:
-      {
-        counterexample.clear();
-      return oracle_interfacet::resultt::PASS;
-      }
     }
   }
 
