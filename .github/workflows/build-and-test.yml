@@ -15,11 +15,8 @@ jobs:
         sudo apt-get install ccache flex bison
 
     - uses: actions/checkout@v1
-
-    - name: git submodules
-      run: |
-        git submodule init
-        git submodule update
+      with:
+        submodules: recursive
 
     - name: cache for ccache
       uses: actions/cache@v1
