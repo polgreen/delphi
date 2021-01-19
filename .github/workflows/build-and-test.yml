@@ -1,0 +1,42 @@
+name: Build and Test
+
+on: [push]
+
+jobs:
+  LinuxUbuntu18:
+    name: Ubuntu 18.04
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Install Packages
+      run: |
+        sudo sh -c 'echo "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted" >> /etc/apt/sources.lst'
+        sudo apt-get install ccache flex bison
+
+    - uses: actions/checkout@v1
+
+    - name: git submodules
+      run: |
+        git submodule init
+        git submodule update
+
+    - name: cache for ccache
+      uses: actions/cache@v1
+      with:
+        path: ~/.ccache
+        key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.[(cpp)ch]') }}
+        restore-keys: |
+          ${{ runner.os }}-ccache-
+
+    - name: ccache stats
+      run: ccache -s --max-size=390MB
+
+    - name: MiniSat
+      run: make -C lib/cbmc/src minisat2-download 
+
+    - name: make
+      run: make -C src -j2 CXX="ccache g++"
+
+    - name: regression tests
+      run: make -C regression
