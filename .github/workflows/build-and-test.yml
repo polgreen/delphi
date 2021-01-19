@@ -18,9 +18,8 @@ jobs:
 
     - name: git submodules
       run: |
-        git config --global url."https://github.com/".insteadOf "git@github.com:"
-        git config --global url."".insteadOf ".git"
-        git submodule sync --recursive
+        git submodule set-url lib/cbmc https://github.com/diffblue/cbmc/
+        git submodule set-url regression/oracles https://github.com/polgreen/oracles/
         git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" -c protocol.version=2 submodule update --init --force --recursive --depth=1
 
     - name: cache for ccache
