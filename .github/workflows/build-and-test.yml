@@ -18,9 +18,10 @@ jobs:
 
     - name: git submodules
       run: |
-        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" -c protocol.version=2 submodule set-url lib/cbmc https://github.com/diffblue/cbmc
-        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" -c protocol.version=2 submodule set-url regression/oracles https://github.com/polgreen/oracles
-        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+        git su
+        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" submodule set-url lib/cbmc https://github.com/diffblue/cbmc
+        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" submodule set-url regression/oracles https://github.com/polgreen/oracles
+        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" submodule update --init --force --recursive --depth=1
 
     - name: cache for ccache
       uses: actions/cache@v1
