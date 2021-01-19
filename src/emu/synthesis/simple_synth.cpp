@@ -141,10 +141,13 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decisi
     last_solution = synth_encoding.get_solution(solver);
     std::cout<< "sat " << std::endl;
     return simple_syntht::resultt::CANDIDATE;
+
   case decision_proceduret::resultt::D_UNSATISFIABLE:
     std::cout<< "Unsat" << std::endl;
     return simple_syntht::resultt::NO_SOLUTION;
+
   case decision_proceduret::resultt::D_ERROR:
+  default:
     std::cout<< "error " << std::endl;
     return simple_syntht::resultt::NO_SOLUTION;
   }
