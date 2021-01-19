@@ -14,13 +14,9 @@ jobs:
         sudo sh -c 'echo "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted" >> /etc/apt/sources.lst'
         sudo apt-get install ccache flex bison
 
-    - uses: actions/checkout@v1
-
-    - name: git submodules
-      run: |
-        git submodule set-url lib/cbmc https://github.com/diffblue/cbmc
-        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" submodule set-url regression/oracles https://github.com/polgreen/oracles
-        git -c "http.extraheader=Authorization: basic ${GITHUB_ACCESS_TOKEN}" submodule update --init --force --recursive --depth=1
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
 
     - name: cache for ccache
       uses: actions/cache@v1
