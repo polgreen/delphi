@@ -32,8 +32,11 @@ jobs:
     - name: MiniSat
       run: make -C lib/cbmc/src minisat2-download 
 
-    - name: make
+    - name: make (tool)
       run: make -C src -j2 CXX="ccache g++"
+
+    - name: make (examples)
+      run: make -C examples/first_order -j2 CXX="ccache g++"
 
     - name: regression tests
       run: make -C regression
