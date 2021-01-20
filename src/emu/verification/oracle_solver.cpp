@@ -1,6 +1,7 @@
 #include "oracle_solver.h"
 
 #include "oracle_response_parser.h"
+#include "../expr2sygus.h"
 
 #include <util/expr.h>
 #include <util/format_expr.h>
@@ -151,12 +152,17 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   // we assume that the oracle returns the result in SMT-LIB format
   std::istringstream oracle_response_istream(stdout_stream.str());
   auto response = oracle_response_parser(oracle_response_istream);
+  log.status()<<"oracle response "<< expr2sygus(response)<<log.eom;
 
   // check whether the constraint is already satisfied
   auto response_equality = equal_exprt(application.handle, response);
 
   if(get(response_equality).is_true())
+  {
+    std::cout<<"get response equality: "<< expr2sygus(response_equality)<<" is true\n";
     return CONSISTENT; // done, SAT
+  }
+  log.status()<<"Response " << expr2sygus(response_equality)<< " was not true\n";  
 
   // add a constraint
   exprt::operandst input_constraints;
