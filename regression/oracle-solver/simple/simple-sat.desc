@@ -1,6 +1,6 @@
 CORE
 simple-sat.smt2
-
+--bitblast
 ^EXIT=20$
 ^SIGNAL=0$
 ^sat$
