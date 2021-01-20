@@ -1,0 +1,8 @@
+CORE
+simple-sat.smt2
+
+^EXIT=20$
+^SIGNAL=0$
+^sat$
+--
+--
