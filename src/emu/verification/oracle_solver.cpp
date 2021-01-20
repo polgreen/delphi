@@ -152,13 +152,13 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   std::istringstream oracle_response_istream(stdout_stream.str());
   auto response = oracle_response_parser(oracle_response_istream);
 
-  // check whether the constraint is already satisfied
-  auto response_equality = equal_exprt(application.handle, response);
-
-  if(get(response_equality).is_true())
+  // check whether the result is consistent with the model
+  if(response == get(application.handle))
     return CONSISTENT; // done, SAT
 
-  // add a constraint
+  // add a constraint that enforces this equality
+  auto response_equality = equal_exprt(application.handle, response);
+
   exprt::operandst input_constraints;
 
   for(auto &argument_handle : application.argument_handles)
