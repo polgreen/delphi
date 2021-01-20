@@ -158,10 +158,10 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   if(response == get(application.handle))
     return CONSISTENT; // done, SAT
 
-  log.status() << "Response " << expr2sygus(response_equality) << " was not true\n";
-
   // add a constraint that enforces this equality
   auto response_equality = equal_exprt(application.handle, response);
+
+  log.status() << "Response " << expr2sygus(response_equality) << " was not true\n";
 
   exprt::operandst input_constraints;
 
