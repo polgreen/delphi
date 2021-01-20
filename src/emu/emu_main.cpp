@@ -25,9 +25,9 @@
 #include <iostream>
 
 #define EMU_OPTIONS                                                      \
-  "(verbosity): "                                                        \
-
-
+  "(verbosity): "                                                         \
+  "(smt) "                                                                \
+  "(bitblast) "                                                           \
 /// File ending of SMT2 files. Used to determine the language frontend that
 /// shall be used.
 #define SMT2_FILE_ENDING ".smt2"
@@ -50,6 +50,11 @@ void help(std::ostream &out)
      "\n"
      " emu [-?] [-h] [--help]       show help\n"
      " emu file.sl ...              source file names\n"
+     "\n"
+     "\n"
+     "Command line options\n"
+     " smt                          use Z3 solver as oracle solver subsolver (default) \n"
+     " bitblast                     use bitblasting solver as oracle solver subsolver\n"
      "\n"
      "\n";
     // clang-format on
