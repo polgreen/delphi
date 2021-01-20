@@ -6,7 +6,7 @@
 
 int answer(int x, int y)
 {
-  return (x+y) % (1<<(WIDTH-1));
+  return (x+y) % (1<<(WIDTH));
 }
 
 int main(int argc, const char *argv[])
