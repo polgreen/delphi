@@ -111,6 +111,13 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   const function_application_exprt &application_expr,
   const applicationt &application)
 {
+  if(oracle_call_history.find(application.binary_name)==oracle_call_history.end())
+  {
+    log.debug()<<"First time we have seen this oracle "<<messaget::eom;
+    oracle_call_history[application.binary_name] = oracle_historyt();
+  }
+  
+  
   // evaluate the argument handles to get concrete inputs
   std::vector<exprt> inputs;
   inputs.reserve(application.argument_handles.size());
@@ -145,14 +152,39 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
 
   if(run_result != 0)
   {
-    log.error() << "oracle " << application.binary_name << " has failed" << messaget::eom;
-    return ERROR;
-  }
+    log.status() << "Running oracle";
+    for (auto &arg : argv)
+      log.status() << ' ' << arg;
+    log.status() << messaget::eom;
 
-  // we assume that the oracle returns the result in SMT-LIB format
-  std::istringstream oracle_response_istream(stdout_stream.str());
-  auto response = oracle_response_parser(oracle_response_istream);
-  log.status() << "oracle response " << expr2sygus(response)<<log.eom;
+    // run the oracle binary
+    std::ostringstream stdout_stream;
+
+    auto run_result = run(
+        id2string(application.binary_name),
+        argv,
+        "",
+        stdout_stream,
+        "");
+
+    if (run_result != 0)
+    {
+      log.error() << "oracle " << application.binary_name << " has failed" << messaget::eom;
+      return ERROR;
+    }
+
+    // we assume that the oracle returns the result in SMT-LIB format
+    std::istringstream oracle_response_istream(stdout_stream.str());
+    response = oracle_response_parser(oracle_response_istream);
+    log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
+    oracle_call_history[application.binary_name][inputs]=response;
+  }
+  else
+  {
+    response = oracle_call_history[application.binary_name][inputs];
+    log.status() << "Have previously run oracle on these inputs" << messaget::eom;
+
+  }
 
   // check whether the result is consistent with the model
   if(response == get(application.handle))

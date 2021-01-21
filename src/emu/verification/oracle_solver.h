@@ -36,13 +36,11 @@ public:
   }
 
 
+  using oracle_historyt = std::map<std::vector<exprt>, exprt>;
+  std::unordered_map<std::string, oracle_historyt> oracle_call_history;
+
 protected:
   resultt dec_solve() override;
-
-  decision_proceduret &sub_solver;
-  messaget log;
-  std::size_t number_of_solver_calls = 0;
-  std::size_t handle_counter = 0;
 
   struct applicationt
   {
@@ -50,6 +48,11 @@ protected:
     std::vector<exprt> argument_handles; // arguments
     exprt handle; // result
   };
+
+  decision_proceduret &sub_solver;
+  messaget log;
+  std::size_t number_of_solver_calls = 0;
+  std::size_t handle_counter = 0;
 
   using check_resultt = enum { INCONSISTENT, CONSISTENT, ERROR };
   check_resultt check_oracles();
