@@ -111,9 +111,9 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   const function_application_exprt &application_expr,
   const applicationt &application)
 {
-  if(oracle_call_history.find(application.binary_name)==oracle_call_history.end())
+  if(cache && oracle_call_history.find(application.binary_name)==oracle_call_history.end() )
   {
-    log.debug()<<"First time we have seen this oracle "<<messaget::eom;
+    log.debug()<<"First time we have seen this oracle for " << to_symbol_expr(application_expr.function()).get_identifier() <<messaget::eom;
     oracle_call_history[application.binary_name] = oracle_historyt();
   }
   
@@ -123,7 +123,12 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   inputs.reserve(application.argument_handles.size());
 
   for(auto &argument_handle : application.argument_handles)
-    inputs.push_back(get(argument_handle));
+  {
+    auto res = get(argument_handle);
+    inputs.push_back(res);
+  } 
+
+
 
   std::vector<std::string> argv;
   argv.push_back(application.binary_name);
@@ -136,8 +141,10 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   }
 
   exprt response;
-  if(oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end())
+  bool new_oracle_call=false;
+  if(oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
   {
+    new_oracle_call=true;
     log.status() << "Running oracle";
     for (auto &arg : argv)
       log.status() << ' ' << arg;
@@ -163,36 +170,47 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
     std::istringstream oracle_response_istream(stdout_stream.str());
     response = oracle_response_parser(oracle_response_istream);
     log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
-    oracle_call_history[application.binary_name][inputs]=response;
+    if(cache)
+      oracle_call_history[application.binary_name][inputs]=response;
   }
   else
   {
     response = oracle_call_history[application.binary_name][inputs];
-    log.status() << "Have previously run oracle on these inputs" << messaget::eom;
-
   }
+
+  
 
   // check whether the result is consistent with the model
   if(response == get(application.handle))
+  {
+    log.status() << "Response matches " << expr2sygus(get(application.handle))<<messaget::eom;
     return CONSISTENT; // done, SAT
+  }
+  // if(new_oracle_call)
+  {
 
-  // add a constraint that enforces this equality
-  auto response_equality = equal_exprt(application.handle, response);
+    function_application_exprt func_app(application_expr.function(), inputs);
 
-  log.status() << "Response " << expr2sygus(response_equality) << " was not true\n";
+    log.status() << "Response does not match " << expr2sygus(get(application.handle)) << messaget::eom;
 
-  exprt::operandst input_constraints;
+    // add a constraint that enforces this equality
+    auto response_equality = equal_exprt(application.handle, response);
+    // auto response_equality = equal_exprt(func_app, response);
+    // set_to_true(response_equality);
 
-  for(auto &argument_handle : application.argument_handles)
-    input_constraints.push_back(equal_exprt(argument_handle, get(argument_handle)));
+    exprt::operandst input_constraints;
 
-  // add 'all inputs equal' => 'return value equal'
-  auto implication = 
-    implies_exprt(
-      conjunction(input_constraints),
-      response_equality);
+    for (auto &argument_handle : application.argument_handles)
+      input_constraints.push_back(equal_exprt(argument_handle, get(argument_handle)));
 
-  set_to_true(implication);
+    // add 'all inputs equal' => 'return value equal'
+    auto implication =
+        implies_exprt(
+            conjunction(input_constraints),
+            response_equality);
+    set_to_true(implication);        
+
+  }
 
   return INCONSISTENT;
 }

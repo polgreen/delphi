@@ -16,6 +16,7 @@ class oracle_solvert : public decision_proceduret
 public:
   using oracle_funt = smt2_parsert::oracle_funt;
   using oracle_fun_mapt = smt2_parsert::oracle_fun_mapt; 
+  bool cache=true;
 
   const oracle_fun_mapt *oracle_fun_map = nullptr;
 
