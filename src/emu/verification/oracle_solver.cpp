@@ -135,22 +135,8 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
     argv.push_back(stream.str());
   }
 
-  log.status() << "Running oracle";
-  for(auto &arg : argv)
-    log.status() << ' ' << arg;
-  log.status() << messaget::eom;
-
-  // run the oracle binary
-  std::ostringstream stdout_stream;
-  
-  auto run_result = run(
-    id2string(application.binary_name),
-    argv,
-    "",
-    stdout_stream,
-    "");
-
-  if(run_result != 0)
+  exprt response;
+  if(oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end())
   {
     log.status() << "Running oracle";
     for (auto &arg : argv)
