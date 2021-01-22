@@ -1,31 +1,33 @@
 #include "oracle_interface.h"
 #include "oracle_solver.h"
+#include "../expr2sygus.h"
 #include <solvers/smt2/smt2_dec.h>
 #include <langapi/language_util.h>
+#include <util/replace_expr.h>
+#include <iostream>
 
 
 
-
-void oracle_interfacet::add_problem(const problemt &problem, const solutiont &solution, decision_proceduret &solver)
+void oracle_interfacet::add_problem(const problemt &problem, const solutiont &solution, oracle_solvert &solver)
 {
+  // add verification problem "/exists x /neg (/alpha \implies \phi"
+  verify_encoding.clear();
   verify_encodingt::check_function_bodies(solution.functions);
   verify_encoding.functions = solution.functions;
   verify_encoding.free_variables = problem.free_variables;
   
-  verify_encoding.clear();
-  const exprt encoded_assumptions = verify_encoding(conjunction(problem.assumptions));
-  solver.set_to_true(encoded_assumptions);
+  // const exprt encoded_assumptions = verify_encoding(conjunction(problem.assumptions));
+  // solver.set_to_true(encoded_assumptions);
+  for(const auto &c: problem.constraints)
+    std::cout<<"problem constraint: " << expr2sygus(c)<<std::endl;
+
   const exprt encoded_constraints = verify_encoding(conjunction(problem.constraints));
+  std::cout<<"encoded constraint: " << expr2sygus(encoded_constraints)<<std::endl;
+
   solver.set_to_false(encoded_constraints);
 }
 
 
-int evaluate_expr(const exprt &expr)
-{
-  // INVARIANT(expr.type().id()==ID_bitvector || expr.type().id()==ID_integer, "can only evaluate integer or bitvec exprs")
-
-return 1;
-}
 
 std::vector<std::vector<exprt>> find_synth_fun(const exprt &expr, const problemt &problem)
 {
@@ -42,49 +44,43 @@ std::vector<std::vector<exprt>> find_synth_fun(const exprt &expr, const problemt
   return result;
 }
 
-// std::set<irep_idt> oracle_interfacet::find_synth_funs (const exprt &expr, const problemt &problem)
-// {
-//   std::set<irep_idt> synthfuns;
-//   if(expr.id()==ID_mathematical_function)
-//   {
-//     auto tmp=to_function_application_expr(expr);
-//     irep_idt id = to_symbol_expr(tmp.function()).id();
-//     if(problem.synthesis_functions.find(id)!=problem.synthesis_functions.end())
-//     {
-//     // if constraint contains synth funs called with complicated expressions rather than
-//     // plain variables from the input signature, throw unsuppored error. 
-//       for(const auto & arg: tmp.arguments())
-//         if(arg.id()!=ID_symbol)
-//           throw error ("synth fun called with unsupported expression in constraint");
-//       result.push_back(id);
-//     }
-//   }
-//   for(const auto &op: expr.operands())
-//     for(const auto &id: find_synth_funs(op, problem))
-//     result.push_back(id);
-//   return result;
-// }
 
+void oracle_interfacet::build_counterexample_constraint(const oracle_solvert &solver, 
+    const counterexamplet &counterexample, problemt &problem)
+{ 
+  counterexamplet result;
+  // get counterexample
+  for(const auto &var : problem.free_variables)
+  {
+    exprt value=solver.get(var);
+    result.assignment[var]=value;
+    if(value==nil_exprt() && var.id()==ID_nondet_symbol)
+    {
+      nondet_symbol_exprt tmp_var=to_nondet_symbol_expr(var);
+      tmp_var.set_identifier("nondet_"+id2string(to_nondet_symbol_expr(var).get_identifier()));
+      value=solver.get(tmp_var);
+      result.assignment[var]=value;
+    }
+    if(value==nil_exprt())
+    {
+      std::cout << "Warning: unable to find value for "<< var.pretty()<<std::endl;
+      result.assignment[var] = constant_exprt("0", var.type());
+      std::cout<<"Assume has been simplified out by solver.\n" <<std::endl;
+    }
+  }
 
-// void oracle_interfacet::set_up_oracles(const problemt &problem)
-// {
-
-//   for(std::size_t idx=0; idx<problem.oracle_constraint_gens.size(); idx++)
-//   {
-//     auto &oracle = problem.oracle_constraint_gens[idx];
-//     // find synth fun in the problem and get arguments
-//     // if constraint contains more than one synth fun, throw unsupported error
-//     std::set<irep_idt> synthfuns=find_synth_funs(oracle.constraint, problem);
-//     if(synthfuns.size()>1)
-//       throw error("more than one synth fun in constraint is not yet supported");
-//     synthfun_to_constraint_map[synthfuns.begin()]=idx;  
-
-//   }
-
-// }
+  // make constraint from counterexample and problem
+  for(auto &p: problem.constraints)
+  {
+    exprt synthesis_constraint = p;
+    replace_expr(result.assignment, synthesis_constraint);
+    std::cout<<"Synthesis constraints "<< expr2sygus(synthesis_constraint)<<std::endl;
+    problem.synthesis_constraints.push_back(synthesis_constraint);
+  }   
+}
 
 void oracle_interfacet::call_oracles(problemt &problem, 
-const solutiont &solution, const counterexamplet &counterexample)
+const solutiont &solution, const counterexamplet &counterexample, oracle_solvert &solver)
 {
   // // pick some strategy to call them? or just call them all
   // for(const auto &cons: problem.oracle_constraint_gens)
@@ -101,16 +97,17 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
   smt2_dect subsolver(
       ns, "fastsynth", "generated by fastsynth",
       "LIA", smt2_dect::solvert::Z3, message_handler);
-   oracle_solvert oracle_solver(subsolver, message_handler);   
+   oracle_solvert oracle_solver(subsolver, message_handler);
+   oracle_solver.oracle_fun_map=&problem.oracle_symbols; 
 
   return this->operator()(problem, solution, oracle_solver);
 }
 
 oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
     const solutiont &solution,
-    decision_proceduret &solver)
+    oracle_solvert &solver)
   {
-    // do something with the model? 
+
     add_problem(problem, solution, solver);
     decision_proceduret::resultt result = solver();
 
@@ -119,7 +116,8 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
       case decision_proceduret::resultt::D_SATISFIABLE:
       {
         counterexample = verify_encoding.get_counterexample(solver);
-        call_oracles(problem, solution, counterexample);
+        build_counterexample_constraint(solver, counterexample, problem);
+        call_oracles(problem, solution, counterexample, solver);
         return oracle_interfacet::resultt::FAIL; 
       }
       case decision_proceduret::resultt::D_UNSATISFIABLE:
@@ -133,7 +131,7 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
       {
         counterexample=
         verify_encoding.get_counterexample(solver);
-        call_oracles(problem, solution, counterexample);
+        call_oracles(problem, solution, counterexample, solver);
         return oracle_interfacet::resultt::FAIL;
       } 
     }
