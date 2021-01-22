@@ -15,8 +15,6 @@ public:
 
   virtual exprt model(exprt) const = 0;
 
-  virtual void add_ce(const counterexamplet &)=0;
-
   virtual solutiont get_solution() const = 0;
 
   virtual void set_program_size(std::size_t) = 0;

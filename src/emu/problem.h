@@ -17,10 +17,13 @@ public:
   // We only ever add assumptions and constraints, we never remove them.
   // assumptions and constraints come from the original spec, and are used for verification
   // Oracle assumption gen and constraint gen may add to the assumptions and constraints
-  // Synthesis assumptions are only used by the synthesis phase, and never by the verification phase
-  // synthesis assumptions contain the counterexamples obtained so far
-  // std::vector<exprt> assumptions, constraints, synthesis_assumptions;
+  // Synthesis constraints are only used by the synthesis phase, and never by the verification phase
+
+  // these are used for verification
   std::vector<exprt> constraints, assumptions;
+  // these are used for synthesis
+  std::vector<exprt> synthesis_constraints;
+  // these are the oracles that can generate assumptions and constraints
   std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens;
   // universally quantified variables
   std::set<exprt> free_variables;
@@ -38,7 +41,7 @@ class solutiont
 class counterexamplet
 {
 public:
-  std::map<exprt, exprt> assignment;
+  std::unordered_map<exprt, exprt, irep_hash> assignment;
   void clear() { assignment.clear(); }
 };
 

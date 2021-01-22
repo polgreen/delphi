@@ -3,6 +3,7 @@
 
 #include "verify.h"
 #include "verify_encoding.h"
+#include "oracle_solver.h"
 #include <solvers/decision_procedure.h>
 #include <util/namespace.h>
 #include <util/message.h>
@@ -21,7 +22,7 @@ class oracle_interfacet : public verifyt
 
   resultt operator()(problemt &problem,
     const solutiont &solution,
-    decision_proceduret &solver);
+    oracle_solvert &solver);
   
   counterexamplet counterexample;
 
@@ -38,11 +39,16 @@ class oracle_interfacet : public verifyt
   std::map<irep_idt, std::size_t> synthfun_to_constraint_map;
   std::map<irep_idt, std::size_t> synthfun_to_assume_map;
 
+  void build_counterexample_constraint(const oracle_solvert &solver, 
+  const counterexamplet &counterexample, problemt &problem);
 
-  void call_oracles(problemt &problem, const solutiont &solution, const counterexamplet &counterexample);
+
+
+  void call_oracles(problemt &problem, 
+  const solutiont &solution, const counterexamplet &counterexample, oracle_solvert &solver);
   std::set<irep_idt> find_synth_funs (const exprt &expr, const problemt &problem);
 
-  void add_problem(const problemt &problem, const solutiont &solution, decision_proceduret &solver );
+  void add_problem(const problemt &problem, const solutiont &solution, oracle_solvert &solver );
 
 };
 

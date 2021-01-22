@@ -63,7 +63,7 @@ ogist::resultt ogist::doit()
   {
     synthesizer.set_program_size(program_size);
     // synthesiser synthesise solution to problem so far
-
+std::cout<<"SYNTH *******"<<std::endl;
     switch(synthesizer(problem))
     {
     case synthesizert::CANDIDATE:
@@ -77,10 +77,12 @@ ogist::resultt ogist::doit()
       if(program_size<10)
       {
         program_size+=1;
+        synthesizer.set_program_size(program_size);
         continue; // do another attempt to synthesize
       }
       return ogist::resultt::D_ERROR;
     }
+std::cout<<"VERIFY *******"<<std::endl;
 
     switch(verify(problem, synthesizer.get_solution()))
     {
@@ -89,7 +91,7 @@ ogist::resultt ogist::doit()
       return decision_proceduret::resultt::D_SATISFIABLE;
     case verifyt::FAIL:
      std::cout<<"Verification Failed" <<std::endl;
-      synthesizer.add_ce(verify.get_counterexample());
+      // synthesizer.add_ce(verify.get_counterexample());
       break;
     }
 

@@ -12,14 +12,14 @@ void simple_syntht::set_program_size(std::size_t size)
 
 bool contains_oracle(exprt expr, const problemt &problem)
 {
-  if (expr.type().id() == ID_mathematical_function &&
-      problem.synthesis_functions.find(to_symbol_expr(expr).get_identifier()) ==
-          problem.synthesis_functions.end())
-    return true;
-  else
-    forall_operands(it, expr) 
-      if(contains_oracle(*it, problem)) 
-        return true;
+  // if (expr.type().id() == ID_mathematical_function &&
+  //     problem.synthesis_functions.find(to_symbol_expr(expr).get_identifier()) ==
+  //         problem.synthesis_functions.end())
+  //   return true;
+  // else
+  //   forall_operands(it, expr) 
+  //     if(contains_oracle(*it, problem)) 
+  //       return true;
 
   return false;
 }
@@ -70,32 +70,32 @@ exprt join_expressions(const std::vector<exprt> &expressions, irep_idt id, const
 
 void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem)
 {
-  implies_exprt implies_expr(join_expressions(problem.assumptions, ID_and, problem),
-                                           join_expressions(problem.constraints, ID_and, problem));
-
-  const exprt encoded = encoding(implies_expr);
+  // implies_exprt implies_expr(join_expressions(problem.assumptions, ID_and, problem),
+  //                                          join_expressions(problem.synthesis_constraints, ID_and, problem));
+ 
+  const exprt encoded = encoding(join_expressions(problem.synthesis_constraints, ID_and, problem));
   solver.set_to_true(encoded);
 
   for(const auto &c : encoding.constraints)
     solver.set_to_true(c);
 }
 
-void simple_syntht::add_counterexample(
-  const counterexamplet &ce,
-  synth_encodingt &synth_encoding,
-  decision_proceduret &solver)
-{
-  std::cout<<"Adding counterexample: ";
-  for(const auto &it : ce.assignment)
-  {
-    const exprt &symbol = it.first;
-    const exprt &value = it.second;
-    std::cout<<expr2sygus(it.first) << " = "<< expr2sygus(it.second)<<std::endl;
+// void simple_syntht::add_counterexample(
+//   const counterexamplet &ce,
+//   synth_encodingt &synth_encoding,
+//   decision_proceduret &solver)
+// {
+//   std::cout<<"Adding counterexample: ";
+//   for(const auto &it : ce.assignment)
+//   {
+//     const exprt &symbol = it.first;
+//     const exprt &value = it.second;
+//     std::cout<<expr2sygus(it.first) << " = "<< expr2sygus(it.second)<<std::endl;
 
-    exprt encoded = synth_encoding(equal_exprt(symbol, value));
-    solver.set_to_true(encoded);
-  }
-}
+//     exprt encoded = synth_encoding(equal_exprt(symbol, value));
+//     solver.set_to_true(encoded);
+//   }
+// }
 
 simple_syntht::resultt simple_syntht::operator()(const problemt &problem)
 {
@@ -114,24 +114,8 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decisi
   synth_encoding.clear();
   synth_encoding.enable_bitwise = false;
 
-  if(counterexamples.empty())
-  {
-    synth_encoding.suffix = "$ce";
-    add_problem(synth_encoding, solver, problem);
-  }
-  else
-  {
-    std::size_t counter = 0;
-    for (const auto &c : counterexamples)
-    {
-      synth_encoding.suffix = "$ce" + std::to_string(counter);
-      synth_encoding.constraints.clear();
-      add_counterexample(c, synth_encoding, solver);
-      add_problem(synth_encoding, solver, problem);
-
-      counter++;
-    }
-  }
+  synth_encoding.suffix = "$ce";
+  add_problem(synth_encoding, solver, problem);
   
   // solve
   const decision_proceduret::resultt result = solver();
@@ -166,8 +150,8 @@ solutiont simple_syntht::get_solution() const
   return last_solution;
 }
 
-void simple_syntht::add_ce(
-  const counterexamplet &counterexample)
-{
-  counterexamples.emplace_back(counterexample);
-}
+// void simple_syntht::add_ce(
+//   const counterexamplet &counterexample)
+// {
+//   counterexamples.emplace_back(counterexample);
+// }

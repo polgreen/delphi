@@ -21,19 +21,19 @@ public:
 
   exprt model(exprt) const override;
 
-  void add_ce(const counterexamplet &cex) override;
+  // void add_ce(const counterexamplet &cex) override;
   solutiont get_solution() const override;
   void set_program_size(std::size_t size) override;
 
 protected:
   resultt operator()(const problemt &, decision_proceduret &solver);
 
-  std::vector<counterexamplet> counterexamples;
+  // std::vector<counterexamplet> counterexamples;
 
-  void add_counterexample(
-  const counterexamplet &ce,
-  synth_encodingt &synth_encoding,
-  decision_proceduret &solver);
+  // void add_counterexample(
+  // const counterexamplet &ce,
+  // synth_encodingt &synth_encoding,
+  // decision_proceduret &solver);
 
   // snthesis encoding
   synth_encodingt synth_encoding;
