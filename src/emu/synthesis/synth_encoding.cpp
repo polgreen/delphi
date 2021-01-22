@@ -322,7 +322,7 @@ exprt e_datat::instructiont::constraint(
         const auto &op0=results[option.operand0];
         const auto &op1=results[option.operand1];
 
-        binary_exprt binary_expr(op0, option.operation, op1);
+        binary_exprt binary_expr(op0, option.operation, op1, bool_typet());
         exprt promoted=promotion(binary_expr, word_type);
 
         result_expr=chain(option.sel, promoted, result_expr);
