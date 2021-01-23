@@ -3,7 +3,7 @@
 #include <util/bv_arithmetic.h>
 
 #include "synth_encoding.h"
-
+#include "../expr2sygus.h"
 #include <algorithm>
 #include <iostream>
 
@@ -324,7 +324,6 @@ exprt e_datat::instructiont::constraint(
 
         binary_exprt binary_expr(op0, option.operation, op1, bool_typet());
         exprt promoted=promotion(binary_expr, word_type);
-
         result_expr=chain(option.sel, promoted, result_expr);
       }
       break;
@@ -549,7 +548,9 @@ exprt synth_encodingt::operator()(const exprt &expr)
       tmp, program_size, enable_bitwise, enable_division);
 
     for(const auto &c : e_data.constraints)
+    {
       constraints.push_back(c);
+    }
 
     return final_result;
   }

@@ -47,23 +47,37 @@ ogist::ogist(
 {
   // get base problem
   // find correctness requirement, add to verifier
-  // add orcle assumptions and constraints to verifier
+  // add oracle assumptions and constraints to verifier
   // set oracle selection strategy in verifier
   // set synthesis strategy
 }
 #include <iostream>
+
+void display_solution(const solutiont &solution)
+{
+  std::cout<<"SOLUTION:"<<std::endl;
+  for(const auto & f: solution.functions)
+  {
+    std::cout<<expr2sygus(f.first)<<"  =  "<<expr2sygus(f.second)<<std::endl;
+  }
+}
+
 // problem is dynamic
 ogist::resultt ogist::doit()
 {
   std::cout<<"Start OGIS"<<std::endl;
   // the actual synthesis loop
   std::size_t program_size=1;
+  std::size_t iteration=0;
+  solutiont solution;
 
   while(true)
   {
+    iteration++;
+
     synthesizer.set_program_size(program_size);
     // synthesiser synthesise solution to problem so far
-std::cout<<"SYNTH *******"<<std::endl;
+    std::cout<<"SYNTH iteration "<<iteration<<std::endl;
     switch(synthesizer(problem))
     {
     case synthesizert::CANDIDATE:
@@ -73,30 +87,32 @@ std::cout<<"SYNTH *******"<<std::endl;
         // check if solution is the same each time?
       break;
     case synthesizert::NO_SOLUTION:
-      std::cout<<"No solution" <<std::endl;
+      std::cout<<"No solution, ";
       if(program_size<10)
       {
         program_size+=1;
+        std::cout<<"increase program size to "<< program_size << std::endl;
         synthesizer.set_program_size(program_size);
         continue; // do another attempt to synthesize
       }
+      std::cout<<" reached max program size" <<std::endl;
       return ogist::resultt::D_ERROR;
     }
-std::cout<<"VERIFY *******"<<std::endl;
 
-    switch(verify(problem, synthesizer.get_solution()))
+    std::cout<<"VERIFY iteration "<< iteration<<std::endl;
+    solutiont solution = synthesizer.get_solution();
+
+    switch(verify(problem, solution))
     {
     case verifyt::PASS:
       std::cout<<"Verification passed" <<std::endl;
+      display_solution(solution);
       return decision_proceduret::resultt::D_SATISFIABLE;
     case verifyt::FAIL:
-     std::cout<<"Verification Failed" <<std::endl;
-      // synthesizer.add_ce(verify.get_counterexample());
+      std::cout<<"Counterexample: "<<expr2sygus(problem.synthesis_constraints.back())<<std::endl;
       break;
     }
 
-    // If not correct, are there other oracles to call? If yes, call some
-    // and add oracle constraints/assumptions to proble
   }
   return decision_proceduret::resultt::D_UNSATISFIABLE;
 } 

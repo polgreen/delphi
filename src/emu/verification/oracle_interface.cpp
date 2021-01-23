@@ -16,17 +16,10 @@ void oracle_interfacet::add_problem(const problemt &problem, const solutiont &so
   verify_encoding.functions = solution.functions;
   verify_encoding.free_variables = problem.free_variables;
   
-  // const exprt encoded_assumptions = verify_encoding(conjunction(problem.assumptions));
-  // solver.set_to_true(encoded_assumptions);
-  for(const auto &c: problem.constraints)
-    std::cout<<"problem constraint: " << expr2sygus(c)<<std::endl;
-
   const exprt encoded_constraints = verify_encoding(conjunction(problem.constraints));
-  std::cout<<"encoded constraint: " << expr2sygus(encoded_constraints)<<std::endl;
 
   solver.set_to_false(encoded_constraints);
 }
-
 
 
 std::vector<std::vector<exprt>> find_synth_fun(const exprt &expr, const problemt &problem)
@@ -44,26 +37,27 @@ std::vector<std::vector<exprt>> find_synth_fun(const exprt &expr, const problemt
   return result;
 }
 
-void oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, const oracle_solvert &solver)
+void oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, oracle_solvert &solver)
 {
+  for(auto &op: expr.operands())
+    replace_oracles(op, problem, solver);
+
   if(expr.id()==ID_function_application)
   {
     auto &func_app = to_function_application_expr(expr);
     if(problem.oracle_symbols.find(to_symbol_expr(func_app.function()).get_identifier())!=problem.oracle_symbols.end())
     {
      exprt result = solver.get_oracle_value(func_app, func_app.arguments());
-     expr = result;
+     if(result!=nil_exprt())
+      expr = result;
     }
   }
-  for(auto &op: expr.operands())
-    replace_oracles(op, problem, solver);
 }
 
 
-void oracle_interfacet::build_counterexample_constraint(const oracle_solvert &solver, 
+void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver, 
     const counterexamplet &counterexample, problemt &problem)
 { 
-  std::cout<<"Building cex constraint \n";
   counterexamplet result;
   // get counterexample
   for(const auto &var : problem.free_variables)
@@ -92,7 +86,6 @@ void oracle_interfacet::build_counterexample_constraint(const oracle_solvert &so
     exprt synthesis_constraint = p;
     replace_expr(result.assignment, synthesis_constraint);
     replace_oracles(synthesis_constraint, problem, solver);
-    std::cout<<"Synthesis constraints: "<< expr2sygus(synthesis_constraint)<<std::endl;
     new_synthesis_constraints.push_back(synthesis_constraint);
   }   
   problem.synthesis_constraints.push_back(and_exprt(new_synthesis_constraints));

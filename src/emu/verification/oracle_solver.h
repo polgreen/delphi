@@ -39,7 +39,7 @@ public:
 
   using oracle_historyt = std::map<std::vector<exprt>, exprt>;
   std::unordered_map<std::string, oracle_historyt> oracle_call_history;
-  exprt get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs) const;
+  exprt get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs);
 
 protected:
   resultt dec_solve() override;
@@ -59,7 +59,7 @@ protected:
   using check_resultt = enum { INCONSISTENT, CONSISTENT, ERROR };
   check_resultt check_oracles();
   check_resultt check_oracle(const function_application_exprt &, const applicationt &);
-
+  exprt call_oracle(const applicationt &application, const std::vector<exprt> &inputs);
   using applicationst = std::unordered_map<function_application_exprt, applicationt, irep_hash>;
   applicationst applications;
 };

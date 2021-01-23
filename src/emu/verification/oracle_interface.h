@@ -39,10 +39,10 @@ class oracle_interfacet : public verifyt
   std::map<irep_idt, std::size_t> synthfun_to_constraint_map;
   std::map<irep_idt, std::size_t> synthfun_to_assume_map;
 
-  void build_counterexample_constraint(const oracle_solvert &solver, 
+  void build_counterexample_constraint(oracle_solvert &solver, 
   const counterexamplet &counterexample, problemt &problem);
 
-  void replace_oracles(exprt &synthesis_constraint, const problemt &problem, const oracle_solvert &solver);
+  void replace_oracles(exprt &synthesis_constraint, const problemt &problem, oracle_solvert &solver);
 
 
 

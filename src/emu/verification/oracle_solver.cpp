@@ -10,6 +10,7 @@
 #include <util/string_utils.h>
 
 #include <sstream>
+#include <iostream>
 
 oracle_solvert::oracle_solvert(
   decision_proceduret &__sub_solver,
@@ -19,17 +20,24 @@ oracle_solvert::oracle_solvert(
 {
 }
 
-exprt oracle_solvert::get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs) const
+exprt oracle_solvert::get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs)
 {
-  auto application = applications.find(oracle_app);
-  INVARIANT(application!=applications.end(), "oracle application not found");
-  auto history = oracle_call_history.find(application->second.binary_name);
-  INVARIANT(history!=oracle_call_history.end(), "No history for oracle");
-  auto result = history->second.find(inputs);
-  INVARIANT(result!=history->second.end(), "inputs not found for oracle");
-  return result->second;
+  for(const auto &app : applications)
+  {
+    if(to_function_application_expr(app.first).function() == oracle_app.function())
+    {
+      auto history = oracle_call_history.find(app.second.binary_name);
+      INVARIANT(history != oracle_call_history.end(), "No history for oracle");
+      auto result = history->second.find(inputs);
+      if(result==history->second.end())
+      {
+        return call_oracle(app.second, inputs);        
+      }
+      return result->second;
+    }
+  }
+  return nil_exprt();
 }
-
 
 void oracle_solvert::set_to(const exprt &expr, bool value)
 {
@@ -119,32 +127,17 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
   return result;
 }
 
-oracle_solvert::check_resultt oracle_solvert::check_oracle(
-  const function_application_exprt &application_expr,
-  const applicationt &application)
+exprt oracle_solvert::call_oracle(
+    const applicationt &application, const std::vector<exprt> &inputs)
 {
-  if(cache && oracle_call_history.find(application.binary_name)==oracle_call_history.end() )
+  if (cache && oracle_call_history.find(application.binary_name) == oracle_call_history.end())
   {
-    log.debug()<<"First time we have seen this oracle for " << to_symbol_expr(application_expr.function()).get_identifier() <<messaget::eom;
     oracle_call_history[application.binary_name] = oracle_historyt();
   }
-  
-  
-  // evaluate the argument handles to get concrete inputs
-  std::vector<exprt> inputs;
-  inputs.reserve(application.argument_handles.size());
-
-  for(auto &argument_handle : application.argument_handles)
-  {
-    auto res = get(argument_handle);
-    inputs.push_back(res);
-  } 
-
-
   std::vector<std::string> argv;
   argv.push_back(application.binary_name);
 
-  for(const auto &input : inputs)
+  for (const auto &input : inputs)
   {
     std::ostringstream stream;
     stream << format(input);
@@ -152,14 +145,14 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   }
 
   exprt response;
-  bool new_oracle_call=false;
-  if(oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
+  bool new_oracle_call = false;
+  if (oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
   {
-    new_oracle_call=true;
-    log.status() << "Running oracle";
+    new_oracle_call = true;
+    log.debug() << "Running oracle";
     for (auto &arg : argv)
-      log.status() << ' ' << arg;
-    log.status() << messaget::eom;
+      log.debug() << ' ' << arg;
+    log.debug() << messaget::eom;
 
     // run the oracle binary
     std::ostringstream stdout_stream;
@@ -173,29 +166,50 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
 
     if (run_result != 0)
     {
-      std::cout<<"oracle has failed\n";
       log.status() << "oracle " << application.binary_name << " has failed" << messaget::eom;
-      return ERROR;
+      assert(0);
+      return nil_exprt();
     }
 
     // we assume that the oracle returns the result in SMT-LIB format
     std::istringstream oracle_response_istream(stdout_stream.str());
     response = oracle_response_parser(oracle_response_istream);
-    log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
-    if(cache)
-      oracle_call_history[application.binary_name][inputs]=response;
+    log.debug() << "oracle response " << expr2sygus(response) << messaget::eom;
+    if (cache)
+      oracle_call_history[application.binary_name][inputs] = response;
   }
   else
   {
     response = oracle_call_history[application.binary_name][inputs];
   }
 
+  return response;
+}
+
+oracle_solvert::check_resultt oracle_solvert::check_oracle(
+  const function_application_exprt &application_expr,
+  const applicationt &application)
+{
   
+  // evaluate the argument handles to get concrete inputs
+  std::vector<exprt> inputs;
+  inputs.reserve(application.argument_handles.size());
+
+  for(auto &argument_handle : application.argument_handles)
+  {
+    auto res = get(argument_handle);
+    inputs.push_back(res);
+  } 
+
+   exprt response = call_oracle(application, inputs);
+   if(response==nil_exprt())
+     return check_resultt::ERROR;
+
 
   // check whether the result is consistent with the model
   if(response == get(application.handle))
   {
-    log.status() << "Response matches " << expr2sygus(get(application.handle))<<messaget::eom;
+    log.debug() << "Response matches " << expr2sygus(get(application.handle))<<messaget::eom;
     return CONSISTENT; // done, SAT
   }
   // if(new_oracle_call)
@@ -203,7 +217,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
 
     function_application_exprt func_app(application_expr.function(), inputs);
 
-    log.status() << "Response does not match " << expr2sygus(get(application.handle)) << messaget::eom;
+    log.debug() << "Response does not match " << expr2sygus(get(application.handle)) << messaget::eom;
 
     // add a constraint that enforces this equality
     auto response_equality = equal_exprt(application.handle, response);
@@ -223,7 +237,6 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
     set_to_true(implication);        
 
   }
-  std::cout<<"oracle inconsistent \n";
   return INCONSISTENT;
 }
 
@@ -238,7 +251,6 @@ decision_proceduret::resultt oracle_solvert::dec_solve()
     switch(sub_solver())
     {
     case resultt::D_SATISFIABLE:
-      std::cout<<"Check oracles\n";
       switch(check_oracles())
       {
       case INCONSISTENT:
