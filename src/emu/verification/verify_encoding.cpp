@@ -90,7 +90,7 @@ exprt verify_encodingt::operator()(const exprt &expr) const
     auto f_it=f_map.find(e_identifier);
 
     exprt result=f_it==f_map.end()?
-      from_integer(0, e.type()):f_it->second;
+      expr:f_it->second;
 
     // need to instantiate parameters with arguments
     exprt instance=instantiate(result, e);
