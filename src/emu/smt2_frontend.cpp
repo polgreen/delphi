@@ -440,12 +440,21 @@ int smt2_frontend(const cmdlinet &cmdline)
   message_handler.set_verbosity(messaget::M_STATISTICS);
 
   std::string logic="ALL";
-
-  if (cmdline.isset("bitblast"))
+ 
+// warning simplify won't work with oracles until freezing is implemented.
+  if (cmdline.isset("bitblast") && cmdline.isset("simplify"))
   {
-    satcheck_minisat_no_simplifiert satcheck_minisat_no_simplifiert(message_handler);
-    boolbvt subsolver(ns, satcheck_minisat_no_simplifiert, message_handler);
+    satcheck_minisat_simplifiert satcheck_minisat_no_simplifier(message_handler);
+    boolbvt subsolver(ns, satcheck_minisat_no_simplifier, message_handler);
     return solver(in, subsolver, message_handler);
+
+  }
+  else if(cmdline.isset("bitblast"))
+  {
+    satcheck_minisat_no_simplifiert satcheck_minisat_no_simplifier(message_handler);
+    boolbvt subsolver(ns, satcheck_minisat_no_simplifier, message_handler);
+    return solver(in, subsolver, message_handler);
+
   }
   else
   {
