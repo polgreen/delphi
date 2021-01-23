@@ -14,12 +14,12 @@ int answer (unsigned int a)
 int main(int argc, const char *argv[])
 {
 
-	if(argc!=3 || !(isdigit(*argv[1])))
+	if(argc!=2 || !(isdigit(*argv[1])))
 	{
-		std::cout<<"This is the oracle for rand\n"
+		std::cout<<"This is the oracle for reffunction \n"
 		<< "it takes 1 inputs, the bitvec value";
 		std::cout
-		<< "It returns a single bitvec value\n";
+		<< " and t returns a single bitvec value\n";
 		return 1;
 	}
 

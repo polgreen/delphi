@@ -16,12 +16,12 @@ int answer (unsigned int a)
 int main(int argc, const char *argv[])
 {
 
-	if(argc!=3 || !(isdigit(*argv[1])))
+	if(argc!=2 || !(isdigit(*argv[1])))
 	{
-		std::cout<<"This is the oracle for rand\n"
-		<< "it takes 1 inputs, the bitvec value";
+		std::cout<<"This is the oracle for rand \n"
+		<< "it takes 1 inputs, the bitvec value and ";
 		std::cout
-		<< "It returns a single bitvec value\n";
+		<< "it returns a single bitvec value\n";
 		return 1;
 	}
 
