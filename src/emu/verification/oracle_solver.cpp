@@ -19,6 +19,18 @@ oracle_solvert::oracle_solvert(
 {
 }
 
+exprt oracle_solvert::get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs) const
+{
+  auto application = applications.find(oracle_app);
+  INVARIANT(application!=applications.end(), "oracle application not found");
+  auto history = oracle_call_history.find(application->second.binary_name);
+  INVARIANT(history!=oracle_call_history.end(), "No history for oracle");
+  auto result = history->second.find(inputs);
+  INVARIANT(result!=history->second.end(), "inputs not found for oracle");
+  return result->second;
+}
+
+
 void oracle_solvert::set_to(const exprt &expr, bool value)
 {
   PRECONDITION(oracle_fun_map != nullptr);
@@ -129,7 +141,6 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   } 
 
 
-
   std::vector<std::string> argv;
   argv.push_back(application.binary_name);
 
@@ -162,7 +173,8 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
 
     if (run_result != 0)
     {
-      log.error() << "oracle " << application.binary_name << " has failed" << messaget::eom;
+      std::cout<<"oracle has failed\n";
+      log.status() << "oracle " << application.binary_name << " has failed" << messaget::eom;
       return ERROR;
     }
 
@@ -211,7 +223,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
     set_to_true(implication);        
 
   }
-
+  std::cout<<"oracle inconsistent \n";
   return INCONSISTENT;
 }
 
@@ -226,6 +238,7 @@ decision_proceduret::resultt oracle_solvert::dec_solve()
     switch(sub_solver())
     {
     case resultt::D_SATISFIABLE:
+      std::cout<<"Check oracles\n";
       switch(check_oracles())
       {
       case INCONSISTENT:

@@ -39,6 +39,7 @@ public:
 
   using oracle_historyt = std::map<std::vector<exprt>, exprt>;
   std::unordered_map<std::string, oracle_historyt> oracle_call_history;
+  exprt get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs) const;
 
 protected:
   resultt dec_solve() override;
