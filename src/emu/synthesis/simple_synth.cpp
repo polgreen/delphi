@@ -70,8 +70,8 @@ exprt join_expressions(const std::vector<exprt> &expressions, irep_idt id, const
 
 void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem)
 {
-  // implies_exprt implies_expr(join_expressions(problem.assumptions, ID_and, problem),
-  //                                          join_expressions(problem.synthesis_constraints, ID_and, problem));
+  // TODO: use assumptions here as well?
+
   for(const auto &c: problem.synthesis_constraints)
   {
     // std::cout<<"constraint "<< expr2sygus(c)<<std::endl;
@@ -83,22 +83,6 @@ void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &
     solver.set_to_true(c);
 }
 
-// void simple_syntht::add_counterexample(
-//   const counterexamplet &ce,
-//   synth_encodingt &synth_encoding,
-//   decision_proceduret &solver)
-// {
-//   std::cout<<"Adding counterexample: ";
-//   for(const auto &it : ce.assignment)
-//   {
-//     const exprt &symbol = it.first;
-//     const exprt &value = it.second;
-//     std::cout<<expr2sygus(it.first) << " = "<< expr2sygus(it.second)<<std::endl;
-
-//     exprt encoded = synth_encoding(equal_exprt(symbol, value));
-//     solver.set_to_true(encoded);
-//   }
-// }
 
 simple_syntht::resultt simple_syntht::operator()(const problemt &problem)
 {

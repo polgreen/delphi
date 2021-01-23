@@ -16,7 +16,9 @@ void oracle_interfacet::add_problem(const problemt &problem, const solutiont &so
   verify_encoding.functions = solution.functions;
   verify_encoding.free_variables = problem.free_variables;
   
-  const exprt encoded_constraints = verify_encoding(conjunction(problem.constraints));
+  const exprt encoded_constraints = (problem.assumptions.size()>1)?
+      verify_encoding(implies_exprt(conjunction(problem.assumptions),conjunction(problem.constraints))): 
+      verify_encoding(conjunction(problem.constraints));
 
   solver.set_to_false(encoded_constraints);
 }
@@ -94,12 +96,13 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
 void oracle_interfacet::call_oracles(problemt &problem, 
 const solutiont &solution, const counterexamplet &counterexample, oracle_solvert &solver)
 {
-  // // pick some strategy to call them? or just call them all
-  // for(const auto &cons: problem.oracle_constraint_gens)
-  //   call_oracle_constraint();
+  // call the other oracles here
 
-  // for(const auto &cons: problem.oracle_assumption_gens)
-  //   call_oracle_assumption();
+  // for all problem.oracle_constraint_gen
+  // call the oracle and add the constraints to problem.synthesis_constraints
+
+  // for all problem.oracle_assumption_gen
+  // call the oracle and add the assumptions to problem.assumptions
 }
 
 oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
