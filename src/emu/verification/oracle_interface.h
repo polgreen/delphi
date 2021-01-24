@@ -44,7 +44,9 @@ class oracle_interfacet : public verifyt
 
   void replace_oracles(exprt &synthesis_constraint, const problemt &problem, oracle_solvert &solver);
 
-
+  exprt get_oracle_constraints(
+    const counterexamplet &,
+    const oracle_constraint_gent &);
 
   void call_oracles(problemt &problem, 
   const solutiont &solution, const counterexamplet &counterexample, oracle_solvert &solver);

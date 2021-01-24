@@ -93,6 +93,13 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
   problem.synthesis_constraints.push_back(and_exprt(new_synthesis_constraints));
 }
 
+exprt oracle_interfacet::get_oracle_constraints(
+  const counterexamplet &counterexample,
+  const oracle_constraint_gent &oracle)
+{
+  return true_exprt();
+}
+
 void oracle_interfacet::call_oracles(
   problemt &problem, 
   const solutiont &solution,
@@ -103,9 +110,19 @@ void oracle_interfacet::call_oracles(
 
   // for all problem.oracle_constraint_gen
   // call the oracle and add the constraints to problem.synthesis_constraints
+  for(const auto &oracle : problem.oracle_constraint_gens)
+  {
+    auto constraints = get_oracle_constraints(counterexample, oracle);
+    problem.synthesis_constraints.push_back(std::move(constraints));
+  }
 
   // for all problem.oracle_assumption_gen
   // call the oracle and add the assumptions to problem.assumptions
+  for(const auto &oracle : problem.oracle_assumption_gens)
+  {
+    auto constraints = get_oracle_constraints(counterexample, oracle);
+    problem.assumptions.push_back(std::move(constraints));
+  }
 }
 
 oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
