@@ -101,7 +101,7 @@ ogist::resultt ogist::doit()
 
     std::cout<<"VERIFY iteration "<< iteration<<std::endl;
     solutiont solution = synthesizer.get_solution();
-
+    std::size_t num_synth_constraints = problem.synthesis_constraints.size();
     switch(verify(problem, solution))
     {
     case verifyt::PASS:
@@ -109,7 +109,8 @@ ogist::resultt ogist::doit()
       display_solution(solution);
       return decision_proceduret::resultt::D_SATISFIABLE;
     case verifyt::FAIL:
-      std::cout<<"Counterexample: "<<expr2sygus(problem.synthesis_constraints.back())<<std::endl;
+      std::cout<<"Fail: got "<<problem.synthesis_constraints.size()-num_synth_constraints <<" new constraints"<<std::endl;
+      synthesizer.increment_synthesis_constraints();
       break;
     }
 
