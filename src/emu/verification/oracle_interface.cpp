@@ -82,15 +82,20 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
   }
 
   // make constraint from counterexample and problem
-  std::vector<exprt> new_synthesis_constraints;
   for(auto &p: problem.constraints)
   {
     exprt synthesis_constraint = p;
     replace_expr(result.assignment, synthesis_constraint);
     replace_oracles(synthesis_constraint, problem, solver);
-    new_synthesis_constraints.push_back(synthesis_constraint);
+    std::cout<<"Synthesis constraint " << expr2sygus(synthesis_constraint)<<std::endl;
+    if(synthesis_constraint.id()==ID_and)
+    {
+      for(const auto &op: synthesis_constraint.operands())
+        problem.synthesis_constraints.push_back(op);
+    }
+    else
+      problem.synthesis_constraints.push_back(synthesis_constraint);
   }   
-  problem.synthesis_constraints.push_back(and_exprt(new_synthesis_constraints));
 }
 
 void oracle_interfacet::call_oracles(problemt &problem, 

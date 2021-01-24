@@ -4,10 +4,16 @@
 #include <solvers/sat/satcheck.h>
 #include <util/mathematical_expr.h>
 #include "../expr2sygus.h"
+#include <algorithm>
 
 void simple_syntht::set_program_size(std::size_t size)
 {
   program_size = size;
+}
+
+void simple_syntht::increment_synthesis_constraints()
+{
+  number_synth_constraints+=synth_constraint_increment;
 }
 
 bool contains_oracle(exprt expr, const problemt &problem)
@@ -70,12 +76,14 @@ exprt join_expressions(const std::vector<exprt> &expressions, irep_idt id, const
 
 void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem)
 {
+  std::cout << "Using  " << std::min(number_synth_constraints, problem.synthesis_constraints.size()) 
+            << " synthesis constraints"<<std::endl;
   // TODO: use assumptions here as well?
-
-  for(const auto &c: problem.synthesis_constraints)
+  for(std::size_t i=0; i<number_synth_constraints; i++)
   {
-    // std::cout<<"constraint "<< expr2sygus(c)<<std::endl;
-    const exprt encoded = encoding(c);
+    if(i>= problem.synthesis_constraints.size())
+      break;
+    const exprt encoded =encoding(problem.synthesis_constraints[i]);
     solver.set_to_true(encoded);
   }
 

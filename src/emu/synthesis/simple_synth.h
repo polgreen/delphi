@@ -13,6 +13,8 @@ class simple_syntht : public synthesizert
 public:
   simple_syntht(namespacet &_namespace, 
                 message_handlert &_ms) :
+                number_synth_constraints(0u),
+                synth_constraint_increment(2u),
                 ns(_namespace),
                 message_handler(_ms),
                 program_size(0){};
@@ -24,16 +26,14 @@ public:
   // void add_ce(const counterexamplet &cex) override;
   solutiont get_solution() const override;
   void set_program_size(std::size_t size) override;
+  void increment_synthesis_constraints() override;
 
 protected:
   resultt operator()(const problemt &, decision_proceduret &solver);
-
-  // std::vector<counterexamplet> counterexamples;
-
-  // void add_counterexample(
-  // const counterexamplet &ce,
-  // synth_encodingt &synth_encoding,
-  // decision_proceduret &solver);
+  // number of synth constraints used so far
+  std::size_t number_synth_constraints;
+  // maximum number of synth constraints to add each iteration
+  std::size_t synth_constraint_increment;
 
   // snthesis encoding
   synth_encodingt synth_encoding;

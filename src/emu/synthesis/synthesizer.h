@@ -18,6 +18,8 @@ public:
   virtual solutiont get_solution() const = 0;
 
   virtual void set_program_size(std::size_t) = 0;
+
+  virtual void increment_synthesis_constraints()=0;
 };
 
 #endif /*EMU_SYNTHESIZER_H*/
