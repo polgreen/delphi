@@ -55,8 +55,8 @@ sygus_parsert::oracle_signature()
       throw error("expected a symbol after define-fun");
 
   const irep_idt binary_name = smt2_tokenizer.get_buffer();
-  std::vector<exprt> inputs;
-  std::vector<exprt> outputs;
+  std::vector<symbol_exprt> inputs;
+  std::vector<symbol_exprt> outputs;
 
   // get input symbols
   if(next_token() != smt2_tokenizert::OPEN)
@@ -65,9 +65,8 @@ sygus_parsert::oracle_signature()
   if(smt2_tokenizer.peek() == smt2_tokenizert::CLOSE)
   {
     // no inputs
-    next_token(); // eat the ')'
   }
-
+  
   while(smt2_tokenizer.peek() != smt2_tokenizert::CLOSE)
   {
     if(next_token() != smt2_tokenizert::OPEN)
@@ -78,7 +77,11 @@ sygus_parsert::oracle_signature()
 
     irep_idt id = smt2_tokenizer.get_buffer();
     typet param_sort = sort();
-    inputs.push_back(exprt(add_fresh_id(id, idt::PARAMETER, exprt(ID_nil, param_sort)), param_sort));
+    // TODO: check that the id exists already?
+    if(id_map.find(id)==id_map.end())
+      throw error("input to oracle must be a known id");
+
+    inputs.push_back(symbol_exprt(id, param_sort));
 
     if(next_token() != smt2_tokenizert::CLOSE)
       throw error("expected ')' at end of input parameter");
@@ -105,7 +108,11 @@ sygus_parsert::oracle_signature()
 
     irep_idt id = smt2_tokenizer.get_buffer();
     typet param_sort = sort();
-    outputs.push_back(exprt(add_fresh_id(id, idt::PARAMETER, exprt(ID_nil, param_sort)), param_sort));
+    outputs.push_back(symbol_exprt(id, param_sort));
+
+    // these are allowed to be new ids
+    if(id_map.find(id)==id_map.end())
+      add_unique_id(id, symbol_exprt(id, param_sort));
 
     if(next_token() != smt2_tokenizert::CLOSE)
       throw error("expected ')' at end of input parameter");
