@@ -47,7 +47,7 @@ void oracle_solvert::set_to(const exprt &expr, bool value)
   expr.visit_pre([this](const exprt &src) {
     if(src.id() == ID_function_application)
     {
-      const auto &application_expr = to_function_application_expr(src);
+      auto &application_expr = to_function_application_expr(src);
       if(application_expr.function().id() == ID_symbol)
       {
         // look up whether it is an oracle
@@ -127,54 +127,59 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
   return result;
 }
 
+exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std::vector<std::string> &argv)
+{
+  log.status() << "Running oracle";
+  for (auto &arg : argv)
+    log.status() << ' ' << arg;
+  log.status() << messaget::eom;
+
+  // run the oracle binary
+  std::ostringstream stdout_stream;
+
+  auto run_result = run(
+      binary_name,
+      argv,
+      "",
+      stdout_stream,
+      "");
+
+  if (run_result != 0)
+  {
+    log.status() << "oracle " << binary_name << " has failed" << messaget::eom;
+    assert(0);
+    return nil_exprt();
+  }
+  // we assume that the oracle returns the result in SMT-LIB format
+  std::istringstream oracle_response_istream(stdout_stream.str());
+  return oracle_response_parser(oracle_response_istream);
+}
+
 exprt oracle_solvert::call_oracle(
     const applicationt &application, const std::vector<exprt> &inputs)
 {
-  if (cache && oracle_call_history.find(application.binary_name) == oracle_call_history.end())
+  if(cache && oracle_call_history.find(application.binary_name) == oracle_call_history.end())
   {
     oracle_call_history[application.binary_name] = oracle_historyt();
-  }
-  std::vector<std::string> argv;
-  argv.push_back(application.binary_name);
-
-  for (const auto &input : inputs)
-  {
-    std::ostringstream stream;
-    stream << format(input);
-    argv.push_back(stream.str());
   }
 
   exprt response;
   //bool new_oracle_call = false;
   if (oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
   {
-    // new_oracle_call = true;
-    log.debug() << "Running oracle";
-    for (auto &arg : argv)
-      log.debug() << ' ' << arg;
-    log.debug() << messaget::eom;
+    std::vector<std::string> argv;
+    argv.push_back(application.binary_name);
 
-    // run the oracle binary
-    std::ostringstream stdout_stream;
-
-    auto run_result = run(
-        id2string(application.binary_name),
-        argv,
-        "",
-        stdout_stream,
-        "");
-
-    if (run_result != 0)
+    for (const auto &input : inputs)
     {
-      log.status() << "oracle " << application.binary_name << " has failed" << messaget::eom;
-      assert(0);
-      return nil_exprt();
+      std::ostringstream stream;
+      stream << format(input);
+      argv.push_back(stream.str());
     }
 
-    // we assume that the oracle returns the result in SMT-LIB format
-    std::istringstream oracle_response_istream(stdout_stream.str());
-    response = oracle_response_parser(oracle_response_istream);
-    log.debug() << "oracle response " << expr2sygus(response) << messaget::eom;
+    new_oracle_call = true;
+    response = make_oracle_call(id2string(application.binary_name), argv);
+    log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
     if (cache)
       oracle_call_history[application.binary_name][inputs] = response;
   }
@@ -239,6 +244,8 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   }
   return INCONSISTENT;
 }
+
+
 
 decision_proceduret::resultt oracle_solvert::dec_solve()
 {

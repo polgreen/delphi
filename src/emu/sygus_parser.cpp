@@ -10,6 +10,44 @@
 #include <cassert>
 #include <fstream>
 
+void sygus_parsert::replace_higher_order_logic(exprt &expr)
+{
+  if(expr.id()==ID_function_application)
+  {
+    for(auto &arg: to_function_application_expr(expr).arguments())
+    {
+      if(arg.type().id()==ID_mathematical_function)
+      {
+        std::string new_id = "_synthbool_"+ id2string(to_symbol_expr(arg).get_identifier());
+        arg = symbol_exprt(new_id, bool_typet());
+      }
+    }
+    auto &func = to_symbol_expr(to_function_application_expr(expr).function());
+    for(auto &d: to_mathematical_function_type(func.type()).domain())
+    {
+      if(d.id()==ID_mathematical_function)
+        d = bool_typet();
+    }
+  }
+  for(auto &op: expr.operands())
+    replace_higher_order_logic(op);
+}
+
+void sygus_parsert::replace_higher_order_logic()
+{
+  for(auto &c: constraints)
+    replace_higher_order_logic(c);
+
+  for(auto &a: assumptions)
+    replace_higher_order_logic(a);
+
+  for(auto &gen: oracle_constraint_gens)
+    replace_higher_order_logic(gen.constraint);
+
+  for(auto &gen: oracle_assumption_gens)
+    replace_higher_order_logic(gen.constraint);
+}
+
 oracle_constraint_gent
 sygus_parsert::oracle_signature()
 {

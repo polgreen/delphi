@@ -34,6 +34,12 @@ problemt build_problem(const sygus_parsert &parser)
   problem.synthesis_functions = parser.synth_fun_set;
 
   problem.oracle_symbols = parser.oracle_symbols;
+  for(const auto &symbol: parser.oracle_symbols)
+  {
+    for(const auto &d: symbol.second.type.domain())
+      if(d.id()==ID_mathematical_function)
+        problem.second_order_oracles.insert(symbol.first);
+  }
 
   for (const auto &c : parser.constraints)
     problem.constraints.push_back(c);
@@ -87,6 +93,7 @@ int sygus_frontend(const cmdlinet &cmdline)
   try
   {
     parser.parse();
+    parser.replace_higher_order_logic();
   }
   catch (const sygus_parsert::smt2_errort &e)
   {

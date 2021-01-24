@@ -40,9 +40,8 @@ public:
   using oracle_historyt = std::map<std::vector<exprt>, exprt>;
   std::unordered_map<std::string, oracle_historyt> oracle_call_history;
   exprt get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs);
-
-protected:
-  resultt dec_solve() override;
+  // make call to oracle with single return
+  exprt make_oracle_call(const std::string &binary_name, const std::vector<std::string> &argv);
 
   struct applicationt
   {
@@ -50,6 +49,11 @@ protected:
     std::vector<exprt> argument_handles; // arguments
     exprt handle; // result
   };
+
+  using applicationst = std::unordered_map<function_application_exprt, applicationt, irep_hash>;
+  applicationst applications;
+protected:
+  resultt dec_solve() override;
 
   decision_proceduret &sub_solver;
   messaget log;
@@ -60,8 +64,7 @@ protected:
   check_resultt check_oracles();
   check_resultt check_oracle(const function_application_exprt &, const applicationt &);
   exprt call_oracle(const applicationt &application, const std::vector<exprt> &inputs);
-  using applicationst = std::unordered_map<function_application_exprt, applicationt, irep_hash>;
-  applicationst applications;
+
 };
 
 #endif // CPROVER_FASTSYNTH_ORACLE_SOLVER_H

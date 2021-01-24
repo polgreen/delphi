@@ -30,6 +30,7 @@ public:
   std::set <irep_idt> synthesis_functions;
   // functions with an external oracle implementation
   smt2_parsert::oracle_fun_mapt oracle_symbols;
+  std::set<irep_idt> second_order_oracles;
 };
 
 class solutiont

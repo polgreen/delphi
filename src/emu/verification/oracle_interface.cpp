@@ -45,19 +45,72 @@ std::vector<std::vector<exprt>> find_synth_fun(const exprt &expr, const problemt
   return result;
 }
 
-void oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, oracle_solvert &solver)
+bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, oracle_solvert &solver)
 {
-  for(auto &op: expr.operands())
-    replace_oracles(op, problem, solver);
+  for (auto &op : expr.operands())
+    if (!replace_oracles(op, problem, solver))
+      return false;
 
-  if(expr.id()==ID_function_application)
+  if (expr.id() == ID_function_application)
   {
     auto &func_app = to_function_application_expr(expr);
-    if(problem.oracle_symbols.find(to_symbol_expr(func_app.function()).get_identifier())!=problem.oracle_symbols.end())
+    auto &id = to_symbol_expr(func_app.function()).get_identifier();
+    if (problem.oracle_symbols.find(id) != problem.oracle_symbols.end())
     {
-     exprt result = solver.get_oracle_value(func_app, func_app.arguments());
-     if(result!=nil_exprt())
-      expr = result;
+      if (problem.second_order_oracles.find(id) != problem.second_order_oracles.end())
+        return false;
+      exprt result = solver.get_oracle_value(func_app, func_app.arguments());
+      if (result != nil_exprt())
+        expr = result;
+    }
+  }
+  return true;
+}
+
+void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, const solutiont &solution)
+{
+  // pre-call all oracles that use 
+  for(const auto &app: solver.applications)
+  {
+    for(const auto &arg: app.first.arguments())
+    {
+      if(arg.type().id()==ID_bool && arg.id()==ID_symbol)
+      {
+        std::string prefix = "_synthbool_";
+        std::string arg_name = id2string(to_symbol_expr(arg).get_identifier());
+        std::cout<<"Arg name "<< arg_name<<std::endl;
+        if(arg_name.size()<prefix.size())
+          continue;
+
+        if(std::string(arg_name, 0, prefix.size())==prefix)
+        {
+          std::cout<<"Has prefix "<<std::endl;
+          std::string synth_fun_name(arg_name, prefix.size(), std::string::npos);
+          INVARIANT(app.first.arguments().size()==1, "do not support 2nd order oracles with more than one arg");
+          // call oracle
+          std::vector<std::string> argv;
+          argv.push_back(app.second.binary_name);
+          if(solution.functions.size()==0)
+            argv.push_back("true");
+     
+          for(const auto &func: solution.functions)
+            if(synth_fun_name == id2string(func.first.get_identifier()))
+            {
+              argv.push_back(expr2sygus(func.second));
+              break;
+            }
+
+
+          exprt response = solver.make_oracle_call(id2string(app.second.binary_name),argv);
+          // overwrite history for this oracle
+          solver.oracle_call_history[app.second.binary_name] = oracle_solvert::oracle_historyt();
+          // force response to be correct response regardless of boolean input value
+          std::vector<exprt> all_true_inputs = {true_exprt()};
+          std::vector<exprt> all_false_inputs = {false_exprt()};
+          solver.oracle_call_history[app.second.binary_name][all_true_inputs] = response;
+          solver.oracle_call_history[app.second.binary_name][all_false_inputs] = response;
+        } 
+      }
     }
   }
 }
@@ -92,7 +145,8 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
   {
     exprt synthesis_constraint = p;
     replace_expr(result.assignment, synthesis_constraint);
-    replace_oracles(synthesis_constraint, problem, solver);
+    if(!replace_oracles(synthesis_constraint, problem, solver))
+      continue;
     std::cout<<"Synthesis constraint " << expr2sygus(synthesis_constraint)<<std::endl;
     if(synthesis_constraint.id()==ID_and)
     {
@@ -218,6 +272,7 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
   {
 
     add_problem(problem, solution, solver);
+    call_second_order_oracles(solver, solution);
     decision_proceduret::resultt result = solver();
 
     switch(result)

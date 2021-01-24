@@ -41,6 +41,8 @@ public:
   function_application_exprt apply_function_to_variables(
     invariant_constraint_functiont id,
     invariant_variablet variable_use);
+  
+  void replace_higher_order_logic();
 
 protected:
   // commands
@@ -51,6 +53,8 @@ protected:
   void GTerm_seq();
   void NTDef();
   void GTerm();
+  void replace_higher_order_logic(exprt &expr);
+
 };
 
 #endif /*_EMU_SYGUS_PARSER_H_*/
