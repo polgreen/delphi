@@ -93,8 +93,11 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
   problem.synthesis_constraints.push_back(and_exprt(new_synthesis_constraints));
 }
 
-void oracle_interfacet::call_oracles(problemt &problem, 
-const solutiont &solution, const counterexamplet &counterexample, oracle_solvert &solver)
+void oracle_interfacet::call_oracles(
+  problemt &problem, 
+  const solutiont &solution,
+  const counterexamplet &counterexample,
+  oracle_solvert &solver)
 {
   // call the other oracles here
 
