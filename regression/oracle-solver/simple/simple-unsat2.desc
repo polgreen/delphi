@@ -1,4 +1,4 @@
-KNOWNBUG
+CORE
 simple-unsat.smt2
 --bitblast
 ^EXIT=0$
