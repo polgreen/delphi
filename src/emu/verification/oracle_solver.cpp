@@ -164,7 +164,7 @@ exprt oracle_solvert::call_oracle(
   }
 
   exprt response;
-  //bool new_oracle_call = false;
+
   if (oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
   {
     std::vector<std::string> argv;
@@ -177,7 +177,6 @@ exprt oracle_solvert::call_oracle(
       argv.push_back(stream.str());
     }
 
-    new_oracle_call = true;
     response = make_oracle_call(id2string(application.binary_name), argv);
     log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
     if (cache)
@@ -217,7 +216,6 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
     log.debug() << "Response matches " << expr2sygus(get(application.handle))<<messaget::eom;
     return CONSISTENT; // done, SAT
   }
-  // if(new_oracle_call)
   {
 
     function_application_exprt func_app(application_expr.function(), inputs);
