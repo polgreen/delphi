@@ -14,7 +14,7 @@ class oracle_interfacet : public verifyt
   oracle_interfacet(namespacet &_namespace, 
                 message_handlert &_ms) :
                 ns(_namespace),
-                message_handler(_ms){};
+                log(_ms){};
 
   resultt operator()( problemt &problem,
     const solutiont &solution) override;
@@ -32,7 +32,7 @@ class oracle_interfacet : public verifyt
   protected:
 
   namespacet ns;
-  message_handlert &message_handler;
+  messaget log;
   /// Encoding for the verification decision procedure call.
   verify_encodingt verify_encoding;
 
