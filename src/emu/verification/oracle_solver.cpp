@@ -148,7 +148,7 @@ exprt oracle_solvert::call_oracle(
   //bool new_oracle_call = false;
   if (oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
   {
-    new_oracle_call = true;
+    // new_oracle_call = true;
     log.debug() << "Running oracle";
     for (auto &arg : argv)
       log.debug() << ' ' << arg;
