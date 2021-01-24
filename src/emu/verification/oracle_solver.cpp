@@ -145,7 +145,7 @@ exprt oracle_solvert::call_oracle(
   }
 
   exprt response;
-  bool new_oracle_call = false;
+  //bool new_oracle_call = false;
   if (oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
   {
     new_oracle_call = true;
