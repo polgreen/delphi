@@ -36,7 +36,7 @@ int main(int argc, const char *argv[])
 	if(!(ssY >> y))
 		std::cerr<<"Unable to parse y "<<std::endl;
 
-	std::cout<< max(x,y)<< "\n"; 
+	std::cout<<"(_ bv"<< max(x,y)<< " 32)\n"; 
 
 	return 0;
 

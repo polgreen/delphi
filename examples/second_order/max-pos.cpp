@@ -34,9 +34,9 @@ int main(int argc, const char *argv[])
 	int y = rand();
 
 
-	std::cout<< x << " "
-	<< y << " "<<
-	max(x,y)<< "\n"; 
+	std::cout<< "(_ bv" << x << " 32) (_ bv"
+	<< y << " 32)  (_ bv"<<
+	max(x,y)<< " 32)\n"; 
 
 	return 0;
 

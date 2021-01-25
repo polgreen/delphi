@@ -1,31 +1,15 @@
-(set-logic LIA)
+(set-logic BV)
 
-(synth-fun max ((x Int) (y Int)) Int
-    ((Start Int (x
-                 y
-                 0
-                 1
-                 (+ Start Start)
-                 (- Start Start)
-                 (ite StartBool Start Start)))
-     (StartBool Bool ((and StartBool StartBool)
-                      (or  StartBool StartBool)
-                      (not StartBool)
-                      (<=  Start Start)
-                      (=   Start Start)
-                      (>=  Start Start)))))
+(synth-fun max ((x (_ BitVec 32)) (y (_ BitVec 32))) (_ BitVec 32))
 
-(declare-var x Int)
-(declare-var y Int)
-(declare-oracle-fun myoracle max-corr ((-> Int Int Int)) Bool)
+(declare-var x (_ BitVec 32))
+(declare-var y (_ BitVec 32))
+(declare-oracle-fun myoracle max-corr ((-> (_ BitVec 32) (_ BitVec 32) (_ BitVec 32))) Bool)
 
-(constraint (>= (max x y) x))
-(constraint (>= (max x y) y))
+(constraint (bvuge (max x y) x))
+(constraint (bvuge (max x y) y))
 (constraint (myoracle max))
 
-(oracle-constraint max-neg () ((x Int)(y Int)(z Int))
+(oracle-constraint max-neg () ((x (_ BitVec 32))(y (_ BitVec 32))(z (_ BitVec 32)))
 (not (= (max x y) z))
 )
-
-
-(check-synth)
