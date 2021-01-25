@@ -3,10 +3,16 @@
 #include <iostream>
 #include <sstream>
 #include <random>
-#include <time.h>
+#include <chrono>
+
+uint64_t timeSinceEpochMillisec() {
+  using namespace std::chrono;
+  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
 
 
-int max(int x, int y)
+
+int maxrand(int x, int y)
 {
 	if(x>y)
 		return y;
@@ -23,6 +29,14 @@ int max(int x, int y)
 		return x;
 }
 
+int max(int x, int y)
+{
+	if(x>y)
+		return y;
+	else 
+		return x;
+}
+
 int main(int argc, const char *argv[])
 {
 	if(argc!=1)
@@ -35,15 +49,14 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
-	srand (time(NULL));
+	srand (timeSinceEpochMillisec());
 	int x = rand();
 	int y = rand();
 
 
-	std::cout<<"(model \n" 
-	<< "(define-fun x () Int "<< x << ")\n"
-	<< "(define-fun y () Int "<< y << ")\n"
-	<< "(define-fun z () Int "<< max(x,y)<< "))\n"; 
+	std::cout<< x << " "
+	<< y << " "<<
+	max(x,y)<< "\n"; 
 
 	return 0;
 
