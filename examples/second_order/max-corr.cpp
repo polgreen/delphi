@@ -36,7 +36,6 @@ void outputSMTFile(std::ostream &out, std::string candidate)
 	out << "(not (>= (max x y) y))\n"; 
 	out << "(not(or (= x (max x y)) (= y (max x y))))))\n";
 	out << "(check-sat)\n";
-	out << "(get-model)\n";
 
 }
 
@@ -46,8 +45,9 @@ int parse_result(std::string &input)
 	std::size_t fail = input.find("sat");
 	if(success!=std::string::npos)
 	{
+		std::cerr<<"Result is definitely unsat"<<std::endl;
 		std::cout<<"true \n";
-		return 10;
+		return 0;
 	}
 	else if(fail!=std::string::npos)
 	{
@@ -77,6 +77,7 @@ int main(int argc, const char *argv[])
 	}
 
 	std::string candidate = std::string(argv[1]);
+	std::cerr<<"Got argument "<< candidate<<std::endl;
 
 	std::ofstream smtfile ("corr-file.smt2");
 	if(!smtfile) {throw std::exception();}
@@ -84,5 +85,6 @@ int main(int argc, const char *argv[])
 	smtfile.close();
 	std::string command ("z3 corr-file.smt2");
 	std::string result = ssystem(command.c_str());
+	std::cerr<<"Got result "<< result<<std::endl;
 	return parse_result(result);
 }
