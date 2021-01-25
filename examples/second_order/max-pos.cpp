@@ -28,10 +28,9 @@ int main(int argc, const char *argv[])
 	int y = rand();
 
 
-	std::cout<<"(model \n" 
-	<< "(define-fun x () Int "<< x << ")\n"
-	<< "(define-fun y () Int "<< y << ")\n"
-	<< "(define-fun z () Int "<< max(x,y)<< "))\n"; 
+	std::cout<< x << " "
+	<< y << " "<<
+	max(x,y)<< "\n"; 
 
 	return 0;
 

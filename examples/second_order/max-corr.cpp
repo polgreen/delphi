@@ -51,7 +51,7 @@ int parse_result(std::string &input)
 	}
 	else if(fail!=std::string::npos)
 	{
-		input.erase(0, input.find("(model"));
+	//	input.erase(0, input.find("(model"));
 		std::cout<<"false \n";//<<input;
 		return 0;
 	}
