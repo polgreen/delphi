@@ -96,7 +96,7 @@ void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, const 
           for(const auto &func: solution.functions)
             if(synth_fun_name == id2string(func.first.get_identifier()))
             {
-              argv.push_back(expr2sygus(func.second));
+              argv.push_back(std::string("\"" + expr2sygus_fun_def(func.first, func.second) + "\""));
               break;
             }
 

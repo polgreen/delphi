@@ -82,6 +82,20 @@ void clean_symbols(exprt &expr)
   }
 }
 
+std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body)
+{
+  INVARIANT(function.type().id()==ID_mathematical_function, "unsupported function definition type");
+  std::string result = "(define-fun " + clean_id(function.get_identifier()) + " (";
+  const auto &func_type = to_mathematical_function_type(function.type());
+
+  for(std::size_t i=0; i<func_type.domain().size(); i++)
+  {
+    result+="( parameter"+ integer2string(i, 10u) +" "+type2sygus(func_type.domain()[i]) + ")"; 
+  }
+  result +=") " + type2sygus(func_type.codomain()) + " " + expr2sygus(body) + ")";
+  return result;
+}
+
 std::string expr2sygus(const exprt &expr)
 {
   return expr2sygus(expr, true);
