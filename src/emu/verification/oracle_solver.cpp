@@ -129,7 +129,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 
 exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std::vector<std::string> &argv)
 {
-  log.status() << "Running oracle";
+  log.status() << "Running oracle, binary name "<< binary_name;
   for (auto &arg : argv)
     log.status() << ' ' << arg;
   log.status() << messaget::eom;
@@ -178,7 +178,7 @@ exprt oracle_solvert::call_oracle(
       argv.push_back(stream.str());
     }
 
-    response = make_oracle_call(id2string(application.binary_name), argv);
+    response = make_oracle_call(application.binary_name, argv);
     log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
     if (cache)
       oracle_call_history[application.binary_name][inputs] = response;
