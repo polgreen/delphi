@@ -3,6 +3,12 @@
 #include <iostream>
 #include <sstream>
 #include <random>
+#include <chrono>
+
+uint64_t timeSinceEpochMillisec() {
+  using namespace std::chrono;
+  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
 
 int max(int x, int y)
 {
@@ -23,7 +29,7 @@ int main(int argc, const char *argv[])
 		<< "as an SMTlib model.\n";
 		return 1;
 	}
-	srand (time(NULL));
+	srand (timeSinceEpochMillisec());
 	int x = rand();
 	int y = rand();
 
