@@ -102,6 +102,7 @@ void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, const 
 
 
           exprt response = solver.make_oracle_call(id2string(app.second.binary_name),argv);
+          std::cout<<"Oracle response "<<expr2sygus(response)<<std::endl;
           // overwrite history for this oracle
           solver.oracle_call_history[app.second.binary_name] = oracle_solvert::oracle_historyt();
           // force response to be correct response regardless of boolean input value
