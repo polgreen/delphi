@@ -12,6 +12,13 @@ public:
 
   define_fun_resultt define_fun()
   {
+    if(next_token() != smt2_tokenizert::OPEN)
+      throw error("expected (define-fun");
+
+    if(next_token() != smt2_tokenizert::SYMBOL ||
+       smt2_tokenizer.get_buffer() != "define-fun")
+      throw error("expected (define-fun");
+
     if(next_token() != smt2_tokenizert::SYMBOL)
       throw error("expected a symbol after define-fun");
 
