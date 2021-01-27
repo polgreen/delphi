@@ -144,7 +144,7 @@ exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std
       stdout_stream,
       "");
 
-  if (run_result != 0)
+  if (run_result != 0 && run_result !=10)
   {
     log.status() << "oracle " << binary_name << " has failed" << messaget::eom;
     assert(0);
