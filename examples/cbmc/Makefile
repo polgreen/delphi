@@ -1,4 +1,4 @@
-SRC = smt2c.cpp
+SRC = smt2c.cpp define_fun_parser.cpp
 
 OBJ+= ../../$(CPROVER_DIR)/src/ansi-c/ansi-c$(LIBEXT) \
       ../../$(CPROVER_DIR)/src/assembler/assembler$(LIBEXT) \
@@ -11,8 +11,7 @@ OBJ+= ../../$(CPROVER_DIR)/src/ansi-c/ansi-c$(LIBEXT) \
       ../../$(CPROVER_DIR)/src/langapi/langapi$(LIBEXT) \
       ../../$(CPROVER_DIR)/src/solvers/solvers$(LIBEXT) \
       ../../$(CPROVER_DIR)/src/analyses/dirty$(OBJEXT) \
-      ../../$(CPROVER_DIR)/src/util/util$(LIBEXT) \
-      ../../src/emu/verification/oracle_response_parser$(OBJEXT)
+      ../../$(CPROVER_DIR)/src/util/util$(LIBEXT)
 
 INCLUDES= -I ../../$(CPROVER_DIR)/src -I ..
 
