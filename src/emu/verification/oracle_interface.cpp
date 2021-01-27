@@ -7,6 +7,9 @@
 
 #include <langapi/language_util.h>
 
+#include <solvers/sat/satcheck.h>
+#include <solvers/flattening/boolbv.h>
+
 #include <util/format_expr.h>
 #include <util/replace_expr.h>
 #include <util/replace_symbol.h>
@@ -91,7 +94,10 @@ void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, const 
           std::vector<std::string> argv;
           argv.push_back(app.second.binary_name);
           if(solution.functions.size()==0)
-            argv.push_back("true");
+          {
+            // argv.push_back(std::string(expr2sygus_fun_def(argv.push_back("true");  
+          }
+            
      
           for(const auto &func: solution.functions)
             if(synth_fun_name == id2string(func.first.get_identifier()))
@@ -99,7 +105,6 @@ void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, const 
               argv.push_back(std::string(expr2sygus_fun_def(func.first, func.second)));
               break;
             }
-
 
           exprt response = solver.make_oracle_call(app.second.binary_name,argv);
           std::cout<<"Oracle response "<<expr2sygus(response)<<std::endl;
@@ -152,10 +157,10 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
     if(synthesis_constraint.id()==ID_and)
     {
       for(const auto &op: synthesis_constraint.operands())
-        problem.synthesis_constraints.push_back(op);
+        problem.synthesis_constraints.insert(std::move(op));
     }
     else
-      problem.synthesis_constraints.push_back(synthesis_constraint);
+      problem.synthesis_constraints.insert(std::move(synthesis_constraint));
   }   
 }
 
@@ -200,7 +205,7 @@ exprt oracle_interfacet::get_oracle_constraints(
       stdout_stream,
       "");
 
-  if (run_result != 0)
+  if (run_result != 0 && run_result != 10)
   {
     log.status() << "oracle " << oracle.binary_name << " has failed" << messaget::eom;
     assert(0);
@@ -210,6 +215,7 @@ exprt oracle_interfacet::get_oracle_constraints(
   // we assume that the oracle returns the result in SMT-LIB format,
   // separated by spaces
   std::istringstream oracle_response_istream(stdout_stream.str());
+  std::cout<<"Response is "<<stdout_stream.str()<<std::endl;
 
   for(auto &return_parameter : oracle.return_parameters)
   {
@@ -242,7 +248,7 @@ void oracle_interfacet::call_oracles(
   for(const auto &oracle : problem.oracle_constraint_gens)
   {
     auto constraints = get_oracle_constraints(counterexample, oracle);
-    problem.synthesis_constraints.push_back(std::move(constraints));
+    problem.synthesis_constraints.insert(std::move(constraints));
   }
 
   // for all problem.oracle_assumption_gen

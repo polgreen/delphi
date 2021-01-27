@@ -79,11 +79,13 @@ void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &
   std::cout << "Using  " << std::min(number_synth_constraints, problem.synthesis_constraints.size()) 
             << " synthesis constraints"<<std::endl;
   // TODO: use assumptions here as well?
-  for(std::size_t i=0; i<number_synth_constraints; i++)
+  std::size_t count = 0;
+  for(const auto &c: problem.synthesis_constraints)
   {
-    if(i>= problem.synthesis_constraints.size())
+    count++;
+    if(count>number_synth_constraints)
       break;
-    const exprt encoded =encoding(problem.synthesis_constraints[i]);
+    const exprt encoded =encoding(c);
     solver.set_to_true(encoded);
   }
 

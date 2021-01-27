@@ -22,7 +22,7 @@ public:
   // these are used for verification
   std::vector<exprt> constraints, assumptions;
   // these are used for synthesis
-  std::vector<exprt> synthesis_constraints;
+  std::set<exprt> synthesis_constraints;
   // these are the oracles that can generate assumptions and constraints
   std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens;
   // universally quantified variables
