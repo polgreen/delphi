@@ -12,7 +12,8 @@ class oracle_interfacet : public verifyt
 {
  public:
   oracle_interfacet(namespacet &_namespace, 
-                message_handlert &_ms) :
+                message_handlert &_ms, bool _bitblast) :
+                bitblast(_bitblast),
                 ns(_namespace),
                 log(_ms){};
 
@@ -30,6 +31,7 @@ class oracle_interfacet : public verifyt
 
 
   protected:
+  bool bitblast;
 
   namespacet ns;
   messaget log;

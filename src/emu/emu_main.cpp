@@ -54,8 +54,8 @@ void help(std::ostream &out)
      "\n"
      "\n"
      "Command line options\n"
-     " smt                          use Z3 solver as oracle solver subsolver (default) \n"
-     " bitblast                     use bitblasting solver as oracle solver subsolver\n"
+     " --smt                          use Z3 solver as oracle solver subsolver (default) \n"
+     " --bitblast                     use bitblasting solver as oracle solver subsolver\n"
      "\n"
      "\n";
     // clang-format on

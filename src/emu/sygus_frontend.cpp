@@ -111,7 +111,7 @@ int sygus_frontend(const cmdlinet &cmdline)
   namespacet ns(symbol_table);
 
   simple_syntht synthesizer(ns, message_handler);
-  oracle_interfacet verifier(ns, message_handler);
+  oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
 
   ogist ogis(synthesizer, verifier, problem, ns);
   ogis.doit();
