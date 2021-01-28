@@ -7,7 +7,9 @@
 
 #include <ansi-c/expr2c.h>
 
+#include <util/config.h>
 #include <util/exception_utils.h>
+#include <util/std_expr.h>
 #include <util/symbol_table.h>
 #include <util/namespace.h>
 
@@ -16,6 +18,32 @@
 void help(std::ostream &out)
 {
   out << "no help yet\n";
+}
+
+irep_idt tweak_identifier(irep_idt src)
+{
+  std::string new_identifier = id2string(src);
+
+  for(auto &ch : new_identifier)
+    if(ch == '#')
+      ch = '$';
+
+  return new_identifier;
+}
+
+exprt tweak_symbols(exprt src)
+{
+  exprt dest = src;
+
+  dest.visit_pre([](exprt &node) {
+    if(node.id() == ID_symbol)
+    {
+      auto &symbol = to_symbol_expr(node);
+      symbol.set_identifier(tweak_identifier(symbol.get_identifier()));
+    }
+  });
+
+  return dest;
 }
 
 void output_function(const define_fun_resultt &define_fun, std::ostream &out)
@@ -48,7 +76,8 @@ void output_function(const define_fun_resultt &define_fun, std::ostream &out)
         out << ", ";
       out << type2c(function_type.domain()[index], ns, configuration);
       out << ' ';
-      out << define_fun.parameters[index];
+      auto parameter_name = tweak_identifier(define_fun.parameters[index]);
+      out << parameter_name;
     }
   }
   else
@@ -57,8 +86,10 @@ void output_function(const define_fun_resultt &define_fun, std::ostream &out)
   out << ')';
 
   // body
+  exprt body_tweaked = tweak_symbols(define_fun.body);
+
   out << " {\n";
-  out << "  return " << expr2c(define_fun.body, ns, configuration) << ";\n";
+  out << "  return " << expr2c(body_tweaked, ns, configuration) << ";\n";
   out << "}\n\n";
 }
 
@@ -80,6 +111,9 @@ int main(int argc, const char *argv[])
 
   try
   {
+    // configure, to get the architecture-specifics of the standard C types
+    config.set(cmdline);
+
     // parse the arguments and output as #define
     for(const auto &arg : cmdline.args)
     {
