@@ -62,6 +62,13 @@ bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, or
     {
       if (problem.second_order_oracles.find(id) != problem.second_order_oracles.end())
         return false;
+
+      for(const auto &arg: func_app.arguments())
+      {
+        if(arg.id()==ID_function_application)
+          return false;
+      }  
+      
       exprt result = solver.get_oracle_value(func_app, func_app.arguments());
       if (result != nil_exprt())
         expr = result;
