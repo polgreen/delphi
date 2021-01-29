@@ -89,13 +89,24 @@ exprt verify_encodingt::operator()(const exprt &expr) const
 
     auto f_it=f_map.find(e_identifier);
 
-    exprt result=f_it==f_map.end()?
-      expr:f_it->second;
+    if(f_it==f_map.end())
+    {
+      exprt tmp=expr;
 
-    // need to instantiate parameters with arguments
-    exprt instance=instantiate(result, e);
+      for(auto &op : tmp.operands())
+        op=(*this)(op);
 
-    return instance;
+      exprt instance=instantiate(tmp, e);  
+      return tmp;
+    }
+    else
+    {
+      exprt result = f_it->second;
+      // need to instantiate parameters with arguments
+      exprt instance=instantiate(result, e);
+
+      return instance;
+    }
   }
   else
   {
