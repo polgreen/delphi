@@ -129,7 +129,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 
 exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std::vector<std::string> &argv)
 {
-  log.status() << "Running oracle, binary name "<< binary_name;
+  log.status() << "Running oracle (verification), binary name "<< binary_name;
   for (auto &arg : argv)
     log.status() << ' ' << arg;
   log.status() << messaget::eom;

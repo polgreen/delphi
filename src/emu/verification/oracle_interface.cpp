@@ -185,7 +185,7 @@ exprt oracle_interfacet::get_oracle_constraints(
     argv.push_back(stream.str());
   }
 
-  log.debug() << "Running oracle";
+  log.debug() << "Running oracle (synthesis)";
   for (auto &arg : argv)
     log.debug() << ' ' << arg;
   log.debug() << messaget::eom;
