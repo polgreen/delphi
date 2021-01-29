@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$1" = "5" ] ; then
+  echo "true"
+else
+  echo "false"
+fi
+
+
