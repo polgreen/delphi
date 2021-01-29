@@ -37,6 +37,7 @@ class oracle_interfacet : public verifyt
   messaget log;
   /// Encoding for the verification decision procedure call.
   verify_encodingt verify_encoding;
+  std::unordered_map<std::string, oracle_solvert::oracle_historyt> copy_of_solver_history;
 
   std::map<irep_idt, std::size_t> synthfun_to_constraint_map;
   std::map<irep_idt, std::size_t> synthfun_to_assume_map;

@@ -303,7 +303,7 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
       "LIA", smt2_dect::solvert::Z3, log.get_message_handler());
    oracle_solvert oracle_solver(subsolver, log.get_message_handler());
    oracle_solver.oracle_fun_map=&problem.oracle_symbols; 
-
+  oracle_solver.oracle_call_history = copy_of_solver_history;
   return this->operator()(problem, solution, oracle_solver);
 }
 
@@ -324,6 +324,7 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
         build_counterexample_constraint(solver, counterexample, problem);
         add_assumptions_from_solver(solver, problem);
         call_oracles(problem, solution, counterexample, solver);
+        copy_of_solver_history = solver.oracle_call_history;
         return oracle_interfacet::resultt::FAIL; 
       }
       case decision_proceduret::resultt::D_UNSATISFIABLE:
