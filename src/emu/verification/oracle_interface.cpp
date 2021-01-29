@@ -66,7 +66,7 @@ bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, or
       for(const auto &arg: func_app.arguments())
       {
         if(arg.id()==ID_function_application)
-          return false;
+          return true;
       }  
       
       exprt result = solver.get_oracle_value(func_app, func_app.arguments());
@@ -267,6 +267,25 @@ void oracle_interfacet::call_oracles(
   }
 }
 
+void oracle_interfacet::add_assumptions_from_solver(const oracle_solvert &solver, problemt &problem)
+{
+  std::cout<<"getting assumptions "<<std::endl;
+  for(const auto &oracle: problem.oracle_symbols)
+  {
+    if(solver.oracle_call_history.find(oracle.second.binary_name)==solver.oracle_call_history.end())
+      continue;
+
+    symbol_exprt func_symbol = symbol_exprt(oracle.first, oracle.second.type);
+    for(const auto &call: solver.oracle_call_history.at(oracle.second.binary_name))
+    {
+      exprt assumption = equal_exprt(function_application_exprt(func_symbol, call.first),
+      call.second);
+      std::cout<<"assumption: "<<expr2sygus(assumption)<<std::endl;
+      problem.assumptions.push_back(assumption);
+    }
+  }
+}
+
 oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
                                                          const solutiont &solution)
 {
@@ -303,6 +322,7 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
       {
         counterexample = verify_encoding.get_counterexample(solver);
         build_counterexample_constraint(solver, counterexample, problem);
+        add_assumptions_from_solver(solver, problem);
         call_oracles(problem, solution, counterexample, solver);
         return oracle_interfacet::resultt::FAIL; 
       }

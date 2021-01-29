@@ -53,6 +53,7 @@ class oracle_interfacet : public verifyt
   void call_oracles(problemt &problem, 
   const solutiont &solution, const counterexamplet &counterexample, oracle_solvert &solver);
   std::set<irep_idt> find_synth_funs (const exprt &expr, const problemt &problem);
+  void add_assumptions_from_solver(const oracle_solvert &solver, problemt &problem);
 
   void add_problem(const problemt &problem, const solutiont &solution, oracle_solvert &solver );
 

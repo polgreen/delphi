@@ -537,6 +537,14 @@ exprt synth_encodingt::operator()(const exprt &expr)
   {
     auto tmp=to_function_application_expr(expr);
 
+    auto &func_id = to_symbol_expr(tmp.function()).get_identifier();
+    if(synth_funs.find(func_id) == synth_funs.end())
+    {
+      exprt tmp = expr;
+      for(auto &op : tmp.operands())
+        op =(*this)(op); // recursive call
+      return tmp;
+    }
     // apply recursively to arguments
     for(auto &op : tmp.arguments())
       op=(*this)(op);
