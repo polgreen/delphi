@@ -10,6 +10,35 @@ public:
   {
   }
 
+  void replace_local_var(exprt &expr, const irep_idt &target, exprt &replacement)
+  {
+    if (expr.id() == ID_symbol)
+    {
+      if (to_symbol_expr(expr).get_identifier() == target)
+        expr = replacement;
+    }
+    for (auto &op : expr.operands())
+      replace_local_var(op, target, replacement);
+  }
+
+  void expand_let_expressions(exprt &expr)
+  {
+    if (expr.id() == ID_let)
+    {
+      auto &let_expr = to_let_expr(expr);
+      for (unsigned int i = 0; i < let_expr.variables().size(); i++)
+      {
+        INVARIANT(let_expr.variables()[i].id() == ID_symbol,
+                  "Let expression should have list of symbols, not " + let_expr.variables()[i].pretty());
+        replace_local_var(let_expr.where(), to_symbol_expr(let_expr.variables()[i]).get_identifier(), let_expr.values()[i]);
+      }
+      expr = let_expr.where();
+      expand_let_expressions(expr);
+    }
+    for (auto &op : expr.operands())
+      expand_let_expressions(op);
+  }
+
   define_fun_resultt define_fun()
   {
     if(next_token() != smt2_tokenizert::OPEN)
@@ -33,6 +62,7 @@ public:
     result.type = signature.type;
     result.parameters = signature.parameters;
     result.body = expression();
+    expand_let_expressions(result.body);
 
     // restore renamings
     std::swap(renaming_map, old_renaming_map);
