@@ -208,20 +208,28 @@ int main(int argc, const char *argv[])
       expr2sygus_fun_def(symbol_exprt(input_fun.id, input_fun.type),input_fun.body),
       pref_string, postf_string, transf_string,
       parser.variable_set);
+      std::cout<<"Result: "<< result.second<<std::endl;
     std::istringstream stream(remove_unsat_prefix(result.second));
     std::map<irep_idt, exprt> arg_parsed = model_parser(stream);
 
-    std::cout<<result.first<<std::endl;
+    if(result.first==true)
+     std::cout<<"true ";
+    else
+    {
+      std::cout<<"false ";
+    }
 
     for(const auto &input: input_fun.parameters)
     {
-      if(arg_parsed.find(input)==arg_parsed.end())
-        std::cerr << "Error unable to find " << id2string(input) << std::endl;
+      std::string id=clean_id(input);
+      if(arg_parsed.find(id)==arg_parsed.end())
+        std::cerr << "Error unable to find " << id2string(id) << std::endl;
       else
       {
-        std::cout << expr2sygus(arg_parsed[input]) << std::endl;
+        std::cout << expr2sygus(arg_parsed[id]) << " ";
       }
     }
+    std::cout<<std::endl;
   }
   catch(const cprover_exception_baset &error)
   {
