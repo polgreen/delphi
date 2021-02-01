@@ -5,6 +5,7 @@
 #include <util/std_expr.h>
 #include <iostream>
 
+std::string clean_id(const irep_idt &id);
 std::string expr2sygus(const exprt &expr);
 std::string expr2sygus(const exprt &expr, bool use_integers);
 std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body);
