@@ -82,6 +82,13 @@ void clean_symbols(exprt &expr)
   }
 }
 
+std::string expr2sygus_var_dec(const symbol_exprt &symbol)
+{
+  std::string result ="(declare-fun ";
+  result += id2string(symbol.get_identifier()) + " () " + type2sygus(symbol.type()) + ")\n";
+  return result;
+}
+
 std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body)
 {
   INVARIANT(function.type().id()==ID_mathematical_function, "unsupported function definition type");
@@ -92,7 +99,7 @@ std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body)
   {
     result+="( parameter"+ integer2string(i, 10u) +" "+type2sygus(func_type.domain()[i]) + ")"; 
   }
-  result +=") " + type2sygus(func_type.codomain()) + " " + expr2sygus(body) + ")";
+  result +=")\n " + type2sygus(func_type.codomain()) + " " + expr2sygus(body) + ")\n";
   return result;
 }
 
@@ -108,6 +115,12 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
   if (expr.id() == ID_equal)
     result += "= " + expr2sygus(expr.operands()[0], use_integers) + " " +
               expr2sygus(expr.operands()[1], use_integers);
+  else if(expr.id()==ID_notequal)
+  {
+    result += "not (= " + expr2sygus(expr.operands()[0], use_integers) + " " +
+              expr2sygus(expr.operands()[1], use_integers)+")";
+
+  }            
   else if (expr.id() == ID_le)
   {
     if (to_binary_relation_expr(expr).operands()[0].id() == ID_typecast)
