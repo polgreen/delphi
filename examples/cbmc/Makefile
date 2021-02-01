@@ -23,10 +23,13 @@ include ../../$(CPROVER_DIR)/src/common
 
 CLEANFILES = fastsynth$(EXEEXT)
 
-all: smt2c$(EXEEXT) sin_oracle$(EXEEXT)
+all: smt2c$(EXEEXT) sin_oracle$(EXEEXT) array_oracle$(EXEEXT)
 
 sin_oracle$(EXEEXT): sin_oracle.c
-	$(CC) sin_oracle.c -o $@
+	$(CC) $< -o $@
+
+array_oracle$(EXEEXT): array_oracle.c
+	$(CC) $< -o $@
 
 ###############################################################################
 
