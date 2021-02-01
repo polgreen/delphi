@@ -7,11 +7,12 @@
 (declare-var index1 (_ BitVec 32))
 (declare-var index2 (_ BitVec 32))
 
-; enforce bounds
-(constraint (bvult index1 (_ bv100 32)))
-(constraint (bvult index2 (_ bv100 32)))
-
 ; invariant must be true for all index1/index2 (within bounds)
-(constraint (invar index1 (array_oracle index1) index2 (array_oracle index2)))
+(constraint 
+  (=>
+    (and
+      (bvult index1 (_ bv100 32))
+      (bvult index2 (_ bv100 32)))
+    (invar index1 (array_oracle index1) index2 (array_oracle index2))))
 
 (check-synth)
