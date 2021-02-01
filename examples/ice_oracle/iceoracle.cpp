@@ -25,6 +25,9 @@
 
 #define CBMC_ORACLE_OPTIONS                                               \
   "(oracle) "                                                             \
+  "(pos)"                                                                 \
+  "(neg)"                                                                 \
+  "(impl)"                                                                \
 
 std::string ssystem (const char *command) 
 {
@@ -114,46 +117,60 @@ std::string remove_unsat_prefix(std::string input)
 
 std::pair<bool,std::string> call_smt_solver(std::string candidate, 
   std::string pref, std::string postf, std::string transf, 
-  std::set<symbol_exprt> variable_set)
+  std::set<symbol_exprt> variable_set, cmdlinet cmdline)
 {
   std::string variable_declarations;
-  for(const auto &v: variable_set)
-    variable_declarations+=expr2sygus_var_dec(v);
-  
-  std::cout<<"positive query"<<std::endl;
-  std::ofstream posfile("pos-file.smt2");
   std::pair<bool, std::string> result;
-  if(!posfile) {throw std::exception();}
-	positive(posfile, candidate, pref, variable_declarations);
-	posfile.close();
-	std::string command ("z3 pos-file.smt2");
-	result.second = ssystem(command.c_str());
-  result.first=model_exists(result.second);
-  if(!result.first)
-    return result;
+  for (const auto &v : variable_set)
+    variable_declarations += expr2sygus_var_dec(v);
+  if (cmdline.isset("pos"))
+  {
+    std::cout << "positive query" << std::endl;
+    std::ofstream posfile("pos-file.smt2");
 
-  std::cout<<"negative query"<<std::endl;
-  std::ofstream negfile("neg-file.smt2");
-  if(!negfile) {throw std::exception();}
-	negative(negfile, candidate, postf, variable_declarations);
-	negfile.close();
-	command = "z3 neg-file.smt2";
-	result.second = ssystem(command.c_str());
-  result.first=model_exists(result.second);
-  if(!result.first)
-    return result;
+    if (!posfile)
+    {
+      throw std::exception();
+    }
+    positive(posfile, candidate, pref, variable_declarations);
+    posfile.close();
+    std::string command("z3 pos-file.smt2");
+    result.second = ssystem(command.c_str());
+    result.first = model_exists(result.second);
 
-  std::cout<<"implication query"<<std::endl;
-  std::ofstream implicationfile("imp-file.smt2");
-  if(!implicationfile) {throw std::exception();}
-	negative(implicationfile, candidate, postf, variable_declarations);
-	implicationfile.close();
-	command = "z3 imp-file.smt2";
-	result.second = ssystem(command.c_str());
-  result.first=model_exists(result.second);
-  return result;
+    return result;
+  }
+  else if (cmdline.isset("neg"))
+  {
+    std::cout << "negative query" << std::endl;
+    std::ofstream negfile("neg-file.smt2");
+    if (!negfile)
+    {
+      throw std::exception();
+    }
+    negative(negfile, candidate, postf, variable_declarations);
+    negfile.close();
+    std::string command = "z3 neg-file.smt2";
+    result.second = ssystem(command.c_str());
+    result.first = model_exists(result.second);
+    return result;
+  }
+  else
+  {
+    std::cout << "implication query" << std::endl;
+    std::ofstream implicationfile("imp-file.smt2");
+    if (!implicationfile)
+    {
+      throw std::exception();
+    }
+    negative(implicationfile, candidate, postf, variable_declarations);
+    implicationfile.close();
+    std::string command = "z3 imp-file.smt2";
+    result.second = ssystem(command.c_str());
+    result.first = model_exists(result.second);
+    return result;
+  }
 }
-
 
 int main(int argc, const char *argv[])
 {
@@ -167,9 +184,9 @@ int main(int argc, const char *argv[])
   try
   {
     define_fun_resultt input_fun;
-    assert(cmdline.args.size()==2);
+    std::size_t arg_size = cmdline.args.size();
     // parse old spec
-    std::ifstream in(cmdline.args[0]);
+    std::ifstream in(cmdline.args[arg_size-2]);
     sygus_parsert parser(in);
     parser.parse();
 
@@ -200,30 +217,34 @@ int main(int argc, const char *argv[])
     pref_string = expr2sygus_fun_def(symbol_exprt(pref->first, pref->second.type),pref->second.definition);
     postf_string = expr2sygus_fun_def(symbol_exprt(postf->first, postf->second.type),postf->second.definition);  
 
-    std::istringstream arg_stream(cmdline.args[1]);
+    std::istringstream arg_stream(cmdline.args[arg_size-1]);
     input_fun = define_fun_parser(arg_stream);
 
     // call smt solver
     std::pair<bool, std::string> result = call_smt_solver(
       expr2sygus_fun_def(symbol_exprt(input_fun.id, input_fun.type),input_fun.body),
       pref_string, postf_string, transf_string,
-      parser.variable_set);
+      parser.variable_set, cmdline);
       std::cout<<"Result: "<< result.second<<std::endl;
     std::istringstream stream(remove_unsat_prefix(result.second));
-    std::map<irep_idt, exprt> arg_parsed = model_parser(stream);
+
+    std::map<irep_idt, exprt> arg_parsed; 
 
     if(result.first==true)
+    {
      std::cout<<"true ";
+    }
     else
     {
       std::cout<<"false ";
+      arg_parsed = model_parser(stream);
     }
 
     for(const auto &input: input_fun.parameters)
     {
       std::string id=clean_id(input);
       if(arg_parsed.find(id)==arg_parsed.end())
-        std::cerr << "Error unable to find " << id2string(id) << std::endl;
+        std::cout <<" 1 ";
       else
       {
         std::cout << expr2sygus(arg_parsed[id]) << " ";
