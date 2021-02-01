@@ -5,7 +5,10 @@
 
 (declare-oracle-fun myoracle ./constant_oracle ((_ BitVec 8)) Bool)
 
+; help
 (constraint (bvult (my_constant (_ bv0 8)) (_ bv10 8)))
+
+; proper constraint
 (constraint (myoracle (my_constant (_ bv0 8))))
 
 (check-synth)
