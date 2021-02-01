@@ -209,10 +209,20 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
       result += " " + expr2sygus(op, use_integers);
   }
   else if (expr.id() == ID_minus)
-    result += (use_integers ? "- "
-                            : "bvsub ") +
-              expr2sygus(expr.operands()[0], use_integers) + " " +
-              expr2sygus(expr.operands()[1], use_integers);
+  {
+    if(expr.operands().size() == 1)
+    {
+      result = "-" + expr2sygus(expr.operands()[0], use_integers) + " ";
+      return result;
+    }
+    else
+    {
+      result += (use_integers ? "- "
+                              : "bvsub ") +
+                expr2sygus(expr.operands()[0], use_integers) +
+                " " + expr2sygus(expr.operands()[1], use_integers);
+    }
+  }
   else if (expr.id() == ID_mult)
     result += (use_integers ? "* " : "bvmul ") + expr2sygus(expr.operands()[0], use_integers) + " " +
               expr2sygus(expr.operands()[1], use_integers);
