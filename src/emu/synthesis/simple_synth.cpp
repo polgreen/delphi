@@ -84,8 +84,8 @@ void simple_syntht::add_problem(synth_encodingt &encoding, decision_proceduret &
   for(const auto &c: problem.synthesis_constraints)
   {
     count++;
-    if(count>number_synth_constraints)
-      break;
+    // if(count>number_synth_constraints)
+    //   break;
     const exprt encoded =encoding(c);
     solver.set_to_true(encoded);
   }

@@ -1,5 +1,6 @@
 #include "sygus_frontend.h"
 #include "synthesis/simple_synth.h"
+#include "synthesis/cvc4_synth.h"
 #include "verification/oracle_interface.h"
 #include "ogis.h"
 #include "sygus_parser.h"
@@ -123,7 +124,8 @@ int sygus_frontend(const cmdlinet &cmdline)
   symbol_tablet symbol_table;
   namespacet ns(symbol_table);
 
-  simple_syntht synthesizer(ns, message_handler, cmdline.isset("bitblast"));
+  // simple_syntht synthesizer(ns, message_handler, cmdline.isset("bitblast"));
+  cvc4_syntht synthesizer(message_handler);
   oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
 
   ogist ogis(synthesizer, verifier, problem, ns);

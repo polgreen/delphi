@@ -3,7 +3,7 @@ synthesis/simple_synth.cpp synthesis/synth_encoding.cpp smt2_frontend.cpp \
 verification/oracle_interface.cpp \
 verification/oracle_solver.cpp \
 verification/oracle_response_parser.cpp \
-synthesis/synthesizer.cpp verification/verify_encoding.cpp literals.cpp
+synthesis/synthesizer.cpp verification/verify_encoding.cpp literals.cpp synthesis/cvc4_synth.cpp
 
 OBJ+= ../../$(CPROVER_DIR)/src/ansi-c/ansi-c$(LIBEXT) \
       ../../$(CPROVER_DIR)/src/assembler/assembler$(LIBEXT) \

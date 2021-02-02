@@ -98,6 +98,34 @@ std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body)
   return result;
 }
 
+std::string expr2sygus_fun_dec(const symbol_exprt &function)
+{
+  INVARIANT(function.type().id()==ID_mathematical_function, "unsupported function definition type");
+  std::string result = "(declare-fun " + clean_id(function.get_identifier()) + " (";
+  const auto &func_type = to_mathematical_function_type(function.type());
+
+  for(std::size_t i=0; i<func_type.domain().size(); i++)
+  {
+    result+= type2sygus(func_type.domain()[i]) + " "; 
+  }
+  result +=")\n " + type2sygus(func_type.codomain()) +  ")\n";
+  return result;
+}
+
+std::string synth_fun_dec(const symbol_exprt &function)
+{
+  INVARIANT(function.type().id()==ID_mathematical_function, "unsupported function definition type");
+  std::string result = "(synth-fun " + clean_id(function.get_identifier()) + " (";
+  const auto &func_type = to_mathematical_function_type(function.type());
+
+  for(std::size_t i=0; i<func_type.domain().size(); i++)
+  {
+    result+="( parameter"+ integer2string(i, 10u) +" "+type2sygus(func_type.domain()[i]) + ")"; 
+  }
+  result +=")\n " + type2sygus(func_type.codomain()) +  ")\n";
+  return result;
+}
+
 
 std::string expr2sygus(const exprt &expr)
 {
