@@ -25,6 +25,9 @@ CLEANFILES = fastsynth$(EXEEXT)
 
 all: smt2c$(EXEEXT) sin_oracle$(EXEEXT) array_oracle$(EXEEXT)
 
+stb_image$(OBJEXT): stb_image.c stb_image.h
+	$(CC) -c stb_image.c
+
 sin_oracle$(EXEEXT): sin_oracle.c
 	$(CC) $< -o $@
 
