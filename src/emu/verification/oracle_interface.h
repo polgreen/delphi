@@ -49,7 +49,8 @@ class oracle_interfacet : public verifyt
   void call_second_order_oracles(oracle_solvert &solver, const solutiont &solution);
   exprt get_oracle_constraints(
     const counterexamplet &,
-    const oracle_constraint_gent &);
+    const oracle_constraint_gent &,
+    const problemt &problem, const solutiont &solution);
 
   void call_oracles(problemt &problem, 
   const solutiont &solution, const counterexamplet &counterexample, oracle_solvert &solver);

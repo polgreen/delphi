@@ -22,7 +22,7 @@
 
 #include <fstream>
 
-problemt build_problem(const sygus_parsert &parser)
+problemt build_problem(sygus_parsert &parser)
 {
   problemt problem;
   for(const auto &v : parser.variable_set)
@@ -41,17 +41,27 @@ problemt build_problem(const sygus_parsert &parser)
         problem.second_order_oracles.insert(symbol.first);
   }
 
-  for (const auto &c : parser.constraints)
-    problem.constraints.push_back(c);
+  problem.constraints=parser.constraints;
+  problem.assumptions=parser.assumptions;
 
-  for (const auto &c : parser.assumptions)
-    problem.assumptions.push_back(c);  
-  
   for (const auto &c : parser.oracle_constraint_gens)
     problem.oracle_constraint_gens.push_back(c);
 
   for (const auto &c : parser.oracle_assumption_gens)
     problem.oracle_assumption_gens.push_back(c);
+
+  for(auto &c : problem.constraints)
+    parser.expand_function_applications(c);
+
+  for(auto &c : problem.assumptions)
+    parser.expand_function_applications(c);
+  
+  // for(auto &o : problem.oracle_constraint_gens)
+  //   parser.expand_function_applications(o.constraint);
+
+  // for(auto &o : problem.oracle_assumption_gens)
+  //   parser.expand_function_applications(o.constraint);
+
   return problem;
 }
 

@@ -3,6 +3,7 @@
 #include <solvers/flattening/bv_pointers.h>
 #include <solvers/sat/satcheck.h>
 #include <util/mathematical_expr.h>
+#include <util/arith_tools.h>
 #include "../expr2sygus.h"
 #include <algorithm>
 
@@ -128,6 +129,17 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decisi
   {
   case decision_proceduret::resultt::D_SATISFIABLE:
     last_solution = synth_encoding.get_solution(solver);
+    if(last_solution.functions.empty())
+    {
+      for(const auto &f: problem.synthesis_functions)
+      {
+        // if(to_mathematical_function_type(f.type()).codomain().id()==ID_bool)
+        //   solution.functions[f]=true_exprt();
+        // else
+          last_solution.functions[f]=
+          from_integer(0, to_mathematical_function_type(f.type()).codomain());
+      }
+    }
     return simple_syntht::resultt::CANDIDATE;
 
   case decision_proceduret::resultt::D_UNSATISFIABLE:

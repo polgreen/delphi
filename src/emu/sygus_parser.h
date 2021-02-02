@@ -29,7 +29,7 @@ public:
   std::vector<oracle_constraint_gent> oracle_constraint_gens;
   std::string logic, action;
 
-  std::set<irep_idt> synth_fun_set;
+  std::set<symbol_exprt> synth_fun_set;
   std::set<symbol_exprt> variable_set;
 
   signature_with_parameter_idst inv_function_signature();

@@ -27,7 +27,7 @@ public:
   std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens;
   // universally quantified variables
   std::set<exprt> free_variables;
-  std::set <irep_idt> synthesis_functions;
+  std::set <symbol_exprt> synthesis_functions;
   // functions with an external oracle implementation
   smt2_parsert::oracle_fun_mapt oracle_symbols;
   std::set<irep_idt> second_order_oracles;

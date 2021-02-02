@@ -167,7 +167,7 @@ void sygus_parsert::setup_commands()
     f_it.first->second.type = signature.type;
     f_it.first->second.parameters = signature.parameters;
 
-    synth_fun_set.insert(id);
+    synth_fun_set.insert(symbol_exprt(id, signature.type));
   };
 
   commands["synth-inv"] = commands["synth-fun"];
@@ -472,15 +472,34 @@ void sygus_parsert::expand_function_applications(exprt &expr)
     {
       const auto &f=f_it->second;
 
-      if(synth_fun_set.find(identifier)!=synth_fun_set.end())
+      if(synth_fun_set.find(to_symbol_expr(app.function()))!=synth_fun_set.end())
       {
         to_symbol_expr(app.function()).set_identifier("synth_fun::"+id2string(identifier));
         return; // do not expand
       }
 
+      for(const auto &arg: app.arguments())
+      {
+        std::cout<<"arg "<< arg.pretty()<<std::endl;
+        if(arg.type().id()==ID_mathematical_function)
+        {
+std::cout<<"Did not expand"<<std::endl;
+          return; // do not expand
+        }
+      }
+
       DATA_INVARIANT(f.type.id() == ID_mathematical_function,
         "functions must have function type");
       const auto &f_type = to_mathematical_function_type(f.type);
+
+      for(const auto &d: f_type.domain())
+      {
+        if(d.id()==ID_mathematical_function)
+        {
+          std::cout<<"d "<< d.pretty()<<std::endl;
+          return; // do not expand
+        }
+      }
 
       assert(f_type.domain().size()==
              app.arguments().size());
@@ -513,7 +532,7 @@ void sygus_parsert::expand_function_applications(exprt &expr)
 
     if(f_it!=id_map.end())
     {
-      if(synth_fun_set.find(identifier)!=synth_fun_set.end())
+      if(synth_fun_set.find(to_symbol_expr(expr))!=synth_fun_set.end())
         return; // do not expand
 
       const auto &f=f_it->second;

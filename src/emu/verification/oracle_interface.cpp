@@ -40,7 +40,7 @@ std::vector<std::vector<exprt>> find_synth_fun(const exprt &expr, const problemt
   if(expr.id()==ID_mathematical_function)
   {
     auto tmp=to_function_application_expr(expr);
-    if(problem.synthesis_functions.find(tmp.function().id())!=problem.synthesis_functions.end())
+    if(problem.synthesis_functions.find(to_symbol_expr(tmp.function()))!=problem.synthesis_functions.end())
     {
       result.push_back(tmp.arguments());
     }
@@ -173,7 +173,9 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
 
 exprt oracle_interfacet::get_oracle_constraints(
   const counterexamplet &counterexample,
-  const oracle_constraint_gent &oracle)
+  const oracle_constraint_gent &oracle,
+  const problemt &problem,
+  const solutiont &solution)
 {
   std::vector<std::string> argv;
 
@@ -183,24 +185,38 @@ exprt oracle_interfacet::get_oracle_constraints(
 
   for(const auto &input_parameter : oracle.input_parameters)
   {
+    std::ostringstream stream;
+
     auto value_it = counterexample.assignment.find(input_parameter);
     if(value_it == counterexample.assignment.end())
     {
-      log.error() << "no value in counterexample for " << format(input_parameter) << messaget::eom;
-      return true_exprt();
+      // is this a synthesis function
+      if(problem.synthesis_functions.find(input_parameter)!=problem.synthesis_functions.end())
+      {
+        if(solution.functions.find(input_parameter)==solution.functions.end())
+          stream << expr2sygus_fun_def(input_parameter, true_exprt());
+        else
+          stream << expr2sygus_fun_def(input_parameter, solution.functions.at(input_parameter));
+      }
+      else
+      {
+        log.error() << "no value in counterexample for " << format(input_parameter) << messaget::eom;
+        return true_exprt();
+      }
     }
-
-    replace_symbol.set(to_symbol_expr(input_parameter), value_it->second);
-
-    std::ostringstream stream;
-    stream << format(value_it->second);
+    else
+    {
+      replace_symbol.set(to_symbol_expr(input_parameter), value_it->second);
+      stream << format(value_it->second);
+    }
+    
     argv.push_back(stream.str());
   }
 
-  log.debug() << "Running oracle (synthesis)";
+  log.status() << "Running oracle (synthesis)";
   for (auto &arg : argv)
-    log.debug() << ' ' << arg;
-  log.debug() << messaget::eom;
+    log.status() << ' ' << arg;
+  log.status() << messaget::eom;
 
   // run the oracle binary
   std::ostringstream stdout_stream;
@@ -236,7 +252,7 @@ exprt oracle_interfacet::get_oracle_constraints(
   exprt constraint = oracle.constraint;
   replace_symbol(constraint);
 
-  log.debug() << "oracle constraint: "
+  log.status() << "oracle constraint: "
               << expr2sygus(constraint) << messaget::eom;
 
   return constraint;
@@ -254,7 +270,8 @@ void oracle_interfacet::call_oracles(
   // call the oracle and add the constraints to problem.synthesis_constraints
   for(const auto &oracle : problem.oracle_constraint_gens)
   {
-    auto constraints = get_oracle_constraints(counterexample, oracle);
+    std::cout<<"Calling oracle constraint"<<std::endl;
+    auto constraints = get_oracle_constraints(counterexample, oracle, problem, solution);
     problem.synthesis_constraints.insert(std::move(constraints));
   }
 
@@ -262,7 +279,8 @@ void oracle_interfacet::call_oracles(
   // call the oracle and add the assumptions to problem.assumptions
   for(const auto &oracle : problem.oracle_assumption_gens)
   {
-    auto constraints = get_oracle_constraints(counterexample, oracle);
+    std::cout<<"Calling oracle assumption"<<std::endl;
+    auto constraints = get_oracle_constraints(counterexample, oracle, problem, solution);
     problem.assumptions.push_back(std::move(constraints));
   }
 }
@@ -276,12 +294,21 @@ void oracle_interfacet::add_assumptions_from_solver(const oracle_solvert &solver
       continue;
 
     symbol_exprt func_symbol = symbol_exprt(oracle.first, oracle.second.type);
-    for(const auto &call: solver.oracle_call_history.at(oracle.second.binary_name))
+    bool is_second_order=false;
+    for(const auto &arg: to_mathematical_function_type(oracle.second.type).domain())
     {
-      exprt assumption = equal_exprt(function_application_exprt(func_symbol, call.first),
-      call.second);
-      std::cout<<"assumption: "<<expr2sygus(assumption)<<std::endl;
-      problem.assumptions.push_back(assumption);
+      if(arg.id()==ID_mathematical_function)
+        is_second_order=true;
+    }
+    if (!is_second_order)
+    {
+      for (const auto &call : solver.oracle_call_history.at(oracle.second.binary_name))
+      {
+        exprt assumption = equal_exprt(function_application_exprt(func_symbol, call.first),
+                                       call.second);
+        std::cout << "assumption: " << expr2sygus(assumption) << std::endl;
+        problem.assumptions.push_back(assumption);
+      }
     }
   }
 }
