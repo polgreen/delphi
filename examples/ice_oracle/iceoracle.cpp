@@ -28,6 +28,7 @@
   "(pos)"                                                                 \
   "(neg)"                                                                 \
   "(impl)"                                                                \
+  "(all)"                                                                \
 
 std::string ssystem (const char *command) 
 {
@@ -80,7 +81,7 @@ void negative(std::ostream &out, std::string candidate, std::string postf, std::
 
 bool model_exists(std::string &input)
 {
-  std::cout<<"input "<< input<<std::endl;
+
 	std::size_t success = input.find("unsat");
 	std::size_t fail = input.find("sat");
 	if(success!=std::string::npos)
@@ -93,7 +94,7 @@ bool model_exists(std::string &input)
 	}
 	else
 	{
-		std::cout<<"SMT solver error: \n";
+		std::cerr<<"SMT solver error: \n";
 		assert(0);
 	}
 }
@@ -123,9 +124,8 @@ std::pair<bool,std::string> call_smt_solver(std::string candidate,
   std::pair<bool, std::string> result;
   for (const auto &v : variable_set)
     variable_declarations += expr2sygus_var_dec(v);
-  if (cmdline.isset("pos"))
+  if (cmdline.isset("pos") || cmdline.isset("all"))
   {
-    std::cout << "positive query" << std::endl;
     std::ofstream posfile("pos-file.smt2");
 
     if (!posfile)
@@ -137,12 +137,11 @@ std::pair<bool,std::string> call_smt_solver(std::string candidate,
     std::string command("z3 pos-file.smt2");
     result.second = ssystem(command.c_str());
     result.first = model_exists(result.second);
-
-    return result;
+    if(cmdline.isset("pos")|| !result.first)
+      return result;
   }
-  else if (cmdline.isset("neg"))
+  if (cmdline.isset("neg") || cmdline.isset("all"))
   {
-    std::cout << "negative query" << std::endl;
     std::ofstream negfile("neg-file.smt2");
     if (!negfile)
     {
@@ -153,23 +152,24 @@ std::pair<bool,std::string> call_smt_solver(std::string candidate,
     std::string command = "z3 neg-file.smt2";
     result.second = ssystem(command.c_str());
     result.first = model_exists(result.second);
-    return result;
+    if(cmdline.isset("neg")|| !result.first)
+      return result;
   }
-  else
+  if (cmdline.isset("impl") || cmdline.isset("all"))
   {
-    std::cout << "implication query" << std::endl;
     std::ofstream implicationfile("imp-file.smt2");
     if (!implicationfile)
     {
       throw std::exception();
     }
-    negative(implicationfile, candidate, postf, variable_declarations);
+    implication(implicationfile, candidate, transf, variable_declarations);
     implicationfile.close();
     std::string command = "z3 imp-file.smt2";
     result.second = ssystem(command.c_str());
     result.first = model_exists(result.second);
     return result;
   }
+  return result;
 }
 
 int main(int argc, const char *argv[])
@@ -198,17 +198,17 @@ int main(int argc, const char *argv[])
 
     if(transf==parser.id_map.end())
     {
-      std::cout<<"unable to find trans-f";
+      std::cerr<<"unable to find trans-f";
       assert(0);
     }
     if(pref==parser.id_map.end())
     {
-      std::cout<<"unable to find pre-f";
+      std::cerr<<"unable to find pre-f";
       assert(0);
     }
     if(postf==parser.id_map.end())
     {
-      std::cout<<"unable to find post-f";
+      std::cerr<<"unable to find post-f";
       assert(0);
     }
 
@@ -225,7 +225,6 @@ int main(int argc, const char *argv[])
       expr2sygus_fun_def(symbol_exprt(input_fun.id, input_fun.type),input_fun.body),
       pref_string, postf_string, transf_string,
       parser.variable_set, cmdline);
-      std::cout<<"Result: "<< result.second<<std::endl;
     std::istringstream stream(remove_unsat_prefix(result.second));
 
     std::map<irep_idt, exprt> arg_parsed; 
@@ -240,14 +239,28 @@ int main(int argc, const char *argv[])
       arg_parsed = model_parser(stream);
     }
 
-    for(const auto &input: input_fun.parameters)
+    std::vector<std::string> arg_ids = {"x","y"};
+
+    for(const auto &input: arg_ids)
     {
-      std::string id=clean_id(input);
-      if(arg_parsed.find(id)==arg_parsed.end())
+      if(arg_parsed.find(input)==arg_parsed.end())
         std::cout <<" 1 ";
       else
       {
-        std::cout << expr2sygus(arg_parsed[id]) << " ";
+        std::cout << expr2sygus(arg_parsed[input]) << " ";
+      }
+    }
+    if (cmdline.isset("impl"))
+    {
+      for (const auto &input : arg_ids)
+      {
+        std::string id = input + "!";
+        if (arg_parsed.find(input) == arg_parsed.end())
+          std::cout << " 1 ";
+        else
+        {
+          std::cout << expr2sygus(arg_parsed[input]) << " ";
+        }
       }
     }
     std::cout<<std::endl;
