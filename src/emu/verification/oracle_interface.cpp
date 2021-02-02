@@ -88,24 +88,17 @@ void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, const 
       {
         std::string prefix = "_synthbool_";
         std::string arg_name = id2string(to_symbol_expr(arg).get_identifier());
-        std::cout<<"Arg name "<< arg_name<<std::endl;
         if(arg_name.size()<prefix.size())
           continue;
 
         if(std::string(arg_name, 0, prefix.size())==prefix)
         {
-          std::cout<<"Has prefix "<<std::endl;
           std::string synth_fun_name(arg_name, prefix.size(), std::string::npos);
           INVARIANT(app.first.arguments().size()==1, "do not support 2nd order oracles with more than one arg");
           // call oracle
           std::vector<std::string> argv;
           argv.push_back(app.second.binary_name);
-          if(solution.functions.size()==0)
-          {
-            // argv.push_back(std::string(expr2sygus_fun_def(argv.push_back("true");  
-          }
-            
-     
+
           for(const auto &func: solution.functions)
             if(synth_fun_name == id2string(func.first.get_identifier()))
             {
