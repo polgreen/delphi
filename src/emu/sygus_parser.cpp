@@ -480,10 +480,8 @@ void sygus_parsert::expand_function_applications(exprt &expr)
 
       for(const auto &arg: app.arguments())
       {
-        std::cout<<"arg "<< arg.pretty()<<std::endl;
         if(arg.type().id()==ID_mathematical_function)
         {
-std::cout<<"Did not expand"<<std::endl;
           return; // do not expand
         }
       }
@@ -496,7 +494,6 @@ std::cout<<"Did not expand"<<std::endl;
       {
         if(d.id()==ID_mathematical_function)
         {
-          std::cout<<"d "<< d.pretty()<<std::endl;
           return; // do not expand
         }
       }
