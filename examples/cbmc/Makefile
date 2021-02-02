@@ -23,7 +23,7 @@ include ../../$(CPROVER_DIR)/src/common
 
 CLEANFILES = fastsynth$(EXEEXT)
 
-all: smt2c$(EXEEXT) sin_oracle$(EXEEXT) array_oracle$(EXEEXT)
+all: smt2c$(EXEEXT) sin_oracle$(EXEEXT) array_oracle$(EXEEXT) sbt_image$(OBJEXT)
 
 stb_image$(OBJEXT): stb_image.c stb_image.h
 	$(CC) -c stb_image.c
