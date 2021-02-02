@@ -2,9 +2,7 @@
 
 # turn the given pixel processing function into C
 
-echo tweak: $1 > /dev/tty
-
-./smt2c $1 > pixel_average.c
+./smt2c "$1" > pixel_average.c
 
 cat << EOM >> pixel_average.c
 
@@ -15,7 +13,7 @@ int main()
 {
   int x, y, n;
   // get grayscale
-  unsigned char *data = stbi_load("foto.png", &x, &y, &n, 1);
+  unsigned char *data = stbi_load("foto.jpg", &x, &y, &n, 1);
   if(data == 0)
     return 1;
 
