@@ -120,7 +120,7 @@ int sygus_frontend(const cmdlinet &cmdline)
   symbol_tablet symbol_table;
   namespacet ns(symbol_table);
 
-  simple_syntht synthesizer(ns, message_handler);
+  simple_syntht synthesizer(ns, message_handler, cmdline.isset("bitblast"));
   oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
 
   ogist ogis(synthesizer, verifier, problem, ns);

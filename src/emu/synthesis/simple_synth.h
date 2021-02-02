@@ -12,12 +12,14 @@ class simple_syntht : public synthesizert
 
 public:
   simple_syntht(namespacet &_namespace, 
-                message_handlert &_ms) :
+                message_handlert &_ms,
+                bool _bitblast) :
                 number_synth_constraints(0u),
                 synth_constraint_increment(2u),
                 ns(_namespace),
                 message_handler(_ms),
-                program_size(0){};
+                program_size(0),
+                bitblast(_bitblast){};
 
   resultt operator()(const problemt &) override;
 
@@ -45,6 +47,7 @@ protected:
   std::string logic = "LIA";
   message_handlert &message_handler;
   std::size_t program_size;
+  bool bitblast;
 };
 
 #endif /* EMU_SIMPLE_SYNTH_H_ */
