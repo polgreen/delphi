@@ -210,18 +210,10 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
   }
   else if (expr.id() == ID_minus)
   {
-    if(expr.operands().size() == 1)
-    {
-      result = "-" + expr2sygus(expr.operands()[0], use_integers) + " ";
-      return result;
-    }
-    else
-    {
-      result += (use_integers ? "- "
+    result += (use_integers ? "- "
                               : "bvsub ") +
                 expr2sygus(expr.operands()[0], use_integers) +
                 " " + expr2sygus(expr.operands()[1], use_integers);
-    }
   }
   else if (expr.id() == ID_mult)
     result += (use_integers ? "* " : "bvmul ") + expr2sygus(expr.operands()[0], use_integers) + " " +
@@ -280,7 +272,7 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
     {
       result = clean_id(to_constant_expr(expr).get_value());
       if (result.front() == '-')
-        return "(- " + result + ")";
+        return "(- " + result.substr(1, result.size() - 1) + ")";
       else
         return result;
     }
@@ -326,9 +318,17 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
   }
   else if (expr.id() == ID_typecast)
   {
-    // ignore typecast, they only occur when we use signed operators
-    // risky behaviour..
-    return expr2sygus(to_typecast_expr(expr).op(), use_integers);
+    auto typecast = to_typecast_expr(expr);
+
+    if(typecast.type().id()==ID_bool && typecast.op().id()!=ID_typecast)
+    {
+      result += "= "+ expr2sygus(typecast.op()) + " " + expr2sygus(from_integer(1, typecast.op().type()));
+    }
+    else
+    {
+      // danger, ignoring typecast.
+      return expr2sygus(to_typecast_expr(expr).op(), use_integers);
+    }
   }
   else if (expr.id() == ID_extractbits)
   {
