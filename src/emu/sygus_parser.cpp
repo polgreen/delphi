@@ -474,7 +474,6 @@ void sygus_parsert::expand_function_applications(exprt &expr)
 
       if(synth_fun_set.find(to_symbol_expr(app.function()))!=synth_fun_set.end())
       {
-        to_symbol_expr(app.function()).set_identifier("synth_fun::"+id2string(identifier));
         return; // do not expand
       }
 

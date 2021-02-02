@@ -49,12 +49,7 @@ std::string clean_id(const irep_idt &id)
       dest.rfind("#") == c_pos)
     dest.erase(c_pos, std::string::npos);
 
-  std::string::size_type c_pos2 = dest.find("synth_fun::"); // 11 chars
-  if (c_pos2 != std::string::npos &&
-      dest.rfind("synth_fun::") == c_pos2)
-    dest.erase(0, c_pos2 + 11);
-
-  c_pos2 = dest.find("synth::"); //7 chars
+  std::string::size_type c_pos2 = dest.find("synth::"); //7 chars
   if (c_pos2 != std::string::npos &&
       dest.rfind("synth::") == c_pos2)
     dest.erase(0, c_pos2 + 7);
@@ -358,16 +353,5 @@ std::string expr2sygus(const exprt &expr, bool use_integers)
   }
   result += ")"; 
   return result;
-}
-
-std::string remove_synth_prefix(std::string in)
-{
-  std::string::size_type c_pos2 = in.find("synth_fun::");
-  if (c_pos2 != std::string::npos &&
-      in.rfind("synth_fun::") == c_pos2)
-  {
-    in.erase(0, c_pos2);
-  }
-  return in;
 }
 
