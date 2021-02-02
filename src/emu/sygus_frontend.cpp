@@ -5,6 +5,7 @@
 #include "sygus_parser.h"
 #include "expr2sygus.h"
 #include "problem.h"
+#include "literals.h"
 
 #include <util/cout_message.h>
 #include <util/expr_initializer.h>
@@ -55,6 +56,8 @@ problemt build_problem(sygus_parsert &parser)
 
   for(auto &c : problem.assumptions)
     parser.expand_function_applications(c);
+
+  problem.literals=find_literals(problem);
   
   // for(auto &o : problem.oracle_constraint_gens)
   //   parser.expand_function_applications(o.constraint);

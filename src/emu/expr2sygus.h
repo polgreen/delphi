@@ -7,7 +7,6 @@
 
 std::string clean_id(const irep_idt &id);
 std::string expr2sygus(const exprt &expr);
-std::string expr2sygus(const exprt &expr, bool use_integers);
 std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body);
 std::string expr2sygus_var_dec(const symbol_exprt &symbol);
 #endif /* EMU_EXPR2SYGUS*/

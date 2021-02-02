@@ -588,6 +588,25 @@ exprt synth_encodingt::operator()(const exprt &expr)
   }
 }
 
+void remove_typecasts(exprt &expr)
+{
+  if(expr.id()==ID_typecast)
+  {
+    auto typecast = to_typecast_expr(expr);
+    if(typecast.op().id()==ID_typecast)
+    {
+      auto typecast_child = to_typecast_expr(typecast.op());
+      if(typecast_child.op().type().id()==expr.type().id())
+      {
+        std::cout<<"REMOVING TYPECAST\n";
+        expr = typecast_child.op();
+      }
+    }
+  }
+  for(auto &op: expr.operands())
+    remove_typecasts(op);
+}
+
 solutiont synth_encodingt::get_solution(
   const decision_proceduret &solver) const
 {
@@ -597,7 +616,9 @@ solutiont synth_encodingt::get_solution(
   {
     result.functions[it.first]=
       it.second.get_function(solver, false);
+    remove_typecasts(result.functions[it.first] );
   }
+
 
   return result;
 }

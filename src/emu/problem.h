@@ -31,6 +31,7 @@ public:
   // functions with an external oracle implementation
   smt2_parsert::oracle_fun_mapt oracle_symbols;
   std::set<irep_idt> second_order_oracles;
+  std::set<constant_exprt> literals; ///
 };
 
 class solutiont

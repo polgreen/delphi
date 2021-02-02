@@ -122,6 +122,7 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decisi
 {
   // add the problem to the solver (synthesis_assumptions => (assumptions => constraints))
   synth_encoding.program_size = program_size;
+  synth_encoding.literals = problem.literals;
   synth_encoding.clear();
   synth_encoding.enable_bitwise = true;
 
