@@ -112,7 +112,7 @@ std::string expr2sygus_fun_dec(const symbol_exprt &function)
   return result;
 }
 
-std::string synth_fun_dec(const symbol_exprt &function)
+std::string synth_fun_dec(const symbol_exprt &function, std::string grammar)
 {
   INVARIANT(function.type().id()==ID_mathematical_function, "unsupported function definition type");
   std::string result = "(synth-fun " + clean_id(function.get_identifier()) + " (";
@@ -122,7 +122,7 @@ std::string synth_fun_dec(const symbol_exprt &function)
   {
     result+="( parameter"+ integer2string(i, 10u) +" "+type2sygus(func_type.domain()[i]) + ")"; 
   }
-  result +=")\n " + type2sygus(func_type.codomain()) +  ")\n";
+  result +=")\n " + type2sygus(func_type.codomain()) + "\n" + grammar +  ")\n";
   return result;
 }
 
