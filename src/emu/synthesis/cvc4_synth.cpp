@@ -50,41 +50,115 @@ void cvc4_syntht::increment_synthesis_constraints()
 }
 
 
+
+std::string nonterminalID(const typet &type)
+{
+  if(type.id()==ID_unsignedbv || type.id()==ID_integer)
+    return "NTnonbool";
+  if(type.id()==ID_bool)
+    return "NTbool";
+
+  return "NTunknown";    
+}
+
+std::string production_rule(const typet &type, const mathematical_function_typet &functype)
+{
+  std::string NTid = nonterminalID(type);
+  std::string result = "("+NTid+" "+type2sygus(type) +"(";
+  std::size_t count=0;
+  for(const auto &d: functype.domain())
+  {
+   if(d==type)
+    result+="parameter"+integer2string(count, 10u)+" ";
+   count++; 
+  }
+  if(type.id()!=ID_bool)
+    result += expr2sygus(from_integer(0, type)) +" "+ expr2sygus(from_integer(1, type))+" "+ expr2sygus(from_integer(2, type))+" "+ expr2sygus(from_integer(3, type));
+
+  if(type.id()==ID_unsignedbv)
+  {
+    result += "(bvadd "+NTid +" "+NTid+")";
+    result += "(bvsub "+NTid +" "+NTid+")";
+    result += "(bvshl "+NTid +" "+NTid+")";
+    result += "(bvlshr "+NTid +" "+NTid+")";
+    // result += "(bvmul "+NTid +" "+NTid+")";
+    // result += "(bvdiv "+NTid +" "+NTid+")";
+    result += "(ite "+ nonterminalID(bool_typet())+ " "+NTid +" "+NTid+")";
+    result+="))\n";
+  }
+  else if(type.id()==ID_bool)
+  {
+    std::string nonbool = nonterminalID(integer_typet());
+    result+="(and " + NTid +" "+NTid+")";
+    result+="(or " + NTid +" "+NTid+")";
+    result+="(not " +NTid+")"; 
+    result+="(= " + nonbool +" "+nonbool+")";
+    result+="(>= " + nonbool +" "+nonbool+")";
+    result+="(> " + nonbool +" "+nonbool+")";
+    result+="))\n";  
+  }
+  else if(type.id()==ID_integer)
+  {
+    result += "(+ "+NTid +" "+NTid+")";
+    result += "(- "+NTid +" "+NTid+")";
+    result += "(- "+NTid +")";
+    result += "(ite "+ nonterminalID(bool_typet())+ " "+NTid +" "+NTid+")";
+    result+="))\n";
+  }
+
+return result;
+}
+
 std::string build_grammar(const symbol_exprt &function)
 {
+  std::set<typet> types;
+  bool integer=false;
+  bool bv=false;
 
   INVARIANT(function.type().id()==ID_mathematical_function, "expected function type");
-  std::set<typet> types;
   auto func = to_mathematical_function_type(function.type());
-  for(const auto &t: func.domain())
+  for (const auto &t : func.domain())
+  {
+    if(t.id()==ID_integer)
+      integer=true;
+    if(t.id()==ID_unsignedbv) 
+      bv=true;
     if(t!=func.codomain())
       types.insert(t);
+  }
+  INVARIANT(!(bv & integer), "do not support grammars with both bv and int");
+  INVARIANT(types.size()<=2, "do not support more than 2 types in a grammar");
 
-  std::string nonterminals = "(( NT0 "+ type2sygus(func.codomain()) + ")";
-  int count=1;
+  std::string nonterminals = "(( "+ nonterminalID(func.codomain())+ " "  + type2sygus(func.codomain()) + ")";
+  std::string grammar = "(" + production_rule(func.codomain(), func);
+
   for(const auto &t: types)
   {
-    nonterminals += "(NT" + integer2string(count)+" "+type2sygus(t)+ ")";
-    count++;
+    nonterminals += "("+ nonterminalID(t) +" " + type2sygus(t)+ ")";
+    grammar += production_rule(t, func) + "\n";
   }
-  nonterminals+=")\n";
-
-  return nonterminals;
+  grammar +=")\n";
+  nonterminals +=")\n";
+  return nonterminals + grammar;
 }
 
 std::string cvc4_syntht::build_query(const problemt &problem)
 {
   std::string query = "(set-logic ALL)\n";
 
-  std::string grammar = "\n((Start Bool) (StartInt Int))\n";
-  grammar +="((Start Bool ((and Start Start)(or Start Start)(>= StartInt StartInt)(= StartInt StartInt)(not Start))) \n";
-  grammar +="(StartInt Int (parameter0 parameter1 0 1 2 3 (- StartInt) (+ StartInt StartInt)(- StartInt StartInt)(ite Start StartInt StartInt))\n";
-  grammar += "))\n";
-  grammar = "";
+  // std::string grammar = "\n((Start Bool) (StartInt Int))\n";
+  // grammar +="((Start Bool ((and Start Start)(or Start Start)(>= StartInt StartInt)(= StartInt StartInt)(not Start))) \n";
+  // grammar +="(StartInt Int (parameter0 parameter1 0 1 2 3 (- StartInt) (+ StartInt StartInt)(- StartInt StartInt)(ite Start StartInt StartInt))\n";
+  // grammar += "))\n";
+  // grammar = "";
+
 
   // declare function
   for(const auto &f: problem.synthesis_functions)
+  {
+    std::string grammar = build_grammar(f);
     query += synth_fun_dec(f, grammar) + "\n";
+  }
 
 
   for(const auto &c: problem.synthesis_constraints)  
@@ -166,7 +240,7 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
   std::string stdin_filename;
 
 
-  argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-pbe", temp_file_problem()};
+  argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-add-const-grammar", temp_file_problem()};
 
   int res =
       run(argv[0], argv, stdin_filename, temp_file_stdout(), temp_file_stderr());
