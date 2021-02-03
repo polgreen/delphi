@@ -21,6 +21,9 @@
 (oracle-constraint iceoracle_pos ((inv-f (-> Int Int Bool))) ((B Bool)(xRes Int) (yRes Int))
 (=> (not B)(= (inv-f xRes yRes) true)))
 
+(oracle-constraint positive_unroll ((inv-f (-> Int Int Bool))) ((xRes Int) (yRes Int)(xRes2 Int)(yRes2 Int))
+(and (inv-f xRes yRes) (inv-f xRes2 yRes2)))
+
 (oracle-constraint iceoracle_neg ((inv-f (-> Int Int Bool))) ((B Bool)(xRes Int) (yRes Int))
 (=> (not B)(= (inv-f xRes yRes) false)))
 

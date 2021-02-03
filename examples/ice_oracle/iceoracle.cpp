@@ -53,7 +53,7 @@ void implication(std::ostream &out, std::string candidate, std::string transf, s
 	out << variable_decls;
   out << transf;
 	out << candidate << "\n";
-	out << "(assert (and (inv-f x y)(trans-f x y x! y!)(not (inv-f x y))))\n";
+	out << "(assert (and (inv-f x y)(trans-f x y x! y!)(not (inv-f x! y!))))\n";
 	out << "(check-sat)\n";
 	out << "(get-model)\n";
 }
