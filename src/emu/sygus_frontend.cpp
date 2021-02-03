@@ -124,12 +124,20 @@ int sygus_frontend(const cmdlinet &cmdline)
   symbol_tablet symbol_table;
   namespacet ns(symbol_table);
 
-  // simple_syntht synthesizer(ns, message_handler, cmdline.isset("bitblast"));
-  cvc4_syntht synthesizer(message_handler);
-  oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
-
-  ogist ogis(synthesizer, verifier, problem, ns);
-  ogis.doit();
+  if(cmdline.isset("cvc4"))
+  {
+    cvc4_syntht synthesizer(message_handler);  
+    oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
+    ogist ogis(synthesizer, verifier, problem, ns);
+    ogis.doit();
+  }
+  else
+  {
+    simple_syntht synthesizer(ns, message_handler, cmdline.isset("bitblast"));
+    oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
+    ogist ogis(synthesizer, verifier, problem, ns);
+    ogis.doit();
+  }
 
   return 0;
 }

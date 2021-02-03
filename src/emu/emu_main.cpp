@@ -29,6 +29,7 @@
   "(smt) "                                                                \
   "(bitblast) "                                                           \
   "(simplify) "                                                           \
+  "(cvc4) "                                                           \
 /// File ending of SMT2 files. Used to determine the language frontend that
 /// shall be used.
 #define SMT2_FILE_ENDING ".smt2"
@@ -56,6 +57,7 @@ void help(std::ostream &out)
      "Command line options\n"
      " --smt                          use Z3 solver as oracle solver subsolver (default) \n"
      " --bitblast                     use bitblasting solver as oracle solver subsolver\n"
+     " --cvc4                         use cvc4 for synthesis\n"
      "\n"
      "\n";
     // clang-format on
