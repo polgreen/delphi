@@ -10,7 +10,7 @@ uint64_t timeSinceEpochMillisec() {
   return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-int max(int x, int y)
+unsigned int max(unsigned int x, unsigned int y)
 {
 	if(x>y)
 		return x;
@@ -30,8 +30,8 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 	srand (timeSinceEpochMillisec());
-	int x = rand();
-	int y = rand();
+	unsigned int x = rand();
+	unsigned int y = rand();
 
 
 	std::cout<< "(_ bv" << x << " 32) (_ bv"
