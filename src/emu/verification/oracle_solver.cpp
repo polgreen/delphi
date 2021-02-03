@@ -147,6 +147,7 @@ exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std
   if (run_result != 0 && run_result !=10)
   {
     log.status() << "oracle " << binary_name << " has failed" << messaget::eom;
+    assert(0);
     return nil_exprt();
   }
   // we assume that the oracle returns the result in SMT-LIB format
