@@ -2,9 +2,9 @@
 
 # turn the given pixel processing function into C
 
-./smt2c "$1" > pixel_average.c
+./smt2c "$1" > pixel_oracle.c
 
-cat << EOM >> pixel_average.c
+cat << EOM >> pixel_oracle.c
 
 unsigned char *stbi_load(char const *filename, int *x, int *y, int *channels_in_file, int desired_channels);
 int printf(const char * restrict, ...) __attribute__((__format__ (__printf__, 1, 2)));
@@ -38,8 +38,8 @@ EOM
 
 # compile
 
-gcc pixel_average.c stb_image.o -o pixel_average
+gcc pixel_oracle.c stb_image.o -o pixel_oracle
 
 # run
 
-./pixel_average
+./pixel_oracle

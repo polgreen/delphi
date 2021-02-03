@@ -2,11 +2,18 @@
 
 (synth-fun tweak ((pixel (_ BitVec 8))) (_ BitVec 8))
 
-(declare-oracle-fun pixel_average ./pixel_average.sh ((-> (_ BitVec 8) (_ BitVec 8))) (_ BitVec 8))
+; abusing pixel_oracle.sh both for 'correctness' and 'hints'
 
-(constraint (= (pixel_average tweak) (_ bv120 8)))
+; correctness (verification)
+(declare-oracle-fun pixel_correct ./pixel_oracle.sh ((-> (_ BitVec 8) (_ BitVec 8))) Bool)
 
-(constraint (= (tweak (_ bv0 8)) (_ bv20 8)))
-(constraint (= (tweak (_ bv10 8)) (_ bv30 8)))
+(constraint (pixel_correct tweak))
+
+; hints (synthesis)
+(oracle-constraint
+  ./pixel_oracle.sh
+  ((tweak (-> (_ BitVec 8) (_ BitVec 8))))
+  ((correct Bool) (pixelIn (_ BitVec 8)) (pixelOut (_ BitVec 8)))
+  (=> (not correct) (= (tweak pixelIn) pixelOut)))
 
 (check-synth)
