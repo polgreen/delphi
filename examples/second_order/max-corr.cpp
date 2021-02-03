@@ -28,12 +28,12 @@ std::string ssystem (const char *command)
 
 void outputSMTFile(std::ostream &out, std::string candidate)
 {
-	out << "(set-logic LIA)\n";
-	out << "(declare-fun x () Int) \n";
-	out << "(declare-fun y () Int) \n";
+	out << "(set-logic BV)\n";
+	out << "(declare-fun x () (_ BitVec 32)) \n";
+	out << "(declare-fun y () (_ BitVec 32)) \n";
 	out << candidate << "\n";
-	out << "(assert (or (not (>= (max x y) x))\n";
-	out << "(not (>= (max x y) y))\n"; 
+	out << "(assert (or (not (bvuge (max x y) x))\n";
+	out << "(not (bvuge (max x y) y))\n"; 
 	out << "(not(or (= x (max x y)) (= y (max x y))))))\n";
 	out << "(check-sat)\n";
 
