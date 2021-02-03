@@ -50,13 +50,42 @@ void cvc4_syntht::increment_synthesis_constraints()
 }
 
 
+std::string build_grammar(const symbol_exprt &function)
+{
+
+  INVARIANT(function.type().id()==ID_mathematical_function, "expected function type");
+  std::set<typet> types;
+  auto func = to_mathematical_function_type(function.type());
+  for(const auto &t: func.domain())
+    if(t!=func.codomain())
+      types.insert(t);
+
+  std::string nonterminals = "(( NT0 "+ type2sygus(func.codomain()) + ")";
+  int count=1;
+  for(const auto &t: types)
+  {
+    nonterminals += "(NT" + integer2string(count)+" "+type2sygus(t)+ ")";
+    count++;
+  }
+  nonterminals+=")\n";
+
+  return nonterminals;
+}
+
 std::string cvc4_syntht::build_query(const problemt &problem)
 {
   std::string query = "(set-logic ALL)\n";
 
+  std::string grammar = "\n((Start Bool) (StartInt Int))\n";
+  grammar +="((Start Bool ((and Start Start)(or Start Start)(>= StartInt StartInt)(= StartInt StartInt)(not Start))) \n";
+  grammar +="(StartInt Int (parameter0 parameter1 0 1 2 3 (- StartInt) (+ StartInt StartInt)(- StartInt StartInt)(ite Start StartInt StartInt))\n";
+  grammar += "))\n";
+  grammar = "";
+
   // declare function
   for(const auto &f: problem.synthesis_functions)
-    query += synth_fun_dec(f) + "\n";
+    query += synth_fun_dec(f, grammar) + "\n";
+
 
   for(const auto &c: problem.synthesis_constraints)  
     query += "(constraint " + expr2sygus(c)+ ")\n";
