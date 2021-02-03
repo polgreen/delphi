@@ -112,7 +112,7 @@ sygus_parsert::oracle_signature()
 
     // these are allowed to be new ids
     if(id_map.find(id)==id_map.end())
-      add_unique_id(id, symbol_exprt(id, param_sort));
+      add_unique_id(id, exprt(ID_nil, param_sort));
 
     if(next_token() != smt2_tokenizert::CLOSE)
       throw error("expected ')' at end of input parameter");
@@ -476,6 +476,8 @@ void sygus_parsert::expand_function_applications(exprt &expr)
       {
         return; // do not expand
       }
+      if(oracle_symbols.find(to_symbol_expr(app.function()).get_identifier())!=oracle_symbols.end())
+        return; //do not expand
 
       for(const auto &arg: app.arguments())
       {

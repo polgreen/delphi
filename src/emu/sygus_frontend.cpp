@@ -60,11 +60,11 @@ problemt build_problem(sygus_parsert &parser)
 
   problem.literals=find_literals(problem);
   
-  // for(auto &o : problem.oracle_constraint_gens)
-  //   parser.expand_function_applications(o.constraint);
+  for(auto &o : problem.oracle_constraint_gens)
+    parser.expand_function_applications(o.constraint);
 
-  // for(auto &o : problem.oracle_assumption_gens)
-  //   parser.expand_function_applications(o.constraint);
+  for(auto &o : problem.oracle_assumption_gens)
+    parser.expand_function_applications(o.constraint);
 
   return problem;
 }
