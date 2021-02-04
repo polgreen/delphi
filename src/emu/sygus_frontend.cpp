@@ -126,7 +126,7 @@ int sygus_frontend(const cmdlinet &cmdline)
 
   if(cmdline.isset("cvc4"))
   {
-    cvc4_syntht synthesizer(message_handler);  
+    cvc4_syntht synthesizer(message_handler, cmdline.isset("constants"), cmdline.isset("grammar"));  
     oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
     ogist ogis(synthesizer, verifier, problem, ns);
     ogis.doit();

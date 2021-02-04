@@ -161,7 +161,7 @@ std::string build_grammar(const symbol_exprt &function)
     nonterminals += "("+ nonterminalID(t) +" " + type2sygus(t)+ ")";
     grammar += production_rule(t, func,bv) + "\n";
   }
-  if(!hasbool)
+  if(!hasbool && func.codomain().id()!=ID_bool)
   {
     nonterminals += "("+ nonterminalID(bool_typet()) +" " + type2sygus(bool_typet())+ ")";
     grammar += production_rule(bool_typet(),bv) + "\n";
@@ -186,7 +186,7 @@ std::string cvc4_syntht::build_query(const problemt &problem)
   // declare function
   for(const auto &f: problem.synthesis_functions)
   {
-    std::string grammar = build_grammar(f);
+    std::string grammar = use_grammar ? build_grammar(f) : " ";
     query += synth_fun_dec(f, grammar) + "\n";
   }
 
@@ -271,9 +271,12 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
   std::string stdin_filename;
 
 
-  argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
-  // argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-grammar-cons=any-const", "--no-sygus-pbe", "--sygus-repair-const", temp_file_problem()};
-
+  // argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
+  if(magic_constants)
+    argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-grammar-cons=any-const", "--no-sygus-pbe", "--sygus-repair-const", temp_file_problem()};
+  else
+    argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
+  
   int res =
       run(argv[0], argv, stdin_filename, temp_file_stdout(), temp_file_stderr());
   if (res < 0)
