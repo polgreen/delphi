@@ -6,6 +6,7 @@
 #include <iostream>
 
 std::string clean_id(const irep_idt &id);
+void clean_symbols(exprt &expr);
 std::string type2sygus(const typet &type);
 std::string expr2sygus(const exprt &expr);
 std::string expr2sygus_fun_dec(const symbol_exprt &function);

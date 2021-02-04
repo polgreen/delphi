@@ -186,6 +186,11 @@ std::string expr2sygus(const exprt &expr)
       result += (use_integers ? "> " : "bvugt ") + expr2sygus(expr.operands()[0]) + " " +
                 expr2sygus(expr.operands()[1]);
   }
+  else if(expr.id()==ID_mod || expr.id()==ID_rem)
+  {
+    INVARIANT(expr.type().id()!=ID_integer, "cannot use mod with integer types in sygus");
+    result += "bvurem "+ expr2sygus(expr.operands()[0]) + " "+ expr2sygus(expr.operands()[1]);
+  }
   else if (expr.id() == ID_and)
   {
     result += "and";

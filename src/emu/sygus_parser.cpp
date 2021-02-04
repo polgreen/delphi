@@ -1,4 +1,5 @@
 #include "sygus_parser.h"
+#include "expr2sygus.h"
 
 #include <util/bv_arithmetic.h>
 #include <util/std_types.h>
@@ -326,12 +327,19 @@ function_application_exprt sygus_parsert::apply_function_to_variables(
   // get arguments
   for(std::size_t i = 0; i < f_type.domain().size(); i++)
   {
-    std::string var_id = id2string(f.parameters[i]) + suffix;
+    std::string init_var_id = id2string(f.parameters[i]) + suffix;
+    auto var_id = clean_id(init_var_id);
+    std::cout<<"Variable ID"<<var_id<<std::endl;
+    const typet &var_type = f_type.domain()[i];
 
     if(id_map.find(var_id) == id_map.end())
-      throw error() << "use of undeclared variable `" << var_id << '\'';
+    {
+      // declare variable
+      add_unique_id(var_id, exprt(ID_nil, var_type));
+      variable_set.insert(symbol_exprt(var_id, var_type));
+    }
 
-    arguments[i] = symbol_exprt(var_id, f_type.domain()[i]);
+    arguments[i] = symbol_exprt(var_id, var_type);
   }
 
   return function_application_exprt(
@@ -344,6 +352,8 @@ void sygus_parsert::generate_invariant_constraints()
   // pre-condition application
   function_application_exprt pre_f =
     apply_function_to_variables(PRE, UNPRIMED);
+
+  std::cout<<"Pref_f"<< pre_f.pretty()<<std::endl;  
 
   // invariant application
   function_application_exprt inv =
@@ -453,7 +463,8 @@ void sygus_parsert::GTerm()
     throw error("Unexpected GTerm");
   }
 }
-
+#include <iostream>
+#include "expr2sygus.h"
 void sygus_parsert::expand_function_applications(exprt &expr)
 {
   for(exprt &op : expr.operands())

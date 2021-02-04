@@ -9,16 +9,16 @@
 #include "../expr2sygus.h"
 #include <algorithm>
 
-  void replace_local_var(exprt &expr, const irep_idt &target, exprt &replacement)
+void replace_local_var(exprt &expr, const irep_idt &target, exprt &replacement)
+{
+  if (expr.id() == ID_symbol)
   {
-    if (expr.id() == ID_symbol)
-    {
-      if (to_symbol_expr(expr).get_identifier() == target)
-        expr = replacement;
-    }
-    for (auto &op : expr.operands())
-      replace_local_var(op, target, replacement);
+    if (to_symbol_expr(expr).get_identifier() == target)
+      expr = replacement;
   }
+  for (auto &op : expr.operands())
+    replace_local_var(op, target, replacement);
+}
 
 
 void expand_let_expressions(exprt &expr)
@@ -61,7 +61,8 @@ std::string nonterminalID(const typet &type)
   return "NTunknown";    
 }
 
-std::string production_rule(const typet &type, const mathematical_function_typet &functype)
+
+std::string production_rule(const typet &type, const mathematical_function_typet &functype, bool bitvecs)
 {
   std::string NTid = nonterminalID(type);
   std::string result = "("+NTid+" "+type2sygus(type) +"(";
@@ -73,7 +74,11 @@ std::string production_rule(const typet &type, const mathematical_function_typet
    count++; 
   }
   if(type.id()!=ID_bool)
-    result += expr2sygus(from_integer(0, type)) +" "+ expr2sygus(from_integer(1, type))+" "+ expr2sygus(from_integer(2, type))+" "+ expr2sygus(from_integer(3, type));
+    result += expr2sygus(from_integer(0, type)) +" "+ 
+              expr2sygus(from_integer(1, type))+" "+ 
+              expr2sygus(from_integer(2, type))+" "+ 
+              expr2sygus(from_integer(3, type)) + " "
+              +"(Constant "+type2sygus(type)+")";
 
   if(type.id()==ID_unsignedbv)
   {
@@ -81,6 +86,7 @@ std::string production_rule(const typet &type, const mathematical_function_typet
     result += "(bvsub "+NTid +" "+NTid+")";
     result += "(bvshl "+NTid +" "+NTid+")";
     result += "(bvlshr "+NTid +" "+NTid+")";
+    result += "(bvurem "+NTid +" "+NTid+")";
     // result += "(bvmul "+NTid +" "+NTid+")";
     // result += "(bvdiv "+NTid +" "+NTid+")";
     result += "(ite "+ nonterminalID(bool_typet())+ " "+NTid +" "+NTid+")";
@@ -93,8 +99,16 @@ std::string production_rule(const typet &type, const mathematical_function_typet
     result+="(or " + NTid +" "+NTid+")";
     result+="(not " +NTid+")"; 
     result+="(= " + nonbool +" "+nonbool+")";
-    result+="(>= " + nonbool +" "+nonbool+")";
-    result+="(> " + nonbool +" "+nonbool+")";
+    if (bitvecs)
+    {
+      result += "(bvuge " + nonbool + " " + nonbool + ")";
+      result += "(bvugt " + nonbool + " " + nonbool + ")";
+    }
+    else
+    {
+      result += "(>= " + nonbool + " " + nonbool + ")";
+      result += "(> " + nonbool + " " + nonbool + ")";
+    }
     result+="))\n";  
   }
   else if(type.id()==ID_integer)
@@ -109,11 +123,19 @@ std::string production_rule(const typet &type, const mathematical_function_typet
 return result;
 }
 
+std::string production_rule(const typet &type, bool bitvecs)
+{
+  std::vector<typet> domain;
+  mathematical_function_typet dummy_func_type(domain, type);
+  return production_rule(type, dummy_func_type , bitvecs);
+}
+
 std::string build_grammar(const symbol_exprt &function)
 {
   std::set<typet> types;
   bool integer=false;
   bool bv=false;
+  bool hasbool=false;
 
   INVARIANT(function.type().id()==ID_mathematical_function, "expected function type");
   auto func = to_mathematical_function_type(function.type());
@@ -123,6 +145,8 @@ std::string build_grammar(const symbol_exprt &function)
       integer=true;
     if(t.id()==ID_unsignedbv) 
       bv=true;
+    if(t.id()==ID_bool)
+      hasbool=true;  
     if(t!=func.codomain())
       types.insert(t);
   }
@@ -130,13 +154,19 @@ std::string build_grammar(const symbol_exprt &function)
   INVARIANT(types.size()<=2, "do not support more than 2 types in a grammar");
 
   std::string nonterminals = "(( "+ nonterminalID(func.codomain())+ " "  + type2sygus(func.codomain()) + ")";
-  std::string grammar = "(" + production_rule(func.codomain(), func);
+  std::string grammar = "(" + production_rule(func.codomain(), func,bv);
 
   for(const auto &t: types)
   {
     nonterminals += "("+ nonterminalID(t) +" " + type2sygus(t)+ ")";
-    grammar += production_rule(t, func) + "\n";
+    grammar += production_rule(t, func,bv) + "\n";
   }
+  if(!hasbool)
+  {
+    nonterminals += "("+ nonterminalID(bool_typet()) +" " + type2sygus(bool_typet())+ ")";
+    grammar += production_rule(bool_typet(),bv) + "\n";
+  }
+
   grammar +=")\n";
   nonterminals +=")\n";
   return nonterminals + grammar;
@@ -209,6 +239,7 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in)
       symbol_exprt symbol = symbol_exprt(to_mathematical_function_type(id.second.type));
       symbol.set_identifier(id.first);
       expand_let_expressions(id.second.definition);
+      clean_symbols(id.second.definition);
       last_solution.functions[symbol] = id.second.definition;
     }
   }
@@ -240,7 +271,8 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
   std::string stdin_filename;
 
 
-  argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-add-const-grammar", temp_file_problem()};
+  argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
+  // argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-grammar-cons=any-const", "--no-sygus-pbe", "--sygus-repair-const", temp_file_problem()};
 
   int res =
       run(argv[0], argv, stdin_filename, temp_file_stdout(), temp_file_stderr());

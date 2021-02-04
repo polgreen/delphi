@@ -164,10 +164,10 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
   }   
 }
 
-exprt oracle_interfacet::get_oracle_constraints(
+void oracle_interfacet::get_oracle_constraints(
   const counterexamplet &counterexample,
   const oracle_constraint_gent &oracle,
-  const problemt &problem,
+  problemt &problem,
   const solutiont &solution)
 {
   std::vector<std::string> argv;
@@ -194,7 +194,6 @@ exprt oracle_interfacet::get_oracle_constraints(
       else
       {
         log.error() << "no value in counterexample for " << format(input_parameter) << messaget::eom;
-        return true_exprt();
       }
     }
     else
@@ -225,30 +224,38 @@ exprt oracle_interfacet::get_oracle_constraints(
   {
     log.status() << "oracle " << oracle.binary_name << " has failed" << messaget::eom;
     assert(0);
-    return true_exprt();
   }
 
   // we assume that the oracle returns the result in SMT-LIB format,
   // separated by spaces
+  
   std::istringstream oracle_response_istream(stdout_stream.str());
   std::cout<<"Response is "<<stdout_stream.str()<<std::endl;
-
-  for(auto &return_parameter : oracle.return_parameters)
+  std::size_t count=0;
+  while(oracle_response_istream )
   {
-    auto response = oracle_response_parser(oracle_response_istream);
-    log.debug() << "oracle response for " << format(return_parameter)
-                << ": " << expr2sygus(response) << messaget::eom;
-    replace_symbol.set(to_symbol_expr(return_parameter), response);
-  }    
+    if(count > 10)
+      break;
+    count++;
+    for (auto &return_parameter : oracle.return_parameters)
+    {
+      try{
+      auto response = oracle_response_parser(oracle_response_istream);
+      log.debug() << "oracle response for " << format(return_parameter)
+                  << ": " << expr2sygus(response) << messaget::eom;
+      replace_symbol.set(to_symbol_expr(return_parameter), response);
+      }
+      catch(...){}
+    }
+      // build constraint
+    exprt constraint = oracle.constraint;
+    replace_symbol(constraint);
 
-  // build constraint
-  exprt constraint = oracle.constraint;
-  replace_symbol(constraint);
-
-  log.status() << "oracle constraint: "
+    log.status() << "oracle constraint: "
               << expr2sygus(constraint) << messaget::eom;
+    problem.synthesis_constraints.insert(constraint);
+  }
 
-  return constraint;
 }
 
 void oracle_interfacet::call_oracles(
@@ -264,8 +271,7 @@ void oracle_interfacet::call_oracles(
   for(const auto &oracle : problem.oracle_constraint_gens)
   {
     std::cout<<"Calling oracle constraint"<<std::endl;
-    auto constraints = get_oracle_constraints(counterexample, oracle, problem, solution);
-    problem.synthesis_constraints.insert(std::move(constraints));
+    get_oracle_constraints(counterexample, oracle, problem, solution);
   }
 
   // for all problem.oracle_assumption_gen
@@ -273,8 +279,7 @@ void oracle_interfacet::call_oracles(
   for(const auto &oracle : problem.oracle_assumption_gens)
   {
     std::cout<<"Calling oracle assumption"<<std::endl;
-    auto constraints = get_oracle_constraints(counterexample, oracle, problem, solution);
-    problem.assumptions.push_back(std::move(constraints));
+    get_oracle_constraints(counterexample, oracle, problem, solution);
   }
 }
 
