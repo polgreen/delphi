@@ -1,0 +1,64 @@
+
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <random>
+#include <chrono>
+#include <string>
+
+uint64_t timeSinceEpochMillisec() {
+  using namespace std::chrono;
+  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+
+
+void init(long &x, long&y)
+{
+	x = 1;
+	y = 10;
+}
+
+
+void unroll_trans(long &x, long &y)
+{
+	if(y>=x)
+	{
+		x =x+2;
+    y--;
+	}
+}
+
+std::string format(long x)
+{
+  std::string result;
+  if(x < 0)
+    result =  "(- " + std::to_string(x*-1) + " )";
+  else
+    result  = std::to_string(x);
+  return result;
+}
+
+int main(int argc, const char *argv[])
+{
+
+	long x,y;
+
+  srand (timeSinceEpochMillisec());
+  unsigned int unroll = rand()% 20; 
+
+
+	// arg 1 is x
+	// std::istringstream ssUnroll(argv[1]);
+	// if(!(ssUnroll >> unroll))
+	// 	std::cerr<<"Unable to parse unroll long "<<std::endl;
+
+  init(x,y);
+  for(int i=0; i<unroll; i++)
+    unroll_trans(x,y);
+
+	std::cout << format(x) << " " << format(y)<<std::endl;
+
+
+	return 0;
+}

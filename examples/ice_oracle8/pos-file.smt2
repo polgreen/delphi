@@ -1,0 +1,12 @@
+(declare-fun x () Int)
+(declare-fun x! () Int)
+(declare-fun y () Int)
+(declare-fun y! () Int)
+(define-fun pre-f (( parameter0 Int)( parameter1 Int))
+ Bool (and (<= x 1) (>= x 0) (= y (- 3))))
+(define-fun inv-f (( parameter0 Int)( parameter1 Int))
+ Bool (>= 1 (ite (> 0 (+ parameter1 3)) 2 parameter0)))
+
+(assert (and (not (inv-f x y))(pre-f x y)))
+(check-sat)
+(get-model)

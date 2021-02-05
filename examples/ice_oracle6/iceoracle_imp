@@ -1,0 +1,1 @@
+./iceoracle --impl minor2.sl "$@"

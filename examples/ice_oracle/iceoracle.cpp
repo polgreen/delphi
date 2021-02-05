@@ -68,6 +68,7 @@ void positive(std::ostream &out, std::string candidate, std::string pref, std::s
 	out << "(get-model)\n";
 }
 
+
 void negative(std::ostream &out, std::string candidate, std::string postf, std::string variable_decls)
 {
 	out << variable_decls;
