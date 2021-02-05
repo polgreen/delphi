@@ -69,7 +69,7 @@ int main(int argc, const char *argv[])
 	long x,y;
 
   srand (timeSinceEpochMillisec());
-  unsigned int unroll = rand()% 10; 
+  unsigned int unroll = rand()%30; 
 
 
 	// arg 1 is x

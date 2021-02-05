@@ -12,7 +12,10 @@ void *malloc(unsigned long);
 
 unsigned char target(unsigned char pixel)
 {
-  return ~ pixel; // invert
+  if(pixel>20)
+    return pixel-20;
+else
+  return pixel;
 }
 
 int main()

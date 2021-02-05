@@ -6,7 +6,7 @@
 
 unsigned char target(unsigned char pixel)
 {
-  return ~ pixel; // invert
+  return 0 - (pixel + 1);
 }
 
 int main()

@@ -283,7 +283,7 @@ sygus_parsert::signature_with_parameter_idst sygus_parsert::inv_function_signatu
   auto type = mathematical_function_typet(domain, bool_typet());
   return signature_with_parameter_idst(type, parameter_ids);
 }
-
+#include <iostream>
 function_application_exprt sygus_parsert::apply_function_to_variables(
   invariant_constraint_functiont function_type,
   invariant_variablet var_use)
@@ -467,6 +467,7 @@ void sygus_parsert::GTerm()
 #include "expr2sygus.h"
 void sygus_parsert::expand_function_applications(exprt &expr)
 {
+  std::cout<<"Expanding "<<expr2sygus(expr)<<std::endl;
   for(exprt &op : expr.operands())
     expand_function_applications(op);
 

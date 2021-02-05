@@ -1,5 +1,9 @@
 unsigned char tweak(unsigned char parameter0$0) {
-  return 0;
+  if(parameter0$0==0)
+    return 20;
+  if(parameter0$0==10)
+    return 30;
+  return 120;
 }
 
 

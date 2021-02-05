@@ -5,7 +5,7 @@
 (define-fun post-f (( parameter0 Int)( parameter1 Int))
  Bool (and (<= x 1) (>= y (- 3))))
 (define-fun inv-f (( parameter0 Int)( parameter1 Int))
- Bool (>= 1 (ite (> 0 (+ parameter1 3)) 2 parameter0)))
+ Bool (> parameter1 (ite (> parameter0 1) parameter1 (- 4))))
 
 (assert (and (inv-f x y)(not (post-f x y))))
 (check-sat)
