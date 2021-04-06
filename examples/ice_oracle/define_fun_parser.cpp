@@ -97,11 +97,14 @@ public:
   {
     std::map<irep_idt, exprt> result;
     if (next_token() != smt2_tokenizert::OPEN)
-      throw error("expected model");
+      throw error("expected model, buffer was not open token");
 
-    if(next_token() != smt2_tokenizert::SYMBOL ||
-       smt2_tokenizer.get_buffer() != "model")
-      throw error("expected model");
+    if(smt2_tokenizer.peek() == smt2_tokenizert::SYMBOL)
+    {
+      if(smt2_tokenizer.get_buffer()!="model")
+        throw error ("expected model");
+    }
+
 
     while(smt2_tokenizer.peek() != smt2_tokenizert::CLOSE)
     {

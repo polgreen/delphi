@@ -44,7 +44,6 @@ public:
   {
     if(next_token() != smt2_tokenizert::OPEN)
     {
-      std::cout<<smt2_tokenizer.get_buffer()<<std::endl;
       throw error("expected (define-fun");
     }
 
@@ -99,9 +98,9 @@ public:
     if (next_token() != smt2_tokenizert::OPEN)
       throw error("expected model");
 
-    if(next_token() != smt2_tokenizert::SYMBOL ||
-       smt2_tokenizer.get_buffer() != "model")
-      throw error("expected model");
+    if(smt2_tokenizer.peek() == smt2_tokenizert::SYMBOL)
+      if(smt2_tokenizer.get_buffer() != "model")
+        throw error("expected model, got different buffer");
 
     while(smt2_tokenizer.peek() != smt2_tokenizert::CLOSE)
     {

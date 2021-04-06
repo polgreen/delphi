@@ -23,12 +23,20 @@ include ../../$(CPROVER_DIR)/src/common
 
 CLEANFILES = fastsynth$(EXEEXT)
 
-all: smt2c$(EXEEXT) sin_oracle$(EXEEXT) array_oracle$(EXEEXT) stb_image$(OBJEXT) pixel_reference$(EXEEXT)
+all: smt2c$(EXEEXT) sin_oracle$(EXEEXT) cos_oracle$(EXEEXT) sin_oracle8bits$(EXEEXT) cos_oracle8bits$(EXEEXT) array_oracle$(EXEEXT) stb_image$(OBJEXT) pixel_reference$(EXEEXT)
 
 stb_image$(OBJEXT): stb_image.c stb_image.h
 	$(CC) -c stb_image.c
 
 sin_oracle$(EXEEXT): sin_oracle.c
+	$(CC) $< -o $@
+
+sin_oracle8bits$(EXEEXT): sin_oracle8bits.c
+	$(CC) $< -o $@
+ 
+cos_oracle$(EXEEXT): cos_oracle.c
+	$(CC) $< -o $@
+cos_oracle8bits$(EXEEXT): cos_oracle8bits.c
 	$(CC) $< -o $@
 
 array_oracle$(EXEEXT): array_oracle.c
