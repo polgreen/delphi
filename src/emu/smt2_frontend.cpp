@@ -24,7 +24,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <solvers/flattening/boolbv.h>
 
 #include "verification/oracle_solver.h"
-#include "verification/oracle_solver2.h"
+#include "verification/negation_oracle_solver.h"
 
 class smt2_solvert:public smt2_parsert
 {
