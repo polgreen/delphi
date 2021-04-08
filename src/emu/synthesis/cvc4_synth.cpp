@@ -191,8 +191,13 @@ std::string cvc4_syntht::build_query(const problemt &problem)
   }
 
 
-  for(const auto &c: problem.synthesis_constraints)  
+  std::size_t count=0;
+  for(const auto &c: problem.synthesis_constraints)
+  {  
+
     query += "(constraint " + expr2sygus(c)+ ")\n";
+    count++;  
+  }  
 
   query +="(check-synth)\n";
   return query;

@@ -24,14 +24,15 @@
 
 #include <iostream>
 
-#define EMU_OPTIONS                                                      \
+#define EMU_OPTIONS                                                       \
   "(verbosity): "                                                         \
   "(smt) "                                                                \
   "(bitblast) "                                                           \
   "(simplify) "                                                           \
-  "(cvc4) "                                                           \
-  "(constants) "                                                           \
-  "(grammar) "                                                           \
+  "(cvc4) "                                                               \
+  "(constants) "                                                          \
+  "(grammar) "                                                            \
+  "(negation-solver) "                                                    \
 /// File ending of SMT2 files. Used to determine the language frontend that
 /// shall be used.
 #define SMT2_FILE_ENDING ".smt2"

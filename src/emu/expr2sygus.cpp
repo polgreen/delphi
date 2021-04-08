@@ -226,6 +226,9 @@ std::string expr2sygus(const exprt &expr)
   else if (expr.id() == ID_lshr)
     result += "bvlshr " + expr2sygus(expr.operands()[0]) + " " +
               expr2sygus(expr.operands()[1]);
+  else if (expr.id() == ID_ashr)
+    result += "bvashr " + expr2sygus(expr.operands()[0]) + " " +
+              expr2sygus(expr.operands()[1]);
   else if (expr.id() == ID_shl)
     result += "bvlshl " + expr2sygus(expr.operands()[0]) + " " +
               expr2sygus(expr.operands()[1]);
