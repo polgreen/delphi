@@ -13,15 +13,28 @@
 #include <iostream>
 
 negation_oracle_solvert::negation_oracle_solvert(
-  decision_proceduret &__negation_sub_solver,
     decision_proceduret &__sub_solver,
+    decision_proceduret &__negation_sub_solver,
   message_handlert &__message_handler) :
   oracle_solvert(__sub_solver, __message_handler),
     negation_sub_solver(__negation_sub_solver)
 {
 }
 
+exprt negation_oracle_solvert::handle(const exprt &expr)
+{
+  if(expr.is_constant())
+    return expr;
+  else
+  {
+    symbol_exprt symbol_expr("H"+std::to_string(handle_counter++), expr.type());
+    auto equality = equal_exprt(symbol_expr, expr);
 
+    sub_solver.set_to(equality, true);
+    negation_sub_solver.set_to(equality, true);
+    return std::move(symbol_expr);
+  }
+}
 
 void negation_oracle_solvert::set_to(const exprt &expr, bool value)
 {
@@ -56,19 +69,17 @@ void negation_oracle_solvert::set_to(const exprt &expr, bool value)
       }
     }
   });
-
   sub_solver.set_to(expr, value);
+  // we flip everything except the assumptions in the negation solver
   negation_sub_solver.set_to(expr, !value);
 }
 
 
-
-negation_oracle_solvert::check_resultt negation_oracle_solvert::check_oracle(
+void negation_oracle_solvert::check_oracle(
   const function_application_exprt &application_expr,
   const applicationt &application)
 {
-  
-  // evaluate the argument handles to get concrete inputs
+    // evaluate the argument handles to get concrete inputs
   std::vector<exprt> inputs;
   inputs.reserve(application.argument_handles.size());
 
@@ -79,22 +90,18 @@ negation_oracle_solvert::check_resultt negation_oracle_solvert::check_oracle(
   } 
 
    exprt response = call_oracle(application, inputs);
+   // return without adding implication
    if(response==nil_exprt())
-     return check_resultt::ERROR;
+     return;
 
-
-  // check whether the result is consistent with the model
-  if(response == negation_sub_solver.get(application.handle))
+  // // check whether the result is consistent with the model
+  // if(response == negation_sub_solver.get(application.handle))
+  // {
+  //   log.debug() << "Response matches " << expr2sygus(negation_sub_solver.get(application.handle))<<messaget::eom;
+  //   // return CONSISTENT; // done, SAT
+  // }
   {
-    log.debug() << "Response matches " << expr2sygus(get(application.handle))<<messaget::eom;
-    return CONSISTENT; // done, SAT
-  }
-  {
-
     function_application_exprt func_app(application_expr.function(), inputs);
-
-    log.debug() << "Response does not match " << expr2sygus(get(application.handle)) << messaget::eom;
-
     // add a constraint that enforces this equality
     auto response_equality = equal_exprt(application.handle, response);
 
@@ -102,21 +109,23 @@ negation_oracle_solvert::check_resultt negation_oracle_solvert::check_oracle(
 
     for (auto &argument_handle : application.argument_handles)
       input_constraints.push_back(equal_exprt(argument_handle, get(argument_handle)));
-
+    
     // add 'all inputs equal' => 'return value equal'
     auto implication =
         implies_exprt(
             conjunction(input_constraints),
             response_equality);
-    sub_solver.set_to_true(implication);
-    // this is actually setting to true, because set_to negates the value for the negation sub solver
-    negation_sub_solver.set_to_false(implication);
-    // set_to_true(implication);        
-
+    sub_solver.set_to(implication, true);
+    negation_sub_solver.set_to(implication, true);
   }
-  return INCONSISTENT;
 }
 
+// it doesn't matter whether the oracles are consistent
+void negation_oracle_solvert::check_negation_solver_oracles()
+{
+  for(const auto &application : applications)
+    check_oracle(application.first, application.second);
+}
 
 
 decision_proceduret::resultt negation_oracle_solvert::dec_solve()
@@ -134,19 +143,26 @@ decision_proceduret::resultt negation_oracle_solvert::dec_solve()
       case resultt::D_ERROR:
         return resultt::D_ERROR;
       case resultt::D_SATISFIABLE:
-        log.debug()<<"Found satisfing counterexample \n";
+        log.status()<<"Found satisfing counterexample \n" <<log.eom;
       // currently do nothing, but consider calling oracles here
     }
 
     switch(negation_sub_solver())
     {
     case resultt::D_SATISFIABLE:
-      check_oracles();
+      check_negation_solver_oracles();
       break;
 
     case resultt::D_UNSATISFIABLE:
-      return resultt::D_SATISFIABLE;
-
+      log.status()<<"Found no negation subsolver assignment, problem is sat"<<log.eom;
+      // call sub solver to get assignment
+      if(sub_solver()==resultt::D_SATISFIABLE)
+        return resultt::D_SATISFIABLE;
+      else
+      {
+        log.status()<<"Result unknown" << log.eom;
+        return resultt::D_ERROR;
+      }
     case resultt::D_ERROR:
       return resultt::D_ERROR;
     }

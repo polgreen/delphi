@@ -16,17 +16,21 @@ class negation_oracle_solvert : public oracle_solvert
 {
 public:
   negation_oracle_solvert(
-    decision_proceduret &negation_sub_solver,
     decision_proceduret &sub_solver,
+    decision_proceduret &negation_sub_solver,
     message_handlert &);
 
   void set_to(const exprt &expr, bool value) override;
+  exprt handle(const exprt &expr) override;
+
 
 
 protected:
   resultt dec_solve() override;
   decision_proceduret &negation_sub_solver;
-  check_resultt check_oracle(const function_application_exprt &, const applicationt &);
+  void check_oracle(const function_application_exprt &, const applicationt &);
+  void check_negation_solver_oracles();
+
 
 
 };
