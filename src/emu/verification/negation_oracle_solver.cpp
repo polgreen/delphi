@@ -85,7 +85,7 @@ void negation_oracle_solvert::check_oracle(
 
   for(auto &argument_handle : application.argument_handles)
   {
-    auto res = get(argument_handle);
+    auto res = negation_sub_solver.get(argument_handle);
     inputs.push_back(res);
   } 
 
@@ -108,7 +108,7 @@ void negation_oracle_solvert::check_oracle(
     exprt::operandst input_constraints;
 
     for (auto &argument_handle : application.argument_handles)
-      input_constraints.push_back(equal_exprt(argument_handle, get(argument_handle)));
+      input_constraints.push_back(equal_exprt(argument_handle, negation_sub_solver.get(argument_handle)));
     
     // add 'all inputs equal' => 'return value equal'
     auto implication =
