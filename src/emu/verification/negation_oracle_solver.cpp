@@ -1,4 +1,4 @@
-#include "oracle_solver2.h"
+#include "negation_oracle_solver.h"
 
 #include "oracle_response_parser.h"
 #include "../expr2sygus.h"
