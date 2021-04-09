@@ -183,7 +183,10 @@ decision_proceduret::resultt negation_oracle_solvert::dec_solve()
         log.status()<<"Found satisfing counterexample \n" <<log.eom;
         // check if counterexample is consistent. This is probably the place where we return SAT
         if(check_oracles()==CONSISTENT)
+        {
+          log.status()<<"consistent with oracles, problem is sat\n" <<log.eom;
           return resultt::D_SATISFIABLE;
+        }
     }
 
     switch(negation_sub_solver())
@@ -194,7 +197,7 @@ decision_proceduret::resultt negation_oracle_solvert::dec_solve()
       break;
 
     case resultt::D_UNSATISFIABLE:
-      log.status()<<"Found no negation subsolver assignment, problem is sat (this will probably never happen)"<<log.eom;
+      log.status()<<"Found no negation subsolver assignment, problem is sat"<<log.eom;
       // call sub solver to get assignment
       if(sub_solver()==resultt::D_SATISFIABLE)
         return resultt::D_SATISFIABLE;
