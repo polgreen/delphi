@@ -157,6 +157,13 @@ exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std
 
 exprt oracle_solvert::call_oracle(
     const applicationt &application, const std::vector<exprt> &inputs)
+    {
+      bool is_new = false;
+      return call_oracle(application, inputs, is_new);
+    }
+
+exprt oracle_solvert::call_oracle(
+    const applicationt &application, const std::vector<exprt> &inputs, bool &is_new_call)
 {
   if(cache && oracle_call_history.find(application.binary_name) == oracle_call_history.end())
   {
@@ -167,6 +174,7 @@ exprt oracle_solvert::call_oracle(
 
   if (oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
   {
+    is_new_call = true;
     std::vector<std::string> argv;
     argv.push_back(application.binary_name);
 
@@ -184,6 +192,8 @@ exprt oracle_solvert::call_oracle(
   }
   else
   {
+    std::cout<<"historical oracle cal"<<std::endl;
+    is_new_call = false;
     response = oracle_call_history[application.binary_name][inputs];
   }
 
