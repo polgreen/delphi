@@ -141,29 +141,6 @@ void negation_oracle_solvert::check_negation_solver_oracles()
     check_oracle(application.first, application.second, true);
 }
 
-// oracle_solvert::check_resultt oracle_solvert::check_positive_solver_oracles()
-// {
-//   oracle_solvert::check_resultt result = CONSISTENT;
-
-//   for(const auto &application : applications)
-//   {
-//     switch(check_oracle(application.first, application.second, false))
-//     {
-//     case INCONSISTENT:
-//       result = INCONSISTENT;
-//       break;
-
-//     case CONSISTENT:
-//       break;
-
-//     case ERROR:
-//       return ERROR; // abort
-//     }
-//   }
-
-//   return result;
-// }
-
 
 decision_proceduret::resultt negation_oracle_solvert::dec_solve()
 {
