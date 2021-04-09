@@ -28,8 +28,9 @@ public:
 protected:
   resultt dec_solve() override;
   decision_proceduret &negation_sub_solver;
-  void check_oracle(const function_application_exprt &, const applicationt &);
+  void check_oracle(const function_application_exprt &, const applicationt &, bool use_negation_solver);
   void check_negation_solver_oracles();
+  // void check_positive_solver_oracles();
 
 
 
