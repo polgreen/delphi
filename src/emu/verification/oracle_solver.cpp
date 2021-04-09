@@ -247,7 +247,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
         implies_exprt(
             conjunction(input_constraints),
             response_equality);
-    set_to_true(implication);        
+    sub_solver.set_to_true(implication);        
 
   }
   return INCONSISTENT;
