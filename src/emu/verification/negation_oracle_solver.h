@@ -30,6 +30,9 @@ protected:
   decision_proceduret &negation_sub_solver;
   void check_oracle(const function_application_exprt &, const applicationt &, bool use_negation_solver);
   void check_negation_solver_oracles();
+  decision_proceduret::resultt get_model();
+  bool try_positive_model;
+
 };
 
 #endif // CPROVER_FASTSYNTH_ORACLE_SOLVER_2_H
