@@ -142,4 +142,4 @@
 (assert (= (_ bv0 63) (bvand ((_ rotate_right 1) shift3) shift2)))
 (assert (= (_ bv0 63) (bvand ((_ rotate_right 1) shift2) shift1)))
 (check-sat)
-(exit)
+(get-model)

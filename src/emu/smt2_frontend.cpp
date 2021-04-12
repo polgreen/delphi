@@ -480,7 +480,7 @@ int smt2_frontend(const cmdlinet &cmdline)
   std::string logic="ALL";
  
 // warning simplify won't work with oracles until freezing is implemented.
-  if (cmdline.isset("negation-solver"))
+  if (!cmdline.isset("no-negation-solver"))
   {
     if (cmdline.isset("bitblast") && cmdline.isset("simplify"))
     {
