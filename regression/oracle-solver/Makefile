@@ -2,7 +2,7 @@ default: test
 
 .PHONY: test
 test:
-	@../../lib/cbmc/regression/test.pl -p -c "../../../src/emu/emu"
+	@../../lib/cbmc/regression/test.pl -p -c "../../../src/delphi/delphi"
 
 .PHONY: show
 show:
