@@ -49,7 +49,7 @@ protected:
   void setup_commands();
 
   // grammars
-  void NTDef_seq();
+  std::string NTDef_seq();
   void GTerm_seq();
   void NTDef();
   void GTerm();

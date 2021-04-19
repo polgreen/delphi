@@ -158,7 +158,7 @@ void sygus_parsert::setup_commands()
       signature.type = mathematical_function_typet({}, signature.type);
     }
 
-    NTDef_seq();
+    std::string grammar = NTDef_seq();
 
     auto f_it = id_map.emplace(
       std::piecewise_construct,
@@ -382,10 +382,11 @@ void sygus_parsert::generate_invariant_constraints()
   constraints.push_back(post_condition);
 }
 
-void sygus_parsert::NTDef_seq()
+std::string sygus_parsert::NTDef_seq()
 {
   // it is not necessary to give a syntactic template
   uint8_t openCount = 0u;
+  std::string result;
   while(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE || openCount)
   {
     switch(smt2_tokenizer.next_token())
@@ -405,7 +406,10 @@ void sygus_parsert::NTDef_seq()
       // Ignore grammar.
       break;
     }
+    result+=smt2_tokenizer.get_buffer();
   }
+  result+=")";
+  return result;
 }
 
 void sygus_parsert::GTerm_seq()
