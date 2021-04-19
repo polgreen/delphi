@@ -14,7 +14,6 @@
 
  Module: Oracle Guided Inductive Synthesis loop
  Author: Elizabeth Polgreen, epolgreen@gmail.com. 
-         Daniel Kroening, kroening@kroening.com
 \*******************************************************************/
 
 #include "ogis.h"

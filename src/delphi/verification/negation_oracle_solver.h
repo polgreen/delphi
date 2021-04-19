@@ -7,7 +7,7 @@
 #include <util/mathematical_expr.h>
 #include <util/message.h>
 
-#include <emu/oracle_constraint_gen.h>
+#include <delphi/oracle_constraint_gen.h>
 
 #include <unordered_set>
 #include "oracle_solver.h"

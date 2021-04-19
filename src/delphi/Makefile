@@ -1,4 +1,4 @@
-SRC = emu_main.cpp expr2sygus.cpp ogis.cpp sygus_parser.cpp sygus_frontend.cpp \
+SRC = delphi_main.cpp expr2sygus.cpp ogis.cpp sygus_parser.cpp sygus_frontend.cpp \
 synthesis/simple_synth.cpp synthesis/synth_encoding.cpp smt2_frontend.cpp \
 verification/oracle_interface.cpp \
 verification/oracle_solver.cpp \
@@ -29,9 +29,9 @@ include ../../$(CPROVER_DIR)/src/common
 
 CLEANFILES = fastsynth$(EXEEXT)
 
-all: emu$(EXEEXT)
+all: delphi$(EXEEXT)
 
 ###############################################################################
 
-emu$(EXEEXT): $(OBJ)
+delphi$(EXEEXT): $(OBJ)
 	$(LINKBIN)
