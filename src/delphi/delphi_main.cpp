@@ -1,20 +1,6 @@
 /*******************************************************************\
- *       \|/
-       -=(')
-         ;;
-        //
-       //
-      : '.---.__
-      |  --_-_)__)
-      `.____,'
-         \  \
-       ___\  \
-      (        \     EMU
-               /
-
- Module: EMU Main Module
+ Module: Delphi Main Module
  Author: Elizabeth Polgreen, epolgreen@gmail.com. 
-         Daniel Kroening, kroening@kroening.com
 \*******************************************************************/
 
 #include <util/cmdline.h>
@@ -24,7 +10,7 @@
 
 #include <iostream>
 
-#define EMU_OPTIONS                                                       \
+#define DELPHI_OPTIONS                                                       \
   "(verbosity): "                                                         \
   "(smt) "                                                                \
   "(bitblast) "                                                           \
@@ -46,21 +32,21 @@ void help(std::ostream &out)
   // clang-format off
   out <<
      "\n"
-     "* *                       EMU-Synt                          * *\n "
-     "* *         Elizabeth's Minimalist Universal Synthesize     * *\n ";
+     "* *                          DELPHI                            * *\n"
+     "* *        Synthesis and Satisfiability modulo oracles         * *\n";
   out  <<
-     "* *                                                          * *\n"
+     "* *                                                            * *\n"
      "\n"
-     "Usage:                       Purpose:\n"
+     "Usage:                           Purpose:\n"
      "\n"
-     " emu [-?] [-h] [--help]       show help\n"
-     " emu file.sl ...              source file names\n"
+     " delphi [-?] [-h] [--help]       show help\n"
+     " delphi file.sl ...              source file names\n"
      "\n"
      "\n"
      "Command line options\n"
-     " --smt                          use Z3 solver as oracle solver subsolver (default) \n"
-     " --bitblast                     use bitblasting solver as oracle solver subsolver\n"
-     " --cvc4                         use cvc4 for synthesis\n"
+     " --smt                           use Z3 solver as oracle solver subsolver (default) \n"
+     " --bitblast                      use bitblasting solver as oracle solver subsolver\n"
+     " --cvc4                          use cvc4 for synthesis\n"
      "\n"
      "\n";
     // clang-format on
@@ -69,7 +55,7 @@ void help(std::ostream &out)
 int main(int argc, const char *argv[])
 {
   cmdlinet cmdline;
-  if(cmdline.parse(argc, argv, EMU_OPTIONS))
+  if(cmdline.parse(argc, argv, DELPHI_OPTIONS))
   {
     std::cerr << "Usage error\n";
     help(std::cerr);

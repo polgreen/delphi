@@ -1,8 +1,8 @@
-DIRS = emu
+DIRS = delphi
 
 include config.inc
 
-all: emu.dir
+all: delphi.dir
 
 .PHONY: $(DIRS)
 
@@ -11,7 +11,7 @@ $(patsubst %, %.dir, $(DIRS)):
 
 # Dependencies
 
-emu.dir: cprover.dir
+delphi.dir: cprover.dir
 
 # building cbmc proper
 .PHONY: cprover.dir
