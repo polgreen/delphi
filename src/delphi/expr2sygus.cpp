@@ -127,7 +127,7 @@ std::string synth_fun_dec(const irep_idt &id, const synth_functiont &definition)
   std::string nts = "(";
   std::string rules = "(";
   // declare nonterminals
-  for(int i=0; i< definition.grammar.nt_ids.size(); i++)
+  for(std::size_t i=0; i< definition.grammar.nt_ids.size(); i++)
   {
     auto &nt = definition.grammar.nt_ids[i];
     auto &rule = definition.grammar.production_rules.at(nt);
