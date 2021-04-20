@@ -186,8 +186,8 @@ std::string cvc4_syntht::build_query(const problemt &problem)
   // declare function
   for(const auto &f: problem.synthesis_functions)
   {
-    std::string grammar = use_grammar ? build_grammar(f) : " ";
-    query += synth_fun_dec(f, grammar) + "\n";
+    // std::string grammar = use_grammar ? build_grammar(f) : " ";
+    query += synth_fun_dec(f.first, f.second) + "\n";
   }
 
 
@@ -307,8 +307,8 @@ cvc4_syntht::resultt cvc4_syntht::operator()(const problemt &problem)
     {
       for (const auto &f : problem.synthesis_functions)
       {
-        last_solution.functions[f] =
-            from_integer(0, to_mathematical_function_type(f.type()).codomain());
+        last_solution.functions[symbol_exprt(f.first, f.second.type)] =
+            from_integer(0, to_mathematical_function_type(f.second.type).codomain());
         
       }
     }

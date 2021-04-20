@@ -3,6 +3,7 @@
 
 #include <util/expr.h>
 #include "sygus_parser.h"
+#include "syntactic_template.h"
 
 class problemt
 {
@@ -27,7 +28,8 @@ public:
   std::vector<oracle_constraint_gent> oracle_assumption_gens, oracle_constraint_gens;
   // universally quantified variables
   std::set<exprt> free_variables;
-  std::set <symbol_exprt> synthesis_functions;
+  std::map<irep_idt, synth_functiont> synthesis_functions;
+
   // functions with an external oracle implementation
   smt2_parsert::oracle_fun_mapt oracle_symbols;
   std::set<irep_idt> second_order_oracles;

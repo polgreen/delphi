@@ -134,7 +134,7 @@ public:
   std::size_t program_size;
   bool enable_bitwise;
   bool enable_division;
-  std::set<symbol_exprt> synth_funs;
+  std::map<irep_idt, synth_functiont> synth_funs;
 
   using constraintst=std::list<exprt>;
   constraintst constraints;

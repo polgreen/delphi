@@ -112,6 +112,38 @@ std::string expr2sygus_fun_dec(const symbol_exprt &function)
   return result;
 }
 
+std::string synth_fun_dec(const irep_idt &id, const synth_functiont &definition)
+{
+  INVARIANT(definition.type.id()==ID_mathematical_function, "unsupported function definition type");
+  std::string result = "(synth-fun " + clean_id(id) + " (";
+  const auto &func_type = to_mathematical_function_type(definition.type);
+
+  for(std::size_t i=0; i<definition.parameters.size(); i++)
+  {
+    result+="(" + clean_id(definition.parameters[i]) + " "+type2sygus(func_type.domain()[i]) + ")"; 
+  }
+  result +=")\n " + type2sygus(func_type.codomain()) + "\n";
+
+  std::string nts = "(";
+  std::string rules = "(";
+  // declare nonterminals
+  for(int i=0; i< definition.grammar.nt_ids.size(); i++)
+  {
+    auto &nt = definition.grammar.nt_ids[i];
+    auto &rule = definition.grammar.production_rules.at(nt);
+    nts += "(" + id2string(nt) + " " + type2sygus(rule[0].type()) + ")";
+    rules +="( " + id2string(nt) + " " + type2sygus(rule[0].type()) + "(";
+    for(const auto &r: rule)
+     rules += expr2sygus(r) + " ";
+    rules +="))\n";
+  }
+  nts+=")\n";
+  rules +=")\n";
+  result += nts + rules + ")\n";
+  return result;
+}
+
+
 std::string synth_fun_dec(const symbol_exprt &function, std::string grammar)
 {
   INVARIANT(function.type().id()==ID_mathematical_function, "unsupported function definition type");

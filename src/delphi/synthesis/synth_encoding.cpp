@@ -537,7 +537,7 @@ exprt synth_encodingt::operator()(const exprt &expr)
   {
     auto tmp=to_function_application_expr(expr);
 
-    auto &func_id = to_symbol_expr(tmp.function());
+    const irep_idt &func_id = to_symbol_expr(tmp.function()).get_identifier();
     if(synth_funs.find(func_id) == synth_funs.end())
     {
       exprt tmp = expr;

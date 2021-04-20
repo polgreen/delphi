@@ -142,8 +142,8 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decisi
         // if(to_mathematical_function_type(f.type()).codomain().id()==ID_bool)
         //   solution.functions[f]=true_exprt();
         // else
-          last_solution.functions[f]=
-          from_integer(0, to_mathematical_function_type(f.type()).codomain());
+          last_solution.functions[symbol_exprt(f.first, f.second.type)]=
+          from_integer(0, to_mathematical_function_type(f.second.type).codomain());
       }
     }
     return simple_syntht::resultt::CANDIDATE;

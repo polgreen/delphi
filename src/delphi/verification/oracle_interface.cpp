@@ -40,7 +40,7 @@ std::vector<std::vector<exprt>> find_synth_fun(const exprt &expr, const problemt
   if(expr.id()==ID_mathematical_function)
   {
     auto tmp=to_function_application_expr(expr);
-    if(problem.synthesis_functions.find(to_symbol_expr(tmp.function()))!=problem.synthesis_functions.end())
+    if(problem.synthesis_functions.find(to_symbol_expr(tmp.function()).get_identifier())!=problem.synthesis_functions.end())
     {
       result.push_back(tmp.arguments());
     }
@@ -184,7 +184,7 @@ void oracle_interfacet::get_oracle_constraints(
     if(value_it == counterexample.assignment.end())
     {
       // is this a synthesis function
-      if(problem.synthesis_functions.find(input_parameter)!=problem.synthesis_functions.end())
+      if(problem.synthesis_functions.find(input_parameter.get_identifier())!=problem.synthesis_functions.end())
       {
         if(solution.functions.find(input_parameter)==solution.functions.end())
           stream << expr2sygus_fun_def(input_parameter, true_exprt());

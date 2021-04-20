@@ -33,7 +33,7 @@ problemt build_problem(sygus_parsert &parser)
   // for(const auto &v: parser.full_let_variable_map)
   //   problem.free_variables.insert(symbol_exprt(v.first, v.second));
 
-  problem.synthesis_functions = parser.synth_fun_set;
+  problem.synthesis_functions = parser.synthesis_functions;
 
   problem.oracle_symbols = parser.oracle_symbols;
   for(const auto &symbol: parser.oracle_symbols)
