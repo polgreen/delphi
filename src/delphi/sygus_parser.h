@@ -9,6 +9,8 @@
 
 #include "oracle_constraint_gen.h"
 
+#include "syntactic_template.h"
+
 class sygus_parsert: public smt2_parsert
 {
 public:
@@ -29,7 +31,8 @@ public:
   std::vector<oracle_constraint_gent> oracle_constraint_gens;
   std::string logic, action;
 
-  std::set<symbol_exprt> synth_fun_set;
+  // std::set<symbol_exprt> synth_fun_set;
+  std::map<irep_idt, synth_functiont> synthesis_functions;
   std::set<symbol_exprt> variable_set;
 
   signature_with_parameter_idst inv_function_signature();
@@ -49,10 +52,9 @@ protected:
   void setup_commands();
 
   // grammars
-  std::string NTDef_seq();
-  void GTerm_seq();
-  void NTDef();
-  void GTerm();
+  syntactic_templatet NTDef_seq();
+  std::vector<exprt> GTerm_seq(const symbol_exprt &nonterminal);
+  symbol_exprt NTDef();
   void replace_higher_order_logic(exprt &expr);
 
 };

@@ -148,9 +148,6 @@ void sygus_parsert::setup_commands()
     auto signature=(id=="inv-f")?
       inv_function_signature() : function_signature_definition();
 
-    // restore renamings
-    std::swap(renaming_map, old_renaming_map);
-
     // we'll tweak the type in case there are no parameters
     if(signature.type.id() != ID_mathematical_function)
     {
@@ -158,7 +155,7 @@ void sygus_parsert::setup_commands()
       signature.type = mathematical_function_typet({}, signature.type);
     }
 
-    std::string grammar = NTDef_seq();
+    syntactic_templatet grammar = NTDef_seq();
 
     auto f_it = id_map.emplace(
       std::piecewise_construct,
@@ -168,7 +165,11 @@ void sygus_parsert::setup_commands()
     f_it.first->second.type = signature.type;
     f_it.first->second.parameters = signature.parameters;
 
-    synth_fun_set.insert(symbol_exprt(id, signature.type));
+    synthesis_functions.insert( 
+      std::pair<irep_idt, synth_functiont> 
+      (id, synth_functiont(grammar, signature.type, signature.parameters)));
+    // restore renamings
+    std::swap(renaming_map, old_renaming_map);
   };
 
   commands["synth-inv"] = commands["synth-fun"];
@@ -283,7 +284,7 @@ sygus_parsert::signature_with_parameter_idst sygus_parsert::inv_function_signatu
   auto type = mathematical_function_typet(domain, bool_typet());
   return signature_with_parameter_idst(type, parameter_ids);
 }
-#include <iostream>
+
 function_application_exprt sygus_parsert::apply_function_to_variables(
   invariant_constraint_functiont function_type,
   invariant_variablet var_use)
@@ -329,7 +330,6 @@ function_application_exprt sygus_parsert::apply_function_to_variables(
   {
     std::string init_var_id = id2string(f.parameters[i]) + suffix;
     auto var_id = clean_id(init_var_id);
-    std::cout<<"Variable ID"<<var_id<<std::endl;
     const typet &var_type = f_type.domain()[i];
 
     if(id_map.find(var_id) == id_map.end())
@@ -352,8 +352,6 @@ void sygus_parsert::generate_invariant_constraints()
   // pre-condition application
   function_application_exprt pre_f =
     apply_function_to_variables(PRE, UNPRIMED);
-
-  std::cout<<"Pref_f"<< pre_f.pretty()<<std::endl;  
 
   // invariant application
   function_application_exprt inv =
@@ -382,47 +380,79 @@ void sygus_parsert::generate_invariant_constraints()
   constraints.push_back(post_condition);
 }
 
-std::string sygus_parsert::NTDef_seq()
+syntactic_templatet sygus_parsert::NTDef_seq()
 {
+  syntactic_templatet result;
+  std::vector<symbol_exprt> non_terminals;
+
   // it is not necessary to give a syntactic template
-  uint8_t openCount = 0u;
-  std::string result;
-  while(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE || openCount)
+  if(smt2_tokenizer.peek()==smt2_tokenizert::CLOSE)
+    return result;
+  
+  if(smt2_tokenizer.next_token()!=smt2_tokenizert::OPEN)
+    throw error("Nonterminal list must begin with '('");
+
+  // parse list of nonterminals
+  while(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE)
   {
-    switch(smt2_tokenizer.next_token())
-    {
-      case smt2_tokenizert::OPEN:
-      ++openCount;
-      break;
-      case smt2_tokenizert::CLOSE:
-      --openCount;
-      break;
-      case smt2_tokenizert::END_OF_FILE:
-      case smt2_tokenizert::KEYWORD:
-      case smt2_tokenizert::NONE:
-      case smt2_tokenizert::NUMERAL:
-      case smt2_tokenizert::STRING_LITERAL:
-      case smt2_tokenizert::SYMBOL:
-      // Ignore grammar.
-      break;
-    }
-    result+=smt2_tokenizer.get_buffer();
+    auto next_nonterminal = NTDef();
+    non_terminals.push_back(next_nonterminal);
+    result.nt_ids.push_back(next_nonterminal.get_identifier());
   }
-  result+=")";
+  // eat the close
+  smt2_tokenizer.next_token();
+  // eat the open
+  smt2_tokenizer.next_token();
+
+  for(const auto &nt: non_terminals)
+  {
+    std::vector<exprt> production_rule = GTerm_seq(nt);
+    result.production_rules[nt.get_identifier()] = production_rule;
+  }
+  smt2_tokenizer.next_token(); // eat the close
+
   return result;
 }
 
-void sygus_parsert::GTerm_seq()
+std::vector<exprt> sygus_parsert::GTerm_seq(const symbol_exprt &nonterminal)
 {
+  irep_idt id;
+  std::vector<exprt> rules;
+
+  if(smt2_tokenizer.next_token()!=smt2_tokenizert::OPEN)
+    throw error("Grammar production rule must start with '('");
+
+  if(smt2_tokenizer.next_token()!=smt2_tokenizert::SYMBOL)
+    throw error("Grammar production rule must start with non terminal name");
+  
+  id = smt2_tokenizer.get_buffer();
+  typet nt_sort = sort(); 
+  if(id!=nonterminal.get_identifier() || nt_sort != nonterminal.type())
+    throw error("Grouped rule listing does not match the name in order) from the predeclaration");
+
+  std::cout<<"Rules for "<< id2string(id)<<std::endl;
+
+  if(smt2_tokenizer.next_token()!=smt2_tokenizert::OPEN)
+    throw error("Grammar production rule must start with '('");
+
   while(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE)
   {
-    GTerm();
+    auto rule = expression();
+    std::cout<<"Rule "<< expr2sygus(rule)<<std::endl;
+    if(rule.type()!=nt_sort)
+      throw error("rule does not match sort");
+    rules.push_back(rule);
   }
+  smt2_tokenizer.next_token(); // eat the close
+  if(smt2_tokenizer.next_token()!=smt2_tokenizert::CLOSE)
+    throw error("Grammar production rule must end with ')'");
+
+  return rules;
 }
 
-void sygus_parsert::NTDef()
+symbol_exprt sygus_parsert::NTDef()
 {
-  // (Symbol Sort GTerm+)
+  // (Symbol Sort)
   if(smt2_tokenizer.next_token()!=smt2_tokenizert::OPEN)
     throw error("NTDef must begin with '('");
 
@@ -432,46 +462,18 @@ void sygus_parsert::NTDef()
   if(smt2_tokenizer.next_token()!=smt2_tokenizert::SYMBOL)
     throw error("NTDef must have a symbol");
 
-  sort();
-
-  GTerm_seq();
+  irep_idt id = smt2_tokenizer.get_buffer();  
+  typet nt_sort = sort();
+  add_unique_id(id, symbol_exprt(id, nt_sort));
 
   if(smt2_tokenizer.next_token()!=smt2_tokenizert::CLOSE)
     throw error("NTDef must end with ')'");
+  
+  return symbol_exprt(id, nt_sort);
 }
 
-void sygus_parsert::GTerm()
-{
-  // production rule
-
-  switch(smt2_tokenizer.next_token())
-  {
-  case smt2_tokenizert::SYMBOL:
-  case smt2_tokenizert::NUMERAL:
-  case smt2_tokenizert::STRING_LITERAL:
-    break;
-
-  case smt2_tokenizert::OPEN:
-    while(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE)
-    {
-      GTerm();
-    }
-
-    smt2_tokenizer.next_token(); // eat ')'
-    break;
-
-  case smt2_tokenizert::NONE:
-  case smt2_tokenizert::END_OF_FILE:
-  case smt2_tokenizert::KEYWORD:
-  case smt2_tokenizert::CLOSE:
-    throw error("Unexpected GTerm");
-  }
-}
-#include <iostream>
-#include "expr2sygus.h"
 void sygus_parsert::expand_function_applications(exprt &expr)
 {
-  std::cout<<"Expanding "<<expr2sygus(expr)<<std::endl;
   for(exprt &op : expr.operands())
     expand_function_applications(op);
 
@@ -488,11 +490,11 @@ void sygus_parsert::expand_function_applications(exprt &expr)
     {
       const auto &f=f_it->second;
 
-      if(synth_fun_set.find(to_symbol_expr(app.function()))!=synth_fun_set.end())
+      if(synthesis_functions.find(identifier)!=synthesis_functions.end())
       {
         return; // do not expand
       }
-      if(oracle_symbols.find(to_symbol_expr(app.function()).get_identifier())!=oracle_symbols.end())
+      if(oracle_symbols.find(identifier)!=oracle_symbols.end())
         return; //do not expand
 
       for(const auto &arg: app.arguments())
@@ -546,7 +548,7 @@ void sygus_parsert::expand_function_applications(exprt &expr)
 
     if(f_it!=id_map.end())
     {
-      if(synth_fun_set.find(to_symbol_expr(expr))!=synth_fun_set.end())
+      if(synthesis_functions.find(identifier)!=synthesis_functions.end())
         return; // do not expand
 
       const auto &f=f_it->second;
