@@ -332,6 +332,50 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
   return this->operator()(problem, solution, oracle_solver);
 }
 
+
+
+
+void stop_previous_candidate_solutions(problemt &problem, const solutiont & solution)
+{
+  for(const auto &f: problem.synthesis_functions)
+  {
+    auto &f_id = f.first;
+    auto &f_type = to_mathematical_function_type(f.second.type);
+    auto &f_parameters = f.second.parameters;
+    if(solution.functions.find(symbol_exprt(f_id, f_type))!=solution.functions.end())
+    {
+      auto f_body = solution.functions.at(symbol_exprt(f_id, f_type));
+      exprt::operandst arguments;
+      arguments.resize(f_type.domain().size());
+      // make new arguments, only used for these constraints
+      for(std::size_t i = 0; i < f_type.domain().size(); i++)
+      {
+        const typet &var_type = f_type.domain()[i];
+        std::string id = "__CPROVER_arg_"+integer2string(i);
+        problem.free_variables.insert(symbol_exprt(id,var_type));
+        arguments[i] = symbol_exprt(id, var_type);
+      }
+      // expand function body
+      replace_symbolt replace_symbol;
+      for(std::size_t i=0; i<f_type.domain().size(); i++)
+      {
+        const auto &parameter_type = f_type.domain()[i];
+        const auto &parameter_id = f_parameters[i];
+
+        replace_symbol.insert(
+          symbol_exprt(parameter_id, parameter_type),
+          arguments[i]);
+      }
+      // this doesn't need to be recursive because we expanded function applications in the grammar before
+      replace_symbol(f_body);
+      // make constraint (f synth) != (fcandidate synth)
+      function_application_exprt synth_fun_application(symbol_exprt(f_id, f_type), arguments);
+      equal_exprt equal_expr(synth_fun_application, f_body);
+      problem.synthesis_constraints.insert(not_exprt(equal_expr));
+    }
+  } 
+} 
+
 oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
     const solutiont &solution,
     oracle_solvert &solver)

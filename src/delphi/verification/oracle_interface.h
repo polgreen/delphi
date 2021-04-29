@@ -8,6 +8,9 @@
 #include <util/namespace.h>
 #include <util/message.h>
 
+
+void stop_previous_candidate_solutions(problemt &problem, const solutiont & solution);
+
 class oracle_interfacet : public verifyt
 {
  public:
