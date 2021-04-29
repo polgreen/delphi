@@ -170,6 +170,8 @@ decision_proceduret::resultt negation_oracle_solvert::dec_solve()
   PRECONDITION(oracle_fun_map != nullptr);
 
   number_of_solver_calls++;
+  if(oracle_fun_map->size()==0)
+    try_positive_model = true;
 
   while(true)
   {
