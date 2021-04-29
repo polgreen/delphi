@@ -131,7 +131,7 @@ int sygus_frontend(const cmdlinet &cmdline)
   symbol_tablet symbol_table;
   namespacet ns(symbol_table);
 
-  if(cmdline.isset("cvc4"))
+  if(!cmdline.isset("bitblast"))
   {
     cvc4_syntht synthesizer(message_handler, cmdline.isset("constants"), cmdline.isset("grammar"));  
     oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
