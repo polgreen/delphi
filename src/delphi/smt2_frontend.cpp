@@ -143,8 +143,8 @@ void smt2_solvert::setup_commands()
 
     commands["check-sat"] = [this]() {
       // add constant definitions as constraints
-      define_constants();
       solver.oracle_fun_map=&oracle_symbols;
+      define_constants();
 
       switch(solver())
       {
