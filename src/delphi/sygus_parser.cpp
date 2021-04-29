@@ -430,15 +430,12 @@ std::vector<exprt> sygus_parsert::GTerm_seq(const symbol_exprt &nonterminal)
   if(id!=nonterminal.get_identifier() || nt_sort != nonterminal.type())
     throw error("Grouped rule listing does not match the name in order) from the predeclaration");
 
-  std::cout<<"Rules for "<< id2string(id)<<std::endl;
-
   if(smt2_tokenizer.next_token()!=smt2_tokenizert::OPEN)
     throw error("Grammar production rule must start with '('");
 
   while(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE)
   {
     auto rule = expression();
-    std::cout<<"Rule "<< expr2sygus(rule)<<std::endl;
     if(rule.type()!=nt_sort)
       throw error("rule does not match sort");
     rules.push_back(rule);
@@ -522,7 +519,7 @@ void sygus_parsert::expand_function_applications(exprt &expr)
 
       replace_symbolt replace_symbol;
 
-      std::map<irep_idt, exprt> parameter_map;
+      // std::map<irep_idt, exprt> parameter_map;
       for(std::size_t i=0; i<f_type.domain().size(); i++)
       {
         const auto &parameter_type = f_type.domain()[i];
