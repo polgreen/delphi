@@ -25,6 +25,11 @@ std::string type2sygus(const typet &type)
     array_typet array = to_array_type(type);
     result += "(Array " + type2sygus(array.size().type()) + " " + type2sygus(array.subtype()) + ")";
   }
+  else if (type.id() == ID_floatbv)
+  {
+    result += "(_ FloatingPoint " + integer2string(to_floatbv_type(type).get_e()) 
+            + " " + integer2string(to_floatbv_type(type).get_e() + 1) + ")";
+  }
   else if (type.id()==ID_mathematical_function)
   {
     result +="(-> ";
