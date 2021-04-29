@@ -461,7 +461,7 @@ symbol_exprt sygus_parsert::NTDef()
 
   irep_idt id = smt2_tokenizer.get_buffer();  
   typet nt_sort = sort();
-  add_unique_id(id, symbol_exprt(id, nt_sort));
+  add_unique_id(id, exprt(ID_nil, nt_sort));
 
   if(smt2_tokenizer.next_token()!=smt2_tokenizert::CLOSE)
     throw error("NTDef must end with ')'");
