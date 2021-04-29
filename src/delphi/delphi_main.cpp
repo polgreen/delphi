@@ -64,6 +64,7 @@ void help(std::ostream &out)
 int main(int argc, const char *argv[])
 {
   cmdlinet cmdline;
+
   if(cmdline.parse(argc, argv, DELPHI_OPTIONS))
   {
     std::cerr << "Usage error\n";
@@ -78,8 +79,10 @@ int main(int argc, const char *argv[])
     else if(cmdline.isset("smto"))
       return smt2_frontend(cmdline, std::cin);
     else
+    {
      help(std::cout);
      return 1;
+    }
   }
 
   if(cmdline.isset("help") || cmdline.isset("h") || cmdline.isset("?"))
