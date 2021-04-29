@@ -155,10 +155,8 @@ decision_proceduret::resultt negation_oracle_solvert::get_model()
       case resultt::D_ERROR:
         return resultt::D_ERROR;
       case resultt::D_SATISFIABLE:
-        log.status()<<"Found satisfing counterexample \n" <<log.eom;
         if(check_oracles()==CONSISTENT)
         {
-          log.status()<<"consistent with oracles, problem is sat\n" <<log.eom;
           return resultt::D_SATISFIABLE;
         }
     }
@@ -182,11 +180,9 @@ decision_proceduret::resultt negation_oracle_solvert::dec_solve()
       case resultt::D_ERROR:
         return resultt::D_ERROR;
       case resultt::D_SATISFIABLE:
-        log.status()<<"Found satisfing counterexample \n" <<log.eom;
         if(try_positive_model)
           if(check_oracles()==CONSISTENT)
           {
-            log.status()<<"consistent with oracles, problem is sat\n" <<log.eom;
             return resultt::D_SATISFIABLE;
           }
     }
@@ -194,11 +190,9 @@ decision_proceduret::resultt negation_oracle_solvert::dec_solve()
     switch(negation_sub_solver())
     {
     case resultt::D_SATISFIABLE:
-      log.status()<<"negation witness \n"<<log.eom;
       check_negation_solver_oracles();
       break;
     case resultt::D_UNSATISFIABLE:
-      log.status()<<"Found no negation subsolver assignment, problem is sat"<<log.eom;
       // call sub solver to get assignment
       if(get_model()==resultt::D_ERROR)
         return resultt::D_ERROR;

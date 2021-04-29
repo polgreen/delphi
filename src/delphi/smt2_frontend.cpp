@@ -445,9 +445,9 @@ int solver(std::istream &in, decision_proceduret &solver, message_handlert &mess
     return 0;
 }
 
-int smt2_frontend(const cmdlinet &cmdline)
+
+int smt2_frontend(const cmdlinet &cmdline, std::istream &in)
 {
-  assert(cmdline.args.size()==1);
 
   // this is our default verbosity
   unsigned int v=messaget::M_STATISTICS;
@@ -458,14 +458,6 @@ int smt2_frontend(const cmdlinet &cmdline)
         cmdline.get_value("verbosity"));;
     if(v>10)
       v=10;
-  }
-
-  std::ifstream in(cmdline.args.front());
-
-  if(!in)
-  {
-    std::cout << "Failed to open input file" << std::endl;
-    return 10;
   }
 
   symbol_tablet symbol_table;
@@ -480,7 +472,7 @@ int smt2_frontend(const cmdlinet &cmdline)
   std::string logic="ALL";
  
 // warning simplify won't work with oracles until freezing is implemented.
-  if (!cmdline.isset("no-negation-solver"))
+  if (cmdline.isset("negation-solver"))
   {
     if (cmdline.isset("bitblast") && cmdline.isset("simplify"))
     {
@@ -531,4 +523,17 @@ int smt2_frontend(const cmdlinet &cmdline)
       return solver(in, subsolver, message_handler);
     }
   }
+}
+
+int smt2_frontend(const cmdlinet &cmdline)
+{
+  assert(cmdline.args.size()==1);
+  std::ifstream in(cmdline.args.front());
+
+  if(!in)
+  {
+    std::cerr << "Failed to open input file" << std::endl;
+    return 10;
+  }
+  return smt2_frontend(cmdline, in);
 }

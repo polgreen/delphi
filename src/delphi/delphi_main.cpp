@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-#define DELPHI_OPTIONS                                                       \
+#define DELPHI_OPTIONS                                                    \
   "(verbosity): "                                                         \
   "(smt) "                                                                \
   "(bitblast) "                                                           \
@@ -18,7 +18,11 @@
   "(cvc4) "                                                               \
   "(constants) "                                                          \
   "(grammar) "                                                            \
-  "(no-negation-solver) "                                                    \
+  "(no-negation-solver) "                                                 \
+  "(negation-solver) "                                                    \
+  "(symo) "                                                               \
+  "(smto)"                                                                \
+  "(smt)"                                                                 \
 /// File ending of SMT2 files. Used to determine the language frontend that
 /// shall be used.
 #define SMT2_FILE_ENDING ".smt2"
@@ -33,7 +37,10 @@ void help(std::ostream &out)
   out <<
      "\n"
      "* *                          DELPHI                            * *\n"
-     "* *        Synthesis and Satisfiability modulo oracles         * *\n";
+     "* *        Synthesis and Satisfiability modulo oracles         * *\n"
+     "* *                                                            * *\n"
+     "* * Delphi supports SyMO and SMTO for bitvectors and integers  * *\n"
+     "* *                                                            * *\n";
   out  <<
      "* *                                                            * *\n"
      "\n"
@@ -47,6 +54,8 @@ void help(std::ostream &out)
      " --smt                           use Z3 solver as oracle solver subsolver (default) \n"
      " --bitblast                      use bitblasting solver as oracle solver subsolver\n"
      " --cvc4                          use cvc4 for synthesis\n"
+     " --symo                          input is in SyMO format\n"
+     " --smto                          input is in SMTO format\n"
      "\n"
      "\n";
     // clang-format on
@@ -64,9 +73,13 @@ int main(int argc, const char *argv[])
 
   if(cmdline.args.size() != 1)
   {
-    std::cerr << "Usage error, file must be given\n";
-    help(std::cerr);
-    return 1;
+    if(cmdline.isset("symo"))
+      return sygus_frontend(cmdline, std::cin);
+    else if(cmdline.isset("smto"))
+      return smt2_frontend(cmdline, std::cin);
+    else
+     help(std::cout);
+     return 1;
   }
 
   if(cmdline.isset("help") || cmdline.isset("h") || cmdline.isset("?"))

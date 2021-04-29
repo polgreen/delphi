@@ -23,6 +23,7 @@
 #include <langapi/mode.h>
 
 #include <fstream>
+#include <iostream>
 
 problemt build_problem(sygus_parsert &parser)
 {
@@ -76,10 +77,8 @@ problemt build_problem(sygus_parsert &parser)
   return problem;
 }
 
-int sygus_frontend(const cmdlinet &cmdline)
+int sygus_frontend(const cmdlinet &cmdline, std::istream &in) 
 {
-  assert(cmdline.args.size() == 1);
-
   register_language(new_ansi_c_language);
   config.ansi_c.set_32();
 
@@ -99,14 +98,6 @@ int sygus_frontend(const cmdlinet &cmdline)
   }
 
   message_handler.set_verbosity(v);
-
-  std::ifstream in(cmdline.args.front());
-
-  if (!in)
-  {
-    message.error() << "Failed to open input file" << messaget::eom;
-    return 10;
-  }
 
   // parse problem
   sygus_parsert parser(in);
@@ -147,4 +138,17 @@ int sygus_frontend(const cmdlinet &cmdline)
   }
 
   return 0;
+}
+
+int sygus_frontend(const cmdlinet &cmdline)
+{
+  assert(cmdline.args.size()==1);
+  std::ifstream in(cmdline.args.front());
+
+  if (!in)
+  {
+    std::cerr << "Failed to open input file" << std::endl;
+    return 10;
+  }
+  return sygus_frontend(cmdline, in);
 }
