@@ -34,6 +34,13 @@ problemt build_problem(sygus_parsert &parser)
   //   problem.free_variables.insert(symbol_exprt(v.first, v.second));
 
   problem.synthesis_functions = parser.synthesis_functions;
+  for(auto &sf: problem.synthesis_functions)
+    for(auto &rule_list: sf.second.grammar.production_rules)
+      for(auto &e: rule_list.second)
+      {
+        parser.expand_function_applications(e);
+      }
+  
 
   problem.oracle_symbols = parser.oracle_symbols;
   for(const auto &symbol: parser.oracle_symbols)
