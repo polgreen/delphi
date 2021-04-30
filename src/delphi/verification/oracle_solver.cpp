@@ -129,10 +129,10 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 
 exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std::vector<std::string> &argv)
 {
-  log.status() << "Running oracle (verification) ";
-  for (auto &arg : argv)
-    log.status() << ' ' << arg;
-  log.status() << messaget::eom;
+  // log.debug() << "Running oracle (verification) ";
+  // for (auto &arg : argv)
+  //   log.debug() << ' ' << arg;
+  // log.debug() << messaget::eom;
 
   // run the oracle binary
   std::ostringstream stdout_stream;
@@ -146,7 +146,7 @@ exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std
 
   if (run_result != 0 && run_result !=10)
   {
-    log.status() << "oracle " << binary_name << " has failed" << messaget::eom;
+    log.error() << "oracle " << binary_name << " has failed" << messaget::eom;
     assert(0);
     return nil_exprt();
   }
@@ -223,14 +223,14 @@ oracle_solvert::check_resultt oracle_solvert::check_oracle(
   // check whether the result is consistent with the model
   if(response == get(application.handle))
   {
-    log.debug() << "Response matches " << expr2sygus(get(application.handle))<<messaget::eom;
+    // log.debug() << "Response matches " << expr2sygus(get(application.handle))<<messaget::eom;
     return CONSISTENT; // done, SAT
   }
   {
 
     function_application_exprt func_app(application_expr.function(), inputs);
 
-    log.debug() << "Response does not match " << expr2sygus(get(application.handle)) << messaget::eom;
+    // log.debug() << "Response does not match " << expr2sygus(get(application.handle)) << messaget::eom;
 
     // add a constraint that enforces this equality
     auto response_equality = equal_exprt(application.handle, response);

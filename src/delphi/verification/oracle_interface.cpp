@@ -205,10 +205,10 @@ void oracle_interfacet::get_oracle_constraints(
     argv.push_back(stream.str());
   }
 
-  log.status() << "Running oracle (synthesis)";
+  log.debug() << "Running oracle (synthesis)";
   for (auto &arg : argv)
-    log.status() << ' ' << arg;
-  log.status() << messaget::eom;
+    log.debug() << ' ' << arg;
+  log.debug() << messaget::eom;
 
   // run the oracle binary
   std::ostringstream stdout_stream;
