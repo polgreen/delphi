@@ -186,13 +186,12 @@ exprt oracle_solvert::call_oracle(
     }
 
     response = make_oracle_call(application.binary_name, argv);
-    log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
+    // log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
     if (cache)
       oracle_call_history[application.binary_name][inputs] = response;
   }
   else
   {
-    std::cout<<"historical oracle cal"<<std::endl;
     is_new_call = false;
     response = oracle_call_history[application.binary_name][inputs];
   }

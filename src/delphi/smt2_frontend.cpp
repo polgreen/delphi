@@ -280,7 +280,7 @@ void smt2_solvert::setup_commands()
 
       bool first = true;
 
-      std::cout << '(';
+      std::cout << "(\n";
       for(const auto &id : id_map)
       {
         const symbol_exprt name(id.first, id.second.type);
@@ -303,7 +303,7 @@ void smt2_solvert::setup_commands()
           std::cout << ' ' << smt2_format(value) << ')';
         }
       }
-      std::cout << ')' << '\n';
+      std::cout << "\n)" << '\n';
     };
 
     commands["simplify"] = [this]() {
