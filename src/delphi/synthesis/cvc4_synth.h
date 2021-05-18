@@ -34,7 +34,7 @@ protected:
   // maximum number of synth constraints to add each iteration
   std::size_t synth_constraint_increment;
   std::string build_query(const problemt &problem);
-  decision_proceduret::resultt read_result(std::istream &in);
+  decision_proceduret::resultt read_result(std::istream &in, const problemt &p);
   decision_proceduret::resultt solve(const problemt &problem);
 
   solutiont last_solution;

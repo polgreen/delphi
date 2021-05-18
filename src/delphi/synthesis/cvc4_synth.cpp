@@ -204,7 +204,7 @@ std::string cvc4_syntht::build_query(const problemt &problem)
 }
 
 
-decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in)
+decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const problemt &problem)
 {
   if (!in)
   {
@@ -237,15 +237,28 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in)
     return decision_proceduret::resultt::D_ERROR;
   }
 
+
   for (auto &id : result_parser.id_map)
   {
-    if (id.second.type.id() == ID_mathematical_function)
+    std::cout<<"Results "<< id2string(id.first) <<std::endl;
+    if(problem.synthesis_functions.find(id.first)!=problem.synthesis_functions.end())
     {
-      symbol_exprt symbol = symbol_exprt(to_mathematical_function_type(id.second.type));
-      symbol.set_identifier(id.first);
-      expand_let_expressions(id.second.definition);
-      clean_symbols(id.second.definition);
-      last_solution.functions[symbol] = id.second.definition;
+      if (id.second.type.id() == ID_mathematical_function)
+      {
+        symbol_exprt symbol = symbol_exprt(id.second.type);
+        symbol.set_identifier(id.first);
+        expand_let_expressions(id.second.definition);
+        clean_symbols(id.second.definition);
+        last_solution.functions[symbol] = id.second.definition;
+      }
+      else
+      {
+        symbol_exprt symbol = symbol_exprt(mathematical_function_typet({}, id.second.type));
+        symbol.set_identifier(id.first);
+        expand_let_expressions(id.second.definition);
+        clean_symbols(id.second.definition);
+        last_solution.functions[symbol] = id.second.definition;
+      }
     }
   }
   return decision_proceduret::resultt::D_SATISFIABLE;
@@ -291,7 +304,7 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
   else
   {
     std::ifstream in(temp_file_stdout());
-    return read_result(in);
+    return read_result(in, problem);
   }
 }
 

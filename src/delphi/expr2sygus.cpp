@@ -317,6 +317,9 @@ std::string expr2sygus(const exprt &expr)
       std::cout << "Unsupported function application " << expr.pretty() << std::endl;
       assert(0);
     }
+    if(fapp.arguments().size()==0)
+      return clean_id(to_symbol_expr(fapp.function()).get_identifier());
+
     result += clean_id(to_symbol_expr(fapp.function()).get_identifier());
     for (const auto &arg : fapp.arguments())
       result += " " + expr2sygus(arg);

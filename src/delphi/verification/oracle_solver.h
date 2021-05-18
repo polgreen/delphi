@@ -39,7 +39,7 @@ public:
 
   using oracle_historyt = std::map<std::vector<exprt>, exprt>;
   std::unordered_map<std::string, oracle_historyt> oracle_call_history;
-  exprt get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs);
+  exprt get_oracle_value(const function_application_exprt &oracle_app);
   // make call to oracle with single return
   exprt make_oracle_call(const std::string &binary_name, const std::vector<std::string> &argv);
 

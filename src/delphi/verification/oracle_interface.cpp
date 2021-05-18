@@ -33,19 +33,22 @@ void oracle_interfacet::add_problem(const problemt &problem, const solutiont &so
 }
 
 
-std::vector<std::vector<exprt>> find_synth_fun(const exprt &expr, const problemt &problem)
+bool contains_synth_fun_app(const exprt &expr, const problemt &problem)
 {
-  std::vector<std::vector<exprt>> result;
-
-  if(expr.id()==ID_mathematical_function)
+  if(expr.id()==ID_symbol)
   {
-    auto tmp=to_function_application_expr(expr);
-    if(problem.synthesis_functions.find(to_symbol_expr(tmp.function()).get_identifier())!=problem.synthesis_functions.end())
+    auto func_id = to_symbol_expr(expr).get_identifier();
+    if(problem.synthesis_functions.find(func_id)!=problem.synthesis_functions.end())
     {
-      result.push_back(tmp.arguments());
+      return true;
     }
   }
-  return result;
+  for(const auto &op: expr.operands())
+  {
+    if(contains_synth_fun_app(op, problem))
+      return true;
+  }
+  return false;
 }
 
 bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, oracle_solvert &solver)
@@ -58,6 +61,7 @@ bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, or
   {
     auto &func_app = to_function_application_expr(expr);
     auto &id = to_symbol_expr(func_app.function()).get_identifier();
+    // is oracle application
     if (problem.oracle_symbols.find(id) != problem.oracle_symbols.end())
     {
       if (problem.second_order_oracles.find(id) != problem.second_order_oracles.end())
@@ -65,11 +69,15 @@ bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, or
 
       for(const auto &arg: func_app.arguments())
       {
-        if(arg.id()==ID_function_application)
-          return true;
+        if(contains_synth_fun_app(arg, problem))
+          return false;
+        // if(arg.id()==ID_function_application)
+        // {
+        //   std::cout<<"is a function app"<<std::endl;
+        //   return true;
+        // }
       }  
-      
-      exprt result = solver.get_oracle_value(func_app, func_app.arguments());
+      exprt result = solver.get_oracle_value(func_app);
       if (result != nil_exprt())
         expr = result;
     }
@@ -222,7 +230,7 @@ void oracle_interfacet::get_oracle_constraints(
 
   if (run_result != 0 && run_result != 10)
   {
-    log.status() << "oracle " << oracle.binary_name << " has failed" << messaget::eom;
+    log.status() << "oracle " << oracle.binary_name << " has failed, run result "<< integer2string(run_result) << messaget::eom;
     assert(0);
   }
 
@@ -376,6 +384,24 @@ void stop_previous_candidate_solutions(problemt &problem, const solutiont & solu
   } 
 } 
 
+void block_previous_solution(problemt &problem, const solutiont &solution)
+{
+  for(const auto &f: solution.functions)
+  {
+    if(f.first.type().id()!=ID_mathematical_function)
+      continue;
+      auto &func = to_mathematical_function_type(f.first.type());
+      std::cout<<"solution "<< type2sygus(func);
+      if(func.domain().size()==0)
+      {
+        equal_exprt equals(function_application_exprt(f.first,{}),f.second);
+        not_exprt blocking_expr(equals);
+        problem.constraints.push_back(blocking_expr);
+      }
+    // TODO block n-ary funcs as well as 0-ary functions
+  }
+}
+
 oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
     const solutiont &solution,
     oracle_solvert &solver)
@@ -393,6 +419,7 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
         build_counterexample_constraint(solver, counterexample, problem);
         add_assumptions_from_solver(solver, problem);
         call_oracles(problem, solution, counterexample, solver);
+        block_previous_solution(problem, solution);
         copy_of_solver_history = solver.oracle_call_history;
         return oracle_interfacet::resultt::FAIL; 
       }
