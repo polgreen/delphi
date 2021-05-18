@@ -129,10 +129,10 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 
 exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std::vector<std::string> &argv)
 {
-  // log.debug() << "Running oracle (verification) ";
-  // for (auto &arg : argv)
-  //   log.debug() << ' ' << arg;
-  // log.debug() << messaget::eom;
+  log.debug() << "Running oracle (verification) ";
+  for (auto &arg : argv)
+    log.debug() << ' ' << arg;
+  log.debug() << messaget::eom;
 
   // run the oracle binary
   std::ostringstream stdout_stream;
