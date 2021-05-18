@@ -390,14 +390,14 @@ void block_previous_solution(problemt &problem, const solutiont &solution)
   {
     if(f.first.type().id()!=ID_mathematical_function)
       continue;
-      auto &func = to_mathematical_function_type(f.first.type());
-      std::cout<<"solution "<< type2sygus(func);
-      if(func.domain().size()==0)
-      {
-        equal_exprt equals(function_application_exprt(f.first,{}),f.second);
-        not_exprt blocking_expr(equals);
-        problem.constraints.push_back(blocking_expr);
-      }
+    auto &func = to_mathematical_function_type(f.first.type());
+    std::cout<<"solution "<< type2sygus(func);
+    if(func.domain().size()==0)
+    {
+      equal_exprt equals(function_application_exprt(f.first,{}),f.second);
+      not_exprt blocking_expr(equals);
+      problem.constraints.push_back(blocking_expr);
+    }
     // TODO block n-ary funcs as well as 0-ary functions
   }
 }
