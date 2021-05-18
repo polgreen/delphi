@@ -20,18 +20,33 @@ oracle_solvert::oracle_solvert(
 {
 }
 
-exprt oracle_solvert::get_oracle_value(const function_application_exprt &oracle_app, const std::vector<exprt> &inputs)
+exprt oracle_solvert::get_oracle_value(const function_application_exprt &oracle_app)
 {
-  for(const auto &app : applications)
+  std::cout << "There are " << applications.size() << " applications in get_oracle_value" << std::endl;
+
+  for (const auto &app : applications)
   {
-    if(to_function_application_expr(app.first).function() == oracle_app.function())
+    if (to_function_application_expr(app.first).function() == oracle_app.function())
     {
+      // get inputs
+      std::vector<exprt> inputs;
+      inputs.reserve(app.second.argument_handles.size());
+
+      for (auto &argument_handle : app.second.argument_handles)
+      {
+        auto res = get(argument_handle);
+        inputs.push_back(res);
+      }
       auto history = oracle_call_history.find(app.second.binary_name);
       INVARIANT(history != oracle_call_history.end(), "No history for oracle");
       auto result = history->second.find(inputs);
-      if(result==history->second.end())
+      if (result == history->second.end())
       {
-        return call_oracle(app.second, inputs);        
+        std::cout << "We didn't find history for inputs\n";
+        for (const auto &i : inputs)
+          std::cout << expr2sygus(i);
+        std::cout << std::endl;
+        return call_oracle(app.second, inputs);
       }
       return result->second;
     }
@@ -58,6 +73,7 @@ void oracle_solvert::set_to(const exprt &expr, bool value)
           // yes
           if(applications.find(application_expr) == applications.end())
           {
+            std::cout<<"adding a new application "<< expr2sygus(application_expr)<<std::endl;
             // not seen before
             auto &application = applications[application_expr];
             application.binary_name = oracle_fun_map_it->second.binary_name;
@@ -108,8 +124,9 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 {
   oracle_solvert::check_resultt result = CONSISTENT;
 
+std::cout<<"There are "<< applications.size()<<" applications in check oracles\n";
   for(const auto &application : applications)
-  {
+  { 
     switch(check_oracle(application.first, application.second))
     {
     case INCONSISTENT:
@@ -146,9 +163,9 @@ exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std
 
   if (run_result != 0 && run_result !=10)
   {
-    log.error() << "oracle " << binary_name << " has failed" << messaget::eom;
-    assert(0);
-    return nil_exprt();
+    log.error() << "oracle " << binary_name << " has failed with exit code " << integer2string(run_result) << messaget::eom;
+    // assert(0);
+    // return nil_exprt();
   }
   // we assume that the oracle returns the result in SMT-LIB format
   std::istringstream oracle_response_istream(stdout_stream.str());
@@ -159,6 +176,10 @@ exprt oracle_solvert::call_oracle(
     const applicationt &application, const std::vector<exprt> &inputs)
     {
       bool is_new = false;
+      std::cout<<"now in call oracle with inputs: "<<std::endl;
+        for(const auto &i: inputs)
+          std::cout<<expr2sygus(i);
+        std::cout<<std::endl;
       return call_oracle(application, inputs, is_new);
     }
 
@@ -171,7 +192,6 @@ exprt oracle_solvert::call_oracle(
   }
 
   exprt response;
-
   if (oracle_call_history[application.binary_name].find(inputs) == oracle_call_history[application.binary_name].end() || !cache)
   {
     is_new_call = true;
