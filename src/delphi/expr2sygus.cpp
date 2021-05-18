@@ -28,7 +28,7 @@ std::string type2sygus(const typet &type)
   else if (type.id() == ID_floatbv)
   {
     result += "(_ FloatingPoint " + integer2string(to_floatbv_type(type).get_e()) 
-            + " " + integer2string(to_floatbv_type(type).get_e() + 1) + ")";
+            + " " + integer2string(to_floatbv_type(type).get_f() + 1) + ")";
   }
   else if (type.id()==ID_mathematical_function)
   {
@@ -119,15 +119,25 @@ std::string expr2sygus_fun_dec(const symbol_exprt &function)
 
 std::string synth_fun_dec(const irep_idt &id, const synth_functiont &definition)
 {
-  INVARIANT(definition.type.id()==ID_mathematical_function, "unsupported function definition type");
-  std::string result = "(synth-fun " + clean_id(id) + " (";
-  const auto &func_type = to_mathematical_function_type(definition.type);
+  std::string result = "(synth-fun " + clean_id(id);
 
-  for(std::size_t i=0; i<definition.parameters.size(); i++)
+  if(definition.type.id()!=ID_mathematical_function)
   {
-    result+="(" + clean_id(definition.parameters[i]) + " "+type2sygus(func_type.domain()[i]) + ")"; 
+    result += "()" + type2sygus(definition.type);
   }
-  result +=")\n " + type2sygus(func_type.codomain()) + "\n";
+  else
+  {
+    result += "(";
+    const auto &func_type = to_mathematical_function_type(definition.type);
+    for (std::size_t i = 0; i < definition.parameters.size(); i++)
+    {
+      result += "(" + clean_id(definition.parameters[i]) + " " + type2sygus(func_type.domain()[i]) + ")";
+    }
+    result += ")\n " + type2sygus(func_type.codomain()) + "\n";
+  }
+  // grammar is empty
+  if(definition.grammar.nt_ids.size()==0)
+    return result += ")\n";
 
   std::string nts = "(";
   std::string rules = "(";
@@ -298,6 +308,7 @@ std::string expr2sygus(const exprt &expr)
   {
     result += "=> " + expr2sygus(expr.operands()[0]) + " " + expr2sygus(expr.operands()[1]);
   }
+
   else if (expr.id() == ID_function_application)
   {
     function_application_exprt fapp = to_function_application_expr(expr);
@@ -353,7 +364,13 @@ std::string expr2sygus(const exprt &expr)
         return result;
     }
     else if (to_constant_expr(expr).type().id() == ID_bool)
-      return result = clean_id(to_constant_expr(expr).get_value());
+      return clean_id(to_constant_expr(expr).get_value());
+    else if (to_constant_expr(expr).type().id() == ID_floatbv)
+    {
+      ieee_float_spect spec;
+      spec.from_type(to_floatbv_type(expr.type()));
+      result = "(_ to_fp ";
+    }
     else
     {
       std::cout << "Unsupported constant type" << expr.pretty() << std::endl;
