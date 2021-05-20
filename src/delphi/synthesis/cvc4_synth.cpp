@@ -268,7 +268,7 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
 decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
 {
   const std::string query = build_query(problem);
-#ifdef DEBUG
+#if 0
   std::cout
       << "Solving query:\n"
       << query << std::endl;
