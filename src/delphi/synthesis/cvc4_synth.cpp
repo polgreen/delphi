@@ -240,7 +240,7 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
 
   for (auto &id : result_parser.id_map)
   {
-    std::cout<<"Results "<< id2string(id.first) <<std::endl;
+    // std::cout<<"Results "<< id2string(id.first) <<std::endl;
     if(problem.synthesis_functions.find(id.first)!=problem.synthesis_functions.end())
     {
       if (id.second.type.id() == ID_mathematical_function)
@@ -268,11 +268,11 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
 decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
 {
   const std::string query = build_query(problem);
-// #ifdef DEBUG
+#ifdef DEBUG
   std::cout
       << "Solving query:\n"
       << query << std::endl;
-// #endif
+#endif
 
   temporary_filet
       temp_file_problem("sygus_problem_", ""),
