@@ -182,8 +182,9 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
   for(auto &p: problem.constraints)
   {
     exprt synthesis_constraint = p;
-    if(!replace_expr(result.assignment, synthesis_constraint))
-      std::cout<<"warning adding counterexample into constraint did nothing \n";
+    replace_expr(result.assignment, synthesis_constraint);
+    // if(!replace_expr(result.assignment, synthesis_constraint))
+      // std::cout<<"warning adding counterexample into constraint did nothing \n";
 
     if(!replace_oracles(synthesis_constraint, problem, solver))
       continue;
