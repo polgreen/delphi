@@ -1105,7 +1105,18 @@ std::string expr2sygus_var_dec(const symbol_exprt &symbol)
   return result;
 }
 
+
 std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body)
+{
+  std::vector<irep_idt>params;
+  const auto &func_type = to_mathematical_function_type(function.type());
+  for(std::size_t i=0; i<func_type.domain().size(); i++)
+    params.push_back("parameter"+integer2string(i));
+
+  return expr2sygus_fun_def(function, body, params);
+}
+
+std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body, std::vector<irep_idt> parameters)
 {
   INVARIANT(function.type().id()==ID_mathematical_function, "unsupported function definition type");
   std::string result = "(define-fun " + clean_id(function.get_identifier()) + " (";

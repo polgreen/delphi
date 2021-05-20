@@ -105,7 +105,8 @@ bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, or
   return true;
 }
 
-void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, const solutiont &solution)
+void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, 
+                  const solutiont &solution, const problemt &problem)
 {
   // pre-call all oracles that use 
   for(const auto &app: solver.applications)
@@ -130,7 +131,10 @@ void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver, const 
           for(const auto &func: solution.functions)
             if(synth_fun_name == id2string(func.first.get_identifier()))
             {
-              argv.push_back(std::string(expr2sygus_fun_def(func.first, func.second)));
+              const auto& synth_fun_id = func.first.get_identifier();
+  
+              argv.push_back(std::string(
+                expr2sygus_fun_def(func.first, func.second, problem.synthesis_functions.at(synth_fun_id).parameters)));
               break;
             }
 
@@ -219,7 +223,7 @@ void oracle_interfacet::get_oracle_constraints(
         if(solution.functions.find(input_parameter)==solution.functions.end())
           stream << expr2sygus_fun_def(input_parameter, true_exprt());
         else
-          stream << expr2sygus_fun_def(input_parameter, solution.functions.at(input_parameter));
+          stream << expr2sygus_fun_def(input_parameter, solution.functions.at(input_parameter), problem.synthesis_functions.at(input_parameter.get_identifier()).parameters);
       }
       else
       {
@@ -386,7 +390,7 @@ oracle_interfacet::resultt oracle_interfacet::operator()(problemt &problem,
   {
 
     add_problem(problem, solution, solver);
-    call_second_order_oracles(solver, solution);
+    call_second_order_oracles(solver, solution, problem);
     decision_proceduret::resultt result = solver();
 
     switch(result)

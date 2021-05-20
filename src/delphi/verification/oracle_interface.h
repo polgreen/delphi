@@ -50,7 +50,7 @@ class oracle_interfacet : public verifyt
   void replace_synth_fun_parameters(const problemt &problem, std::map <symbol_exprt, exprt> &solution_functions);
 
   bool replace_oracles(exprt &synthesis_constraint, const problemt &problem, oracle_solvert &solver);
-  void call_second_order_oracles(oracle_solvert &solver, const solutiont &solution);
+  void call_second_order_oracles(oracle_solvert &solver, const solutiont &solution, const problemt& problem);
   void get_oracle_constraints(
     const counterexamplet &,
     const oracle_constraint_gent &,
