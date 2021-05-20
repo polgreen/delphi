@@ -1124,7 +1124,7 @@ std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body, s
 
   for(std::size_t i=0; i<func_type.domain().size(); i++)
   {
-    result+="( parameter"+ integer2string(i, 10u) +" "+type2sygus(func_type.domain()[i]) + ")"; 
+    result+="( "+ clean_id(parameters[i]) +" "+type2sygus(func_type.domain()[i]) + ")"; 
   }
   result +=")\n " + type2sygus(func_type.codomain()) + " " + expr2sygus(body) + ")\n";
   return result;
@@ -2156,6 +2156,22 @@ std::string convert_typecast(const typecast_exprt &expr)
     else
     {
       UNEXPECTEDCASE("TODO typecast1 "+src_type.id_string()+" -> bool");
+    }
+  }
+  else if(dest_type.id()==ID_unsignedbv ||
+          dest_type.id()==ID_signedbv ||
+          dest_type.id()==ID_fixedbv ||
+          dest_type.id()==ID_unsignedbv )
+  {
+    if(src_type.id()==ID_bool)
+    {
+      result += "(ite ";
+      result +=convert_expr(src);
+      result += " ";
+      result +=convert_expr(from_integer(1, dest_type));
+      result +=" ";
+      result +=convert_expr(from_integer(0, dest_type));
+      result += " )";
     }
   }
   else if(dest_type.id()==ID_floatbv)

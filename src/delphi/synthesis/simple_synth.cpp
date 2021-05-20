@@ -6,6 +6,7 @@
 #include <util/arith_tools.h>
 #include "../expr2sygus.h"
 #include <algorithm>
+#include <util/replace_expr.h>
 
 void simple_syntht::set_program_size(std::size_t size)
 {
@@ -118,6 +119,22 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem)
   }
 }
 
+
+void simple_syntht::replace_synth_fun_parameters(const problemt &problem, std::map <symbol_exprt, exprt> &solution_functions)
+{
+  for(const auto &sf: problem.synthesis_functions)
+  {
+    const auto &args = sf.second.parameters;
+    auto sol = solution_functions.find(symbol_exprt(sf.first, sf.second.type));
+    if(sol==solution_functions.end())
+      return;
+
+    const auto &domain = to_mathematical_function_type(sf.second.type).domain();
+    for(std::size_t i=0; i< domain.size(); i++)
+      replace_expr(symbol_exprt("synth::parameter"+integer2string(i),domain[i]), symbol_exprt(clean_id(args[i]), domain[i]),sol->second);
+  }
+}
+
 simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decision_proceduret &solver)
 {
   // add the problem to the solver (synthesis_assumptions => (assumptions => constraints))
@@ -135,6 +152,7 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decisi
   {
   case decision_proceduret::resultt::D_SATISFIABLE:
     last_solution = synth_encoding.get_solution(solver);
+    replace_synth_fun_parameters(problem, last_solution.functions);
     if(last_solution.functions.empty())
     {
       for(const auto &f: problem.synthesis_functions)

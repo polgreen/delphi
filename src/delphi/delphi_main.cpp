@@ -14,6 +14,7 @@
   "(verbosity): "                                                         \
   "(smt) "                                                                \
   "(bitblast) "                                                           \
+  "(bitblast-synth) "                                                     \
   "(simplify) "                                                           \
   "(cvc4) "                                                               \
   "(constants) "                                                          \

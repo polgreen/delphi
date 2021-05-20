@@ -41,7 +41,7 @@ protected:
   synth_encodingt synth_encoding;
   void add_problem(synth_encodingt &encoding, decision_proceduret &solver, const problemt &problem);
   solutiont last_solution;
-
+  void replace_synth_fun_parameters(const problemt &problem, std::map <symbol_exprt, exprt> &solution_functions);
   /// Namespace passed on to decision procedure.
   namespacet ns;
   std::string logic = "LIA";
