@@ -22,8 +22,6 @@ oracle_solvert::oracle_solvert(
 
 exprt oracle_solvert::get_oracle_value(const function_application_exprt &oracle_app)
 {
-  std::cout << "There are " << applications.size() << " applications in get_oracle_value" << std::endl;
-
   for (const auto &app : applications)
   {
     if (to_function_application_expr(app.first).function() == oracle_app.function())
@@ -42,10 +40,6 @@ exprt oracle_solvert::get_oracle_value(const function_application_exprt &oracle_
       auto result = history->second.find(inputs);
       if (result == history->second.end())
       {
-        std::cout << "We didn't find history for inputs\n";
-        for (const auto &i : inputs)
-          std::cout << expr2sygus(i);
-        std::cout << std::endl;
         return call_oracle(app.second, inputs);
       }
       return result->second;
@@ -73,7 +67,7 @@ void oracle_solvert::set_to(const exprt &expr, bool value)
           // yes
           if(applications.find(application_expr) == applications.end())
           {
-            std::cout<<"adding a new application "<< expr2sygus(application_expr)<<std::endl;
+            // std::cout<<"adding a new application "<< expr2sygus(application_expr)<<std::endl;
             // not seen before
             auto &application = applications[application_expr];
             application.binary_name = oracle_fun_map_it->second.binary_name;
@@ -124,7 +118,7 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 {
   oracle_solvert::check_resultt result = CONSISTENT;
 
-std::cout<<"There are "<< applications.size()<<" applications in check oracles\n";
+// std::cout<<"There are "<< applications.size()<<" applications in check oracles\n";
   for(const auto &application : applications)
   { 
     switch(check_oracle(application.first, application.second))
@@ -177,10 +171,6 @@ exprt oracle_solvert::call_oracle(
     const applicationt &application, const std::vector<exprt> &inputs)
     {
       bool is_new = false;
-      std::cout<<"now in call oracle with inputs: "<<std::endl;
-        for(const auto &i: inputs)
-          std::cout<<expr2sygus(i);
-        std::cout<<std::endl;
       return call_oracle(application, inputs, is_new);
     }
 
@@ -207,7 +197,6 @@ exprt oracle_solvert::call_oracle(
     }
 
     response = make_oracle_call(application.binary_name, argv);
-    // log.status() << "oracle response " << expr2sygus(response) << messaget::eom;
     if (cache)
       oracle_call_history[application.binary_name][inputs] = response;
   }
