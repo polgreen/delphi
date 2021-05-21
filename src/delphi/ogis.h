@@ -19,7 +19,7 @@ public:
   using resultt = decision_proceduret::resultt;
 
   resultt doit();
-
+  bool increase_program_size;
 
 protected:
   synthesizert &synthesizer;

@@ -39,6 +39,7 @@ ogist::ogist(
   verifyt &__verify,
   problemt &__problem, 
   namespacet &_ns) :
+  increase_program_size(true),
   synthesizer(__synthesizer),
   verify(__verify),
   problem(__problem),
@@ -52,12 +53,22 @@ ogist::ogist(
 }
 #include <iostream>
 
-void display_solution(const solutiont &solution)
+void display_solution(const solutiont &solution, std::vector<exprt> synth_fun_helpers)
 {
   std::cout<<"SOLUTION:"<<std::endl;
   for(const auto & f: solution.functions)
   {
-    std::cout<<expr2sygus(f.first)<<"  =  "<<expr2sygus(f.second)<<std::endl;
+    if(synth_fun_helpers.size()==0)
+      std::cout<<expr2sygus(f.first)<<"  =  "<<expr2sygus(f.second)<<std::endl;
+    else
+    {
+      exprt result = f.second;
+      for(const auto &h: synth_fun_helpers)
+      {
+        result = and_exprt(f.second, h);
+      }
+      std::cout<<expr2sygus(f.first)<<"  =  "<<expr2sygus(result)<<std::endl;
+    }
   }
 }
 
@@ -69,6 +80,7 @@ ogist::resultt ogist::doit()
   std::size_t program_size=1;
   std::size_t iteration=0;
   solutiont solution;
+  bool switched_to_alternative_constraints=false;
 
   while(true)
   {
@@ -86,15 +98,28 @@ ogist::resultt ogist::doit()
         // check if solution is the same each time?
       break;
     case synthesizert::NO_SOLUTION:
-      std::cout<<"No solution, ";
-      if(program_size<10)
+      if(program_size<10 && increase_program_size)
       {
         program_size+=1;
         std::cout<<"increase program size to "<< program_size << std::endl;
         synthesizer.set_program_size(program_size);
         continue; // do another attempt to synthesize
       }
-      std::cout<<" reached max program size" <<std::endl;
+      else if(problem.alternative_constraints.size()>0 
+              && !switched_to_alternative_constraints)
+      {
+        std::cout<<"switching to alternative constraints"<<std::endl;
+        problem.constraints = problem.alternative_constraints;
+        problem.synthesis_constraints.clear();
+        switched_to_alternative_constraints=true;
+        continue;
+      }
+      else
+      {
+        std::cout<<"No solution found"<<std::endl;
+        return decision_proceduret::resultt::D_UNSATISFIABLE;
+      }
+
       return ogist::resultt::D_ERROR;
     }
 
@@ -105,7 +130,7 @@ ogist::resultt ogist::doit()
     {
     case verifyt::PASS:
       std::cout<<"Verification passed" <<std::endl;
-      display_solution(solution);
+      display_solution(solution, problem.synth_fun_helpers);
       return decision_proceduret::resultt::D_SATISFIABLE;
     case verifyt::FAIL:
       std::cout<<"Fail: got "<<problem.synthesis_constraints.size()-num_synth_constraints <<" new constraints"<<std::endl;
