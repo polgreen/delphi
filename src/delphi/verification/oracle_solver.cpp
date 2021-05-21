@@ -24,7 +24,7 @@ exprt oracle_solvert::get_oracle_value(const function_application_exprt &oracle_
 {
   for (const auto &app : applications)
   {
-    if (to_function_application_expr(app.first).function() == oracle_app.function())
+    if(to_function_application_expr(app.first) == oracle_app)
     {
       // get inputs
       std::vector<exprt> inputs;

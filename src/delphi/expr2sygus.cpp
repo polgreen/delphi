@@ -1065,11 +1065,19 @@ std::string convert_expr(const exprt &expr)
     }  
     result+=')';  
   }
+  else if (expr.id()==ID_tuple)
+  {
+    for(const auto &op: expr.operands())
+      result += convert_expr(op);
+  }
   else
+  {
+    std::cout<<"Got id" << expr.id() <<std::endl;
     INVARIANT_WITH_DIAGNOSTICS(
       false,
       "smt2_convt::convert_expr should not be applied to unsupported type",
-      expr.id_string());
+      expr.pretty());
+  }
   return result;
 }
 

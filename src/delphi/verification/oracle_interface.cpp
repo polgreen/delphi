@@ -72,6 +72,7 @@ bool contains_synth_fun_app(const exprt &expr, const problemt &problem)
 
 bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, oracle_solvert &solver)
 {
+  // std::cout<<"replacing oracle in "<< expr2sygus(expr)<<std::endl;
   for (auto &op : expr.operands())
     if (!replace_oracles(op, problem, solver))
       return false;
