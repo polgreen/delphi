@@ -24,6 +24,8 @@
   "(symo) "                                                               \
   "(smto)"                                                                \
   "(smt)"                                                                 \
+  "(pbe)"                                                                 \
+  "(fp)"                                                                  \
 /// File ending of SMT2 files. Used to determine the language frontend that
 /// shall be used.
 #define SMT2_FILE_ENDING ".smt2"
