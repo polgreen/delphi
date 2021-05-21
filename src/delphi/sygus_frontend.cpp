@@ -52,7 +52,9 @@ problemt build_problem(sygus_parsert &parser)
   }
 
   problem.constraints=parser.constraints;
+  problem.alternative_constraints=parser.alternative_constraints;
   problem.assumptions=parser.assumptions;
+  problem.synth_fun_helpers = parser.synth_fun_helpers;
 
   for (const auto &c : parser.oracle_constraint_gens)
     problem.oracle_constraint_gens.push_back(c);
@@ -61,6 +63,9 @@ problemt build_problem(sygus_parsert &parser)
     problem.oracle_assumption_gens.push_back(c);
 
   for(auto &c : problem.constraints)
+    parser.expand_function_applications(c);
+
+  for(auto &c : problem.alternative_constraints)
     parser.expand_function_applications(c);
 
   for(auto &c : problem.assumptions)
@@ -73,6 +78,9 @@ problemt build_problem(sygus_parsert &parser)
 
   for(auto &o : problem.oracle_assumption_gens)
     parser.expand_function_applications(o.constraint);
+
+  for(auto &h : problem.synth_fun_helpers)
+    parser.expand_function_applications(h);
 
   return problem;
 }
@@ -124,9 +132,10 @@ int sygus_frontend(const cmdlinet &cmdline, std::istream &in)
 
   if(!cmdline.isset("bitblast"))
   {
-    cvc4_syntht synthesizer(message_handler, cmdline.isset("constants"), cmdline.isset("grammar"));  
+    cvc4_syntht synthesizer(message_handler, cmdline.isset("constants"), cmdline.isset("pbe"), cmdline.isset("grammar"), cmdline.isset("fp"));  
     oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
     ogist ogis(synthesizer, verifier, problem, ns);
+    ogis.increase_program_size=false;
     ogis.doit();
   }
   else

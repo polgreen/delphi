@@ -23,9 +23,8 @@ public:
   using smt2_errort = smt2_tokenizert::smt2_errort;
 
   enum invariant_variablet { PRIMED, UNPRIMED };
-  enum invariant_constraint_functiont { PRE, INV, TRANS, POST };
 
-  exprt::operandst constraints;
+  exprt::operandst constraints, alternative_constraints;
   exprt::operandst assumptions;
   std::vector<oracle_constraint_gent> oracle_assumption_gens;
   std::vector<oracle_constraint_gent> oracle_constraint_gens;
@@ -37,14 +36,15 @@ public:
 
   signature_with_parameter_idst inv_function_signature();
   void expand_function_applications(exprt &);
-  void generate_invariant_constraints();
+  void generate_invariant_constraints(const irep_idt &inv, const irep_idt &pre, const irep_idt &trans, const irep_idt &post);
 
   oracle_constraint_gent oracle_signature();
 
   function_application_exprt apply_function_to_variables(
-    invariant_constraint_functiont id,
+    irep_idt id,
     invariant_variablet variable_use);
   
+  std::vector<exprt> synth_fun_helpers;
   void replace_higher_order_logic();
 
 protected:

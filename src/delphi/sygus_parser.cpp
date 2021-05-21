@@ -241,8 +241,21 @@ void sygus_parsert::setup_commands()
   };
 
   commands["inv-constraint"] = [this] {
-    ignore_command();
-    generate_invariant_constraints();
+    irep_idt inv,pre,trans,post;
+    if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error() << "expected a symbol for invariant in inv-constraint" ;
+    inv = smt2_tokenizer.get_buffer();
+    if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error() << "expected a symbol for pre in inv-constraint" ;
+    pre=smt2_tokenizer.get_buffer();
+    if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error() << "expected a symbol for trans in inv-constraint" ;
+    trans=smt2_tokenizer.get_buffer();
+    if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error() << "expected a symbol for post in inv-constraint" ;
+    post=smt2_tokenizer.get_buffer();
+
+    generate_invariant_constraints(inv, pre, trans, post);
   };
 
   commands["set-options"] = [this] {
@@ -286,28 +299,13 @@ sygus_parsert::signature_with_parameter_idst sygus_parsert::inv_function_signatu
 }
 
 function_application_exprt sygus_parsert::apply_function_to_variables(
-  invariant_constraint_functiont function_type,
+  irep_idt id,
   invariant_variablet var_use)
 {
   std::string suffix;
   if(var_use == PRIMED)
-    suffix = "!";
-
-  std::string id;
-  switch(function_type)
   {
-  case PRE:
-    id = "pre-f";
-    break;
-  case INV:
-    id = "inv-f";
-    break;
-  case TRANS:
-    id = "trans-f";
-    break;
-  case POST:
-    id = "post-f";
-    break;
+    suffix="!";
   }
 
   auto f_it = id_map.find(id);
@@ -328,8 +326,7 @@ function_application_exprt sygus_parsert::apply_function_to_variables(
   // get arguments
   for(std::size_t i = 0; i < f_type.domain().size(); i++)
   {
-    std::string init_var_id = id2string(f.parameters[i]) + suffix;
-    auto var_id = clean_id(init_var_id);
+    std::string var_id = clean_id(f.parameters[i]) + suffix;
     const typet &var_type = f_type.domain()[i];
 
     if(id_map.find(var_id) == id_map.end())
@@ -341,43 +338,58 @@ function_application_exprt sygus_parsert::apply_function_to_variables(
 
     arguments[i] = symbol_exprt(var_id, var_type);
   }
-
   return function_application_exprt(
     symbol_exprt(id, f.type),
     arguments);
 }
 
-void sygus_parsert::generate_invariant_constraints()
+void sygus_parsert::generate_invariant_constraints(
+    const irep_idt &inv, const irep_idt &pre, const irep_idt &trans, const irep_idt &post)
+
 {
   // pre-condition application
   function_application_exprt pre_f =
-    apply_function_to_variables(PRE, UNPRIMED);
+    apply_function_to_variables(pre, UNPRIMED);
 
   // invariant application
-  function_application_exprt inv =
-    apply_function_to_variables(INV, UNPRIMED);
+  function_application_exprt inv_f =
+    apply_function_to_variables(inv, UNPRIMED);
 
   function_application_exprt primed_inv =
-    apply_function_to_variables(INV, PRIMED);
+    apply_function_to_variables(inv, PRIMED);
 
   // transition function application
   function_application_exprt trans_f =
-    apply_function_to_variables(TRANS, UNPRIMED);
+    apply_function_to_variables(trans, UNPRIMED);
 
   //post-condition function application
   function_application_exprt post_f =
-    apply_function_to_variables(POST, UNPRIMED);
+    apply_function_to_variables(post, UNPRIMED);
+
+  function_application_exprt primed_post =
+    apply_function_to_variables(post, PRIMED);
 
   // create constraints
-  implies_exprt pre_condition(pre_f, inv);
+  and_exprt inv_p(inv_f, post_f);
+  implies_exprt pre_condition(pre_f, inv_p); // init => inv & post
   constraints.push_back(pre_condition);
-
-  and_exprt inv_and_transition(inv, trans_f);
-  implies_exprt transition_condition(inv_and_transition, primed_inv);
+  and_exprt inv_p_primed(primed_inv, primed_post); 
+  and_exprt inv_and_transition(inv_p, trans_f); // (inv & post & trans)
+  implies_exprt transition_condition(inv_and_transition, inv_p_primed); //(inv & post & trans) => inv' & post'
   constraints.push_back(transition_condition);
 
-  implies_exprt post_condition(inv, post_f);
+  implies_exprt post_condition(inv_p, post_f); // inv & post => post. Really not needed. 
   constraints.push_back(post_condition);
+  synth_fun_helpers.push_back(post_f);
+
+  implies_exprt pre_condition2(pre_f, inv_f);
+  alternative_constraints.push_back(pre_condition2);
+  and_exprt inv_and_transition2(inv_f, trans_f);
+  implies_exprt transition_condition2(inv_and_transition2, primed_inv);
+  alternative_constraints.push_back(transition_condition2);
+
+  implies_exprt post_condition2(inv_f, post_f);
+  alternative_constraints.push_back(post_condition2);
 }
 
 syntactic_templatet sygus_parsert::NTDef_seq()

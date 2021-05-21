@@ -292,6 +292,12 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
   // argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
   if(magic_constants)
     argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-grammar-cons=any-const", "--no-sygus-pbe", "--sygus-repair-const", temp_file_problem()};
+  else if(usePBE)
+  {
+    argv = {"cvc4", "--lang", "sygus2", temp_file_problem()};
+  }
+  else if(FP)
+    argv = {"cvc4", "--lang", "sygus2", "--fp-ext",  temp_file_problem()};
   else
     argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
   

@@ -10,9 +10,11 @@ class cvc4_syntht : public synthesizert
 {
 
 public:
-  cvc4_syntht(message_handlert &_ms, bool _magic_constants, bool _use_grammar) :
+  cvc4_syntht(message_handlert &_ms, bool _magic_constants, bool _usePBE, bool _use_grammar, bool _FP) :
                 magic_constants(_magic_constants),
+                usePBE(_usePBE),
                 use_grammar(_use_grammar),
+                FP(_FP),
                 number_synth_constraints(0u),
                 synth_constraint_increment(2u),
                 message_handler(_ms){};
@@ -26,7 +28,9 @@ public:
   void set_program_size(std::size_t size) override;
   void increment_synthesis_constraints() override;
   bool magic_constants;
+  bool usePBE;
   bool use_grammar;
+  bool FP;
 
 protected:
   // number of synth constraints used so far
