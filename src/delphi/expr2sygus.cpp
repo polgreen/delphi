@@ -7,6 +7,19 @@
 #include <util/expr_util.h>
 #include <util/fixedbv.h>
 
+
+std::size_t boolbv_width(const typet &expr_type)
+{
+  if (expr_type.id() == ID_signedbv)
+    return to_signedbv_type(expr_type).get_width();
+  else if (expr_type.id() == ID_unsignedbv)
+    return to_unsignedbv_type(expr_type).get_width();
+  else if (expr_type.id() == ID_bv)
+    return to_bv_type(expr_type).get_width();
+  else
+    assert(0);
+}
+
 std::string convert_constant(const constant_exprt &expr)
 {
   std::string result;
@@ -447,73 +460,71 @@ std::string convert_expr(const exprt &expr)
           expr.id()==ID_lshr ||
           expr.id()==ID_shl)
   {
-    // const shift_exprt &shift_expr = to_shift_expr(expr);
-    // const typet &type = shift_expr.type();
+    const shift_exprt &shift_expr = to_shift_expr(expr);
+    const typet &type = shift_expr.type();
 
-    // if(type.id()==ID_unsignedbv ||
-    //    type.id()==ID_signedbv ||
-    //    type.id()==ID_bv)
-    // {
-    //   if(shift_expr.id() == ID_ashr)
-    //     result+= "(bvashr ";
-    //   else if(shift_expr.id() == ID_lshr)
-    //     result+= "(bvlshr ";
-    //   else if(shift_expr.id() == ID_shl)
-    //     result+= "(bvshl ";
-    //   else
-    //     UNREACHABLE;
+    if(type.id()==ID_unsignedbv ||
+       type.id()==ID_signedbv ||
+       type.id()==ID_bv)
+    {
+      if(shift_expr.id() == ID_ashr)
+        result+= "(bvashr ";
+      else if(shift_expr.id() == ID_lshr)
+        result+= "(bvlshr ";
+      else if(shift_expr.id() == ID_shl)
+        result+= "(bvshl ";
+      else
+        UNREACHABLE;
 
-    //   result += convert_expr(shift_expr.op());
-    //   result+= " ";
+      result += convert_expr(shift_expr.op());
+      result+= " ";
 
-    //   // SMT2 requires the shift distance to have the same width as
-    //   // the value that is shifted -- odd!
+      // SMT2 requires the shift distance to have the same width as
+      // the value that is shifted -- odd!
 
-    //   // if(shift_expr.distance().type().id() == ID_integer)
-    //   // {
-    //   //   const mp_integer i =
-    //   //     numeric_cast_v<mp_integer>(to_constant_expr(shift_expr.distance()));
+      // if(shift_expr.distance().type().id() == ID_integer)
+      // {
+      //   const mp_integer i =
+      //     numeric_cast_v<mp_integer>(to_constant_expr(shift_expr.distance()));
 
-    //   //   // shift distance must be bit vector
-    //   //   std::size_t width_op0 = boolbv_width(shift_expr.op().type());
-    //   //   exprt tmp=from_integer(i, unsignedbv_typet(width_op0));
-    //   //   result += convert_expr(tmp);
-    //   // }
-    //   if(
-    //     shift_expr.distance().type().id() == ID_signedbv &&
-    //     shift_expr.distance().type().id() == ID_unsignedbv ||
-    //     shift_expr.distance().type().id() == ID_c_enum ||
-    //     shift_expr.distance().type().id() == ID_c_bool)
-    //   {
-    //     std::size_t width_op0 = boolbv_width(shift_expr.op().type());
-    //     std::size_t width_op1 = boolbv_width(shift_expr.distance().type());
+      //   // shift distance must be bit vector
+      //   std::size_t width_op0 = boolbv_width(shift_expr.op().type());
+      //   exprt tmp=from_integer(i, unsignedbv_typet(width_op0));
+      //   result += convert_expr(tmp);
+      // }
+      if(
+        shift_expr.distance().type().id() == ID_signedbv ||
+        shift_expr.distance().type().id() == ID_unsignedbv)
+      {
+        std::size_t width_op0 = boolbv_width(shift_expr.op().type());
+        std::size_t width_op1 = boolbv_width(shift_expr.distance().type());
 
-    //     if(width_op0==width_op1)
-    //       result += convert_expr(shift_expr.distance());
-    //     else if(width_op0>width_op1)
-    //     {
-    //       result+= "((_ zero_extend " + width_op0-width_op1 + ") ";
-    //       result += convert_expr(shift_expr.distance());
-    //       result+= ")"; // zero_extend
-    //     }
-    //     else // width_op0<width_op1
-    //     {
-    //       result+= "((_ extract " + width_op0-1 + " 0) ";
-    //       result += convert_expr(shift_expr.distance());
-    //       result+= ")"; // extract
-    //     }
-    //   }
-    //   else
-    //     UNEXPECTEDCASE(
-    //       "unsupported distance type for " + shift_expr.id_string() + ": " +
-    //       type.id_string());
+        if(width_op0==width_op1)
+          result += convert_expr(shift_expr.distance());
+        else if(width_op0>width_op1)
+        {
+          result+= "((_ zero_extend " + integer2string(width_op0-width_op1) + ") ";
+          result += convert_expr(shift_expr.distance());
+          result+= ")"; // zero_extend
+        }
+        else // width_op0<width_op1
+        {
+          result+= "((_ extract " + integer2string(width_op0-1) + " 0) ";
+          result += convert_expr(shift_expr.distance());
+          result+= ")"; // extract
+        }
+      }
+      else
+        UNEXPECTEDCASE(
+          "unsupported distance type for " + shift_expr.id_string() + ": " +
+          type.id_string());
 
-    //   result+= ")"; // bv*sh
-    // }
-    // else
-    //   UNEXPECTEDCASE(
-    //     "unsupported type for " + shift_expr.id_string() + ": " +
-    //     type.id_string());
+      result+= ")"; // bv*sh
+    }
+    else
+      UNEXPECTEDCASE(
+        "unsupported type for " + shift_expr.id_string() + ": " +
+        type.id_string());
   }
   else if(expr.id() == ID_rol || expr.id() == ID_ror)
   {
