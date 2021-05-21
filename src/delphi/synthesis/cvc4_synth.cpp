@@ -297,7 +297,7 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
     argv = {"cvc4", "--lang", "sygus2", temp_file_problem()};
   }
   else if(FP)
-    argv = {"cvc4", "--lang", "sygus2", "--fp-ext",  temp_file_problem()};
+    argv = {"cvc4", "--lang", "sygus2", "--fp-exp",  temp_file_problem()};
   else
     argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
   
