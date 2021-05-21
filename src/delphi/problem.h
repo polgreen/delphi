@@ -21,7 +21,7 @@ public:
   // Synthesis constraints are only used by the synthesis phase, and never by the verification phase
 
   // these are used for verification
-  std::vector<exprt> constraints, assumptions;
+  std::vector<exprt> constraints, assumptions, alternative_constraints;
   // these are used for synthesis
   std::set<exprt> synthesis_constraints;
   // these are the oracles that can generate assumptions and constraints
@@ -35,6 +35,7 @@ public:
   std::set<irep_idt> second_order_oracles;
   std::set<constant_exprt> literals; ///
   std::size_t iteration;
+  std::vector<exprt> synth_fun_helpers;
 };
 
 class solutiont
