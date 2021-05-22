@@ -1,7 +1,7 @@
 #include "define_fun_parser.h"
 
-#include "../../src/emu/expr2sygus.h"
-#include "../../src/emu/sygus_parser.h"
+#include "../../src/delphi/expr2sygus.h"
+#include "../../src/delphi/sygus_parser.h"
 
 #include <util/cmdline.h>
 #include <util/mathematical_types.h>
@@ -48,35 +48,61 @@ std::string ssystem (const char *command)
 }
 
 
-void implication(std::ostream &out, std::string candidate, std::string transf, std::string variable_decls)
+void implication(std::ostream &out, const define_fun_resultt &candidate, const std::string &transf)
 {
-	out << variable_decls;
   out << transf;
-	out << candidate << "\n";
-	out << "(assert (and (inv-f x y)(trans-f x y x! y!)(not (inv-f x! y!))))\n";
-	out << "(check-sat)\n";
-	out << "(get-model)\n";
+  out << expr2sygus_fun_def(symbol_exprt(candidate.id, candidate.type),candidate.body) << "\n";
+  out << "(assert (and (inv-f ";
+  for(const auto &p: candidate.parameters)
+    out << clean_id(p)<<" ";
+  out <<")(trans-f ";
+
+  for(const auto &p: candidate.parameters)
+    out << clean_id(p)<<" ";
+
+  for(const auto &p: candidate.parameters)
+    out << clean_id(p)<<"! ";
+
+  out <<") (not (inv-f ";
+  for(const auto &p: candidate.parameters)
+    out << clean_id(p)<<"! ";
+
+  out << "))))\n";
+  out << "(check-sat)\n";
+  out << "(get-model)\n";
 }
 
-void positive(std::ostream &out, std::string candidate, std::string pref, std::string variable_decls)
+void positive(std::ostream &out, const define_fun_resultt &candidate, const std::string &pref )
 {
-	out << variable_decls;
 	out << pref;
-	out << candidate << "\n";
-	out << "(assert (and (not (inv-f x y))(pre-f x y)))\n";
+	out << expr2sygus_fun_def(symbol_exprt(candidate.id, candidate.type),candidate.body) << "\n";
+	out << "(assert (and (not (inv-f ";
+  for(const auto &p: candidate.parameters)
+    out << clean_id(p)<<" ";
+  out <<"))(pre-f ";
+
+  for(const auto &p: candidate.parameters)
+    out << clean_id(p)<<" ";
+  out <<")))\n";
 	out << "(check-sat)\n";
 	out << "(get-model)\n";
 }
 
 
-void negative(std::ostream &out, std::string candidate, std::string postf, std::string variable_decls)
+void negative(std::ostream &out, const define_fun_resultt &candidate, const std::string &postf)
 {
-	out << variable_decls;
-	out << postf;
-	out << candidate << "\n";
-	out << "(assert (and (inv-f x y)(not (post-f x y))))\n";
-	out << "(check-sat)\n";
-	out << "(get-model)\n";
+  out << postf;
+  out << expr2sygus_fun_def(symbol_exprt(candidate.id, candidate.type),candidate.body) << "\n";
+  out << "(assert (and (not (post-f ";
+  for(const auto &p: candidate.parameters)
+    out << clean_id(p)<<" ";
+  out <<"))(inv-f ";
+
+  for(const auto &p: candidate.parameters)
+    out << clean_id(p)<<" ";
+  out <<")))\n";
+  out << "(check-sat)\n";
+  out << "(get-model)\n";
 }
 
 
@@ -117,14 +143,16 @@ std::string remove_unsat_prefix(std::string input)
 
 
 
-std::pair<bool,std::string> call_smt_solver(std::string candidate, 
-  std::string pref, std::string postf, std::string transf, 
-  std::set<symbol_exprt> variable_set, cmdlinet cmdline)
+std::pair<bool,std::string> call_smt_solver(define_fun_resultt candidate, 
+  std::string pref, std::string postf, std::string transf, cmdlinet cmdline)
 {
-  std::string variable_declarations;
   std::pair<bool, std::string> result;
-  for (const auto &v : variable_set)
-    variable_declarations += expr2sygus_var_dec(v);
+  std::string variable_declarations;
+  const auto &domain = to_mathematical_function_type(candidate.type).domain();
+  for(std::size_t i=0; i< domain.size(); i++)
+    variable_declarations += expr2sygus_fun_dec(symbol_exprt(candidate.parameters[i], domain[i]));
+
+
   if (cmdline.isset("pos") || cmdline.isset("all"))
   {
     std::ofstream posfile("pos-file.smt2");
@@ -133,7 +161,8 @@ std::pair<bool,std::string> call_smt_solver(std::string candidate,
     {
       throw std::exception();
     }
-    positive(posfile, candidate, pref, variable_declarations);
+    posfile << variable_declarations;
+    positive(posfile, candidate, pref);
     posfile.close();
     std::string command("z3 pos-file.smt2");
     result.second = ssystem(command.c_str());
@@ -148,7 +177,8 @@ std::pair<bool,std::string> call_smt_solver(std::string candidate,
     {
       throw std::exception();
     }
-    negative(negfile, candidate, postf, variable_declarations);
+    negfile << variable_declarations;
+    negative(negfile, candidate, postf);
     negfile.close();
     std::string command = "z3 neg-file.smt2";
     result.second = ssystem(command.c_str());
@@ -163,7 +193,8 @@ std::pair<bool,std::string> call_smt_solver(std::string candidate,
     {
       throw std::exception();
     }
-    implication(implicationfile, candidate, transf, variable_declarations);
+    implicationfile << variable_declarations;
+    implication(implicationfile, candidate, transf);
     implicationfile.close();
     std::string command = "z3 imp-file.smt2";
     result.second = ssystem(command.c_str());
@@ -184,10 +215,9 @@ int main(int argc, const char *argv[])
 
   try
   {
-    define_fun_resultt input_fun;
     std::size_t arg_size = cmdline.args.size();
-    // parse old spec
     std::ifstream in(cmdline.args[arg_size-2]);
+
     sygus_parsert parser(in);
     parser.parse();
 
@@ -213,19 +243,18 @@ int main(int argc, const char *argv[])
       assert(0);
     }
 
-
     transf_string = expr2sygus_fun_def(symbol_exprt(transf->first, transf->second.type),transf->second.definition);
     pref_string = expr2sygus_fun_def(symbol_exprt(pref->first, pref->second.type),pref->second.definition);
-    postf_string = expr2sygus_fun_def(symbol_exprt(postf->first, postf->second.type),postf->second.definition);  
+    postf_string = expr2sygus_fun_def(symbol_exprt(postf->first, postf->second.type),postf->second.definition); 
+
 
     std::istringstream arg_stream(cmdline.args[arg_size-1]);
-    input_fun = define_fun_parser(arg_stream);
+    define_fun_resultt input_fun = define_fun_parser(arg_stream);
+
 
     // call smt solver
-    std::pair<bool, std::string> result = call_smt_solver(
-      expr2sygus_fun_def(symbol_exprt(input_fun.id, input_fun.type),input_fun.body),
-      pref_string, postf_string, transf_string,
-      parser.variable_set, cmdline);
+    std::pair<bool, std::string> result = call_smt_solver(input_fun,
+      pref_string, postf_string, transf_string, cmdline);
     std::istringstream stream(remove_unsat_prefix(result.second));
 
     std::map<irep_idt, exprt> arg_parsed; 
@@ -240,27 +269,28 @@ int main(int argc, const char *argv[])
       arg_parsed = model_parser(stream);
     }
 
-    std::vector<std::string> arg_ids = {"x","y"};
 
-    for(const auto &input: arg_ids)
+    for(const auto &input: input_fun.parameters)
     {
-      if(arg_parsed.find(input)==arg_parsed.end())
+      auto res = arg_parsed.find(clean_id(input));
+      if(res==arg_parsed.end())
         std::cout <<" 1 ";
       else
       {
-        std::cout << expr2sygus(arg_parsed[input]) << " ";
+        std::cout << expr2sygus(res->second) << " ";
       }
     }
     if (cmdline.isset("impl"))
     {
-      for (const auto &input : arg_ids)
+      for (const auto &input : input_fun.parameters)
       {
-        std::string id = input + "!";
-        if (arg_parsed.find(input) == arg_parsed.end())
+        std::string id = clean_id(input) + "!";
+        auto res = arg_parsed.find(id);
+        if (res == arg_parsed.end())
           std::cout << " 1 ";
         else
         {
-          std::cout << expr2sygus(arg_parsed[input]) << " ";
+          std::cout << expr2sygus(res->second) << " ";
         }
       }
     }
