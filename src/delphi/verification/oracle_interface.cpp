@@ -140,7 +140,7 @@ void oracle_interfacet::call_second_order_oracles(oracle_solvert &solver,
             }
 
           exprt response = solver.make_oracle_call(app.second.binary_name,argv);
-          std::cout<<"Oracle response "<<expr2sygus(response)<<std::endl;
+          // std::cout<<"Oracle response "<<expr2sygus(response)<<std::endl;
           // overwrite history for this oracle
           solver.oracle_call_history[app.second.binary_name] = oracle_solvert::oracle_historyt();
           // force response to be correct response regardless of boolean input value
@@ -305,7 +305,6 @@ void oracle_interfacet::call_oracles(
   // call the oracle and add the constraints to problem.synthesis_constraints
   for(const auto &oracle : problem.oracle_constraint_gens)
   {
-    std::cout<<"Calling oracle constraint"<<std::endl;
     get_oracle_constraints(counterexample, oracle, problem, solution);
   }
 
@@ -313,7 +312,6 @@ void oracle_interfacet::call_oracles(
   // call the oracle and add the assumptions to problem.assumptions
   for(const auto &oracle : problem.oracle_assumption_gens)
   {
-    std::cout<<"Calling oracle assumption"<<std::endl;
     get_oracle_constraints(counterexample, oracle, problem, solution);
   }
 }
