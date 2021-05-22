@@ -1,4 +1,4 @@
-SRC = iceoracle.cpp define_fun_parser.cpp ../../src/emu/expr2sygus.cpp ../../src/emu/sygus_parser.cpp
+SRC = iceoracle.cpp define_fun_parser.cpp ../../src/delphi/expr2sygus.cpp ../../src/delphi/sygus_parser.cpp
 
 OBJ+= ../../$(CPROVER_DIR)/src/ansi-c/ansi-c$(LIBEXT) \
       ../../$(CPROVER_DIR)/src/assembler/assembler$(LIBEXT) \
