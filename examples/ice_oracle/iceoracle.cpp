@@ -29,6 +29,7 @@
   "(neg)"                                                                 \
   "(impl)"                                                                \
   "(all)"                                                                \
+  "(constraints)"                                                        \
 
 std::string ssystem (const char *command) 
 {
@@ -204,6 +205,55 @@ std::pair<bool,std::string> call_smt_solver(define_fun_resultt candidate,
   return result;
 }
 
+int output_oracle_constraints(std::vector<irep_idt> params, std::vector<typet> domain, std::string oracle_suffix)
+{
+  // only works for ints
+  std::string input1string = "(inv-f (-> ";
+  for(const auto &d: domain)
+    input1string+=type2sygus(d)+" ";
+  input1string+=" Bool))";
+
+  std::string output1string = "(B Bool)";
+  std::string output2string;
+
+  for(std::size_t i=0; i<params.size(); i++)
+  {
+    output1string+="("+ clean_id(params[i]) + " ";
+    output1string+=type2sygus(domain[i])+")";
+    output2string+="("+ clean_id(params[i]) + "! ";
+    output2string+=type2sygus(domain[i])+")";
+  }
+
+// positive constraint
+  std::cout<<"(oracle-constraint iceoracle_pos"<<oracle_suffix<<" ("
+          << input1string <<")("
+          << output1string <<")";
+  std::cout<<"\n(=> (not B)(= (inv-f ";
+  for(const auto &p: params)
+      std::cout<<clean_id(p)<<" ";
+  std::cout<<") true )))\n"; 
+
+  std::cout<<"(oracle-constraint iceoracle_neg"<<oracle_suffix<<" ("
+          << input1string <<")("
+          << output1string <<")";
+  std::cout<<"\n(=> (not B)(= (inv-f ";
+  for(const auto &p: params)
+      std::cout<<clean_id(p)<<" ";
+  std::cout<<") false )))\n";      
+
+  std::cout<<"(oracle-constraint iceoracle_impl"<<oracle_suffix<<" ("
+          << input1string <<")("
+          << output1string << output2string<<")";
+  std::cout<<"\n(=> (not B)(=> (inv-f ";
+  for(const auto &p: params)
+      std::cout<<clean_id(p)<<" ";
+  std::cout<<")(inv-f ";
+  for(const auto &p: params)
+      std::cout<<clean_id(p)<<"! ";  
+  std::cout<<"))))\n";
+  return 1;
+}
+
 int main(int argc, const char *argv[])
 {
   cmdlinet cmdline;
@@ -216,7 +266,8 @@ int main(int argc, const char *argv[])
   try
   {
     std::size_t arg_size = cmdline.args.size();
-    std::ifstream in(cmdline.args[arg_size-2]);
+    std::size_t file_location=2;
+    std::ifstream in(cmdline.args[arg_size-file_location]);
 
     sygus_parsert parser(in);
     parser.parse();
@@ -241,6 +292,13 @@ int main(int argc, const char *argv[])
     {
       std::cerr<<"unable to find post-f";
       assert(0);
+    }
+
+    if(cmdline.isset("constraints"))
+    {
+
+      return output_oracle_constraints(pref->second.parameters,
+        to_mathematical_function_type(pref->second.type).domain(), cmdline.args.back());
     }
 
     transf_string = expr2sygus_fun_def(symbol_exprt(transf->first, transf->second.type),transf->second.definition);
