@@ -18,7 +18,7 @@ std::string type2sygus(const typet &type);
 std::string expr2sygus(const exprt &expr);
 std::string expr2sygus_fun_dec(const symbol_exprt &function);
 std::string synth_fun_dec(const irep_idt &id, const synth_functiont &definition);
-std::string synth_fun_dec(const symbol_exprt &function, std::string grammar);
+std::string synth_fun_dec(const irep_idt &id, const synth_functiont &definition, const std::string &override_grammar);
 std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body);
 std::string expr2sygus_fun_def(const symbol_exprt &function, const exprt&body, std::vector<irep_idt> parameters);
 std::string expr2sygus_var_dec(const symbol_exprt &symbol);
