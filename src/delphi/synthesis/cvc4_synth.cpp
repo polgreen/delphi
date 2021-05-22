@@ -12,10 +12,9 @@
 void replace_local_var(exprt &expr, const irep_idt &target, exprt &replacement)
 {
   if (expr.id() == ID_symbol)
-  {
     if (to_symbol_expr(expr).get_identifier() == target)
       expr = replacement;
-  }
+
   for (auto &op : expr.operands())
     replace_local_var(op, target, replacement);
 }
@@ -62,17 +61,17 @@ std::string nonterminalID(const typet &type)
 }
 
 
-std::string production_rule(const typet &type, const mathematical_function_typet &functype, bool bitvecs)
+std::string production_rule(const typet &type, const synth_functiont &function_definition, bool bitvecs)
 {
   std::string NTid = nonterminalID(type);
   std::string result = "("+NTid+" "+type2sygus(type) +"(";
-  std::size_t count=0;
-  for(const auto &d: functype.domain())
+  auto func_type = to_mathematical_function_type(function_definition.type);
+  for(std::size_t i=0; i< func_type.domain().size(); i++)
   {
-   if(d==type)
-    result+="parameter"+integer2string(count, 10u)+" ";
-   count++; 
+    if(func_type.domain()[i]==type)
+      result +=clean_id(function_definition.parameters[i])+ " ";
   }
+
   if(type.id()!=ID_bool)
     result += expr2sygus(from_integer(0, type)) +" "+ 
               expr2sygus(from_integer(1, type))+" "+ 
@@ -125,20 +124,21 @@ return result;
 
 std::string production_rule(const typet &type, bool bitvecs)
 {
+  // create empty definition
   std::vector<typet> domain;
   mathematical_function_typet dummy_func_type(domain, type);
-  return production_rule(type, dummy_func_type , bitvecs);
+  synth_functiont dummy_def(dummy_func_type);
+  return production_rule(type, dummy_def, bitvecs);
 }
 
-std::string build_grammar(const symbol_exprt &function)
+std::string build_grammar(const synth_functiont &function_definition)
 {
   std::set<typet> types;
   bool integer=false;
   bool bv=false;
   bool hasbool=false;
 
-  INVARIANT(function.type().id()==ID_mathematical_function, "expected function type");
-  auto func = to_mathematical_function_type(function.type());
+  auto func = to_mathematical_function_type(function_definition.type);
   for (const auto &t : func.domain())
   {
     if(t.id()==ID_integer)
@@ -154,12 +154,12 @@ std::string build_grammar(const symbol_exprt &function)
   INVARIANT(types.size()<=2, "do not support more than 2 types in a grammar");
 
   std::string nonterminals = "(( "+ nonterminalID(func.codomain())+ " "  + type2sygus(func.codomain()) + ")";
-  std::string grammar = "(" + production_rule(func.codomain(), func,bv);
+  std::string grammar = "(" + production_rule(func.codomain(), function_definition,bv);
 
   for(const auto &t: types)
   {
     nonterminals += "("+ nonterminalID(t) +" " + type2sygus(t)+ ")";
-    grammar += production_rule(t, func,bv) + "\n";
+    grammar += production_rule(t, function_definition,bv) + "\n";
   }
   if(!hasbool && func.codomain().id()!=ID_bool)
   {
@@ -175,30 +175,21 @@ std::string build_grammar(const symbol_exprt &function)
 std::string cvc4_syntht::build_query(const problemt &problem)
 {
   std::string query = "(set-logic ALL)\n";
-
-  // std::string grammar = "\n((Start Bool) (StartInt Int))\n";
-  // grammar +="((Start Bool ((and Start Start)(or Start Start)(>= StartInt StartInt)(= StartInt StartInt)(not Start))) \n";
-  // grammar +="(StartInt Int (parameter0 parameter1 0 1 2 3 (- StartInt) (+ StartInt StartInt)(- StartInt StartInt)(ite Start StartInt StartInt))\n";
-  // grammar += "))\n";
-  // grammar = "";
-
-
   // declare function
   for(const auto &f: problem.synthesis_functions)
   {
-    // std::string grammar = use_grammar ? build_grammar(f) : " ";
-    query += synth_fun_dec(f.first, f.second) + "\n";
+    if(use_grammar)
+      query += synth_fun_dec(f.first, f.second, build_grammar(f.second)) + "\n";
+    else
+      query += synth_fun_dec(f.first, f.second) + "\n";
   }
-
 
   std::size_t count=0;
   for(const auto &c: problem.synthesis_constraints)
   {  
-
     query += "(constraint " + expr2sygus(c)+ ")\n";
     count++;  
-  }  
-
+  }
   query +="(check-synth)\n";
   return query;
 }
@@ -214,11 +205,7 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
   std::string firstline;
   std::getline(in, firstline);
   if (firstline == "unknown")
-  {
-    // std::cout << "SyGuS solver says unknown \n"
-    //           << std::endl;
     return decision_proceduret::resultt::D_UNSATISFIABLE;
-  }
 
   sygus_parsert result_parser(in);
   try
@@ -232,15 +219,10 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
     return decision_proceduret::resultt::D_ERROR;
   }
   if (result_parser.id_map.size() == 0)
-  {
-    // std::cout << "Inner synthesis phase failed or timed-out. ";
     return decision_proceduret::resultt::D_ERROR;
-  }
-
 
   for (auto &id : result_parser.id_map)
   {
-    // std::cout<<"Results "<< id2string(id.first) <<std::endl;
     if(problem.synthesis_functions.find(id.first)!=problem.synthesis_functions.end())
     {
       if (id.second.type.id() == ID_mathematical_function)
@@ -268,7 +250,7 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
 decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
 {
   const std::string query = build_query(problem);
-#if 0
+#ifdef DEBUGSYGUS
   std::cout
       << "Solving query:\n"
       << query << std::endl;
@@ -279,7 +261,6 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
       temp_file_stdout("sygus_stdout_", ""),
       temp_file_stderr("sygus_stderr_", "");
   {
-    // we write the problem into a file
     std::ofstream problem_out(
         temp_file_problem(), std::ios_base::out | std::ios_base::trunc);
     problem_out << query;
@@ -288,8 +269,7 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
   std::vector<std::string> argv;
   std::string stdin_filename;
 
-
-  // argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
+// TODO pass these arguments via command line
   if(magic_constants)
     argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-grammar-cons=any-const", "--no-sygus-pbe", "--sygus-repair-const", temp_file_problem()};
   else if(usePBE)
@@ -304,9 +284,7 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
   int res =
       run(argv[0], argv, stdin_filename, temp_file_stdout(), temp_file_stderr());
   if (res < 0)
-  {
     return decision_proceduret::resultt::D_ERROR;
-  }
   else
   {
     std::ifstream in(temp_file_stdout());
@@ -318,7 +296,6 @@ cvc4_syntht::resultt cvc4_syntht::operator()(const problemt &problem)
 {
 
   const decision_proceduret::resultt result = solve(problem);
-
   switch (result)
   {
   case decision_proceduret::resultt::D_SATISFIABLE:
@@ -355,8 +332,3 @@ solutiont cvc4_syntht::get_solution() const
   return last_solution;
 }
 
-// void cvc4_syntht::add_ce(
-//   const counterexamplet &counterexample)
-// {
-//   counterexamples.emplace_back(counterexample);
-// }

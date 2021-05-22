@@ -40,9 +40,7 @@ protected:
   std::string build_query(const problemt &problem);
   decision_proceduret::resultt read_result(std::istream &in, const problemt &p);
   decision_proceduret::resultt solve(const problemt &problem);
-
   solutiont last_solution;
-
   message_handlert &message_handler;
 };
 
