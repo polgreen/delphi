@@ -14,7 +14,8 @@
   "(verbosity): "                                                         \
   "(smt) "                                                                \
   "(bitblast) "                                                           \
-  "(bitblast-synth) "                                                     \
+  "(symbolic-bitblast)"                                                   \
+  "(symbolic-synth)"                                                      \
   "(simplify) "                                                           \
   "(cvc4) "                                                               \
   "(constants) "                                                          \
@@ -54,11 +55,20 @@ void help(std::ostream &out)
      "\n"
      "\n"
      "Command line options\n"
-     " --smt                           use Z3 solver as oracle solver subsolver (default) \n"
+     "  Oracle SMTO subsolver:         default uses CVC4\n"
      " --bitblast                      use bitblasting solver as oracle solver subsolver\n"
-     " --cvc4                          use cvc4 for synthesis\n"
-     " --symo                          input is in SyMO format\n"
-     " --smto                          input is in SMTO format\n"
+     " --simplify                      enables simplifcation in bitblasting solver\n"
+     " --negation-solver               enables solving algorithm that searches for negation of model\n\n"
+     "  Synthesis solver               default uses CVC4\n"
+     " --fp                            enables floating points of arbitrary size\n"
+     " --pbe                           enables PBE mode in CVC4 (not recommended unless using a grammar)\n"
+     " --grammar                       adds a default grammar to all synthesis functions (overrides any existing grammar)\n"
+     " --constants                     collects constants from benchmark and adds to grammar\n"
+     " --symbolic-synth                use symbolic encoding for synthesis (does not support grammars)\n"
+     " --symbolic-bitblast             use bitblaster with symbolic encoding\n\n\n"
+     " --symo                          interactive mode, input is in SyMO format\n"
+     " --smto                          interactive mode, input is in SMTO format\n\n"
+     " --verbosity N                   increase verbosity (10 gives maximum verbosity)\n\n"
      "\n"
      "\n";
     // clang-format on
