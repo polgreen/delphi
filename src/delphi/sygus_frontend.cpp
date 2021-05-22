@@ -130,7 +130,8 @@ int sygus_frontend(const cmdlinet &cmdline, std::istream &in)
   symbol_tablet symbol_table;
   namespacet ns(symbol_table);
 
-  if(!cmdline.isset("bitblast"))
+
+  if(!cmdline.isset("symbolic-synth"))
   {
     cvc4_syntht synthesizer(message_handler, cmdline.isset("constants"), cmdline.isset("pbe"), cmdline.isset("grammar"), cmdline.isset("fp"));  
     oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
@@ -140,7 +141,7 @@ int sygus_frontend(const cmdlinet &cmdline, std::istream &in)
   }
   else
   {
-    simple_syntht synthesizer(ns, message_handler, cmdline.isset("bitblast"));
+    simple_syntht synthesizer(ns, message_handler, cmdline.isset("symbolic-bitblast"));
     oracle_interfacet verifier(ns, message_handler, cmdline.isset("bitblast"));
     ogist ogis(synthesizer, verifier, problem, ns);
     ogis.doit();
