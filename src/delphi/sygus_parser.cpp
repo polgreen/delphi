@@ -145,8 +145,7 @@ void sygus_parsert::setup_commands()
     if(id_map.find(id)!=id_map.end())
       throw error() << "function `" << id << "' declared twice";
 
-    auto signature=(id=="inv-f")?
-      inv_function_signature() : function_signature_definition();
+    auto signature= function_signature_definition();
 
     // we'll tweak the type in case there are no parameters
     if(signature.type.id() != ID_mathematical_function)
@@ -154,7 +153,6 @@ void sygus_parsert::setup_commands()
       // turn into () -> signature.type
       signature.type = mathematical_function_typet({}, signature.type);
     }
-
     syntactic_templatet grammar = NTDef_seq();
 
     auto f_it = id_map.emplace(
@@ -172,7 +170,42 @@ void sygus_parsert::setup_commands()
     std::swap(renaming_map, old_renaming_map);
   };
 
-  commands["synth-inv"] = commands["synth-fun"];
+  commands["synth-inv"] = [this]
+  {
+    if(smt2_tokenizer.next_token()!=smt2_tokenizert::SYMBOL)
+      throw error("expected a symbol after synth-fun");
+
+    // save the renaming map
+    renaming_mapt old_renaming_map = renaming_map;
+    irep_idt id=smt2_tokenizer.get_buffer();
+
+    if(id_map.find(id)!=id_map.end())
+      throw error() << "function `" << id << "' declared twice";
+
+    auto signature=inv_function_signature();
+
+    // we'll tweak the type in case there are no parameters
+    if(signature.type.id() != ID_mathematical_function)
+    {
+      // turn into () -> signature.type
+      signature.type = mathematical_function_typet({}, signature.type);
+    }
+    syntactic_templatet grammar = NTDef_seq();
+
+    auto f_it = id_map.emplace(
+      std::piecewise_construct,
+      std::forward_as_tuple(id),
+      std::forward_as_tuple(idt::VARIABLE, nil_exprt()));
+
+    f_it.first->second.type = signature.type;
+    f_it.first->second.parameters = signature.parameters;
+
+    synthesis_functions.insert( 
+      std::pair<irep_idt, synth_functiont> 
+      (id, synth_functiont(grammar, signature.type, signature.parameters)));
+    // restore renamings
+    std::swap(renaming_map, old_renaming_map);
+  };
 
   commands["declare-var"]=[this]{
     const auto s = smt2_tokenizer.get_buffer();
