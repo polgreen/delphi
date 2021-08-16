@@ -95,6 +95,10 @@ void smt2_solvert::expand_function_applications(exprt &expr)
       if(f_it != id_map.end())
       {
         const auto &f = f_it->second;
+
+        if(f.definition.id()!=ID_lambda)
+          return;
+
         if(to_lambda_expr(f.definition).variables().size()==0)
         {
           // this was UF
