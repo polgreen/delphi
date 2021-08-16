@@ -138,14 +138,12 @@ void sygus_parsert::setup_commands()
     if(smt2_tokenizer.next_token()!=smt2_tokenizert::SYMBOL)
       throw error("expected a symbol after synth-fun");
 
-    // save the renaming map
-    renaming_mapt old_renaming_map = renaming_map;
     irep_idt id=smt2_tokenizer.get_buffer();
 
     if(id_map.find(id)!=id_map.end())
       throw error() << "function `" << id << "' declared twice";
 
-    auto signature= function_signature_definition();
+    auto signature=function_signature_definition();
 
     // we'll tweak the type in case there are no parameters
     if(signature.type.id() != ID_mathematical_function)
@@ -155,19 +153,16 @@ void sygus_parsert::setup_commands()
     }
     syntactic_templatet grammar = NTDef_seq();
 
-    auto f_it = id_map.emplace(
+    id_map.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(id),
       std::forward_as_tuple(idt::VARIABLE, nil_exprt()));
-
-    f_it.first->second.type = signature.type;
-    f_it.first->second.parameters = signature.parameters;
 
     synthesis_functions.insert( 
       std::pair<irep_idt, synth_functiont> 
       (id, synth_functiont(grammar, signature.type, signature.parameters)));
     // restore renamings
-    std::swap(renaming_map, old_renaming_map);
+    // std::swap(renaming_map, old_renaming_map);
   };
 
   commands["synth-inv"] = [this]
@@ -176,7 +171,7 @@ void sygus_parsert::setup_commands()
       throw error("expected a symbol after synth-fun");
 
     // save the renaming map
-    renaming_mapt old_renaming_map = renaming_map;
+    // renaming_mapt old_renaming_map = renaming_map;
     irep_idt id=smt2_tokenizer.get_buffer();
 
     if(id_map.find(id)!=id_map.end())
@@ -192,19 +187,16 @@ void sygus_parsert::setup_commands()
     }
     syntactic_templatet grammar = NTDef_seq();
 
-    auto f_it = id_map.emplace(
+    id_map.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(id),
-      std::forward_as_tuple(idt::VARIABLE, nil_exprt()));
-
-    f_it.first->second.type = signature.type;
-    f_it.first->second.parameters = signature.parameters;
+      std::forward_as_tuple(idt::VARIABLE, lambda_exprt(signature.binding_variables(), nil_exprt())));
 
     synthesis_functions.insert( 
       std::pair<irep_idt, synth_functiont> 
       (id, synth_functiont(grammar, signature.type, signature.parameters)));
     // restore renamings
-    std::swap(renaming_map, old_renaming_map);
+    // std::swap(renaming_map, old_renaming_map);
   };
 
   commands["declare-var"]=[this]{
@@ -257,20 +249,20 @@ void sygus_parsert::setup_commands()
   commands["oracle-constraint"]=[this]{
   
     // save the renaming map
-    renaming_mapt old_renaming_map = renaming_map;
+    // renaming_mapt old_renaming_map = renaming_map;
     // get constraint
     oracle_constraint_gent constraint = oracle_signature();
     oracle_constraint_gens.push_back(constraint);
-    renaming_map = old_renaming_map;    
+    // renaming_map = old_renaming_map;    
   };
 
   commands["oracle-assumption"]=[this]{
         // save the renaming map
-    renaming_mapt old_renaming_map = renaming_map;
+    // renaming_mapt old_renaming_map = renaming_map;
     // get constraint
     oracle_constraint_gent assumption = oracle_signature();
     oracle_assumption_gens.push_back(assumption);
-    renaming_map = old_renaming_map;    
+    // renaming_map = old_renaming_map;    
   };
 
   commands["inv-constraint"] = [this] {
@@ -354,12 +346,12 @@ function_application_exprt sygus_parsert::apply_function_to_variables(
   exprt::operandst arguments;
   arguments.resize(f_type.domain().size());
 
-  assert(f.parameters.size()==f_type.domain().size());
+  assert(to_lambda_expr(f.definition).variables().size()==f_type.domain().size());
 
   // get arguments
   for(std::size_t i = 0; i < f_type.domain().size(); i++)
   {
-    std::string var_id = clean_id(f.parameters[i]) + suffix;
+    std::string var_id = clean_id(to_symbol_expr(to_lambda_expr(f.definition).variables()[i]).get_identifier()) + suffix;
     const typet &var_type = f_type.domain()[i];
 
     if(id_map.find(var_id) == id_map.end())
@@ -567,11 +559,10 @@ void sygus_parsert::expand_function_applications(exprt &expr)
       // std::map<irep_idt, exprt> parameter_map;
       for(std::size_t i=0; i<f_type.domain().size(); i++)
       {
-        const auto &parameter_type = f_type.domain()[i];
-        const auto &parameter_id = f.parameters[i];
+        const auto &parameter = to_symbol_expr(to_lambda_expr(f.definition).variables()[i]);
 
         replace_symbol.insert(
-          symbol_exprt(parameter_id, parameter_type),
+          parameter,
           app.arguments()[i]);
       }
 

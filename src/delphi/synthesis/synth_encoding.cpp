@@ -4,6 +4,8 @@
 
 #include "synth_encoding.h"
 #include "../expr2sygus.h"
+#include <util/bitvector_types.h>
+#include <util/bitvector_expr.h>
 #include <algorithm>
 #include <iostream>
 

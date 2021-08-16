@@ -5,7 +5,10 @@
 #include <util/arith_tools.h>
 #include <util/range.h>
 #include <util/expr_util.h>
+#include <util/bitvector_types.h>
+#include <util/bitvector_expr.h>
 #include <util/fixedbv.h>
+
 
 
 std::size_t boolbv_width(const typet &expr_type)

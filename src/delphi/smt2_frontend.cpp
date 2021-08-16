@@ -95,7 +95,7 @@ void smt2_solvert::expand_function_applications(exprt &expr)
       if(f_it != id_map.end())
       {
         const auto &f = f_it->second;
-        if(f.parameters.size()==0)
+        if(to_lambda_expr(f.definition).variables().size()==0)
         {
           // this was UF
           return;
@@ -116,7 +116,7 @@ void smt2_solvert::expand_function_applications(exprt &expr)
         for(std::size_t i = 0; i < domain.size(); i++)
         {
           replace_symbol.insert(
-            symbol_exprt(f.parameters[i], domain[i]), app.arguments()[i]);
+            to_lambda_expr(f.definition).variables()[i], app.arguments()[i]);
         }
 
         exprt body = f.definition;

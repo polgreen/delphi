@@ -3,6 +3,7 @@
 
 #include <util/expr.h>
 #include <util/std_expr.h>
+#include <util/floatbv_expr.h>
 #include <iostream>
 #include "syntactic_template.h"
 
