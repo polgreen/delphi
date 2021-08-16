@@ -52,10 +52,7 @@ void sygus_parsert::replace_higher_order_logic()
 oracle_constraint_gent
 sygus_parsert::oracle_signature()
 {
-  if(next_token() != smt2_tokenizert::SYMBOL)
-      throw error("expected a symbol after define-fun");
 
-  const irep_idt binary_name = smt2_tokenizer.get_buffer();
   std::vector<symbol_exprt> inputs;
   std::vector<symbol_exprt> outputs;
 
@@ -98,7 +95,7 @@ sygus_parsert::oracle_signature()
     // no outputs
     next_token(); // eat the ')'
   }
-
+  //  get the outputs 
   while(smt2_tokenizer.peek() != smt2_tokenizert::CLOSE)
   {
     if(next_token() != smt2_tokenizert::OPEN)
@@ -122,6 +119,11 @@ sygus_parsert::oracle_signature()
 
   // get constraint
   exprt constraint = expression();
+  
+  if(next_token() != smt2_tokenizert::SYMBOL)
+      throw error("expected a symbol for oracle binary");
+
+  const irep_idt binary_name = smt2_tokenizer.get_buffer();
   return oracle_constraint_gent(binary_name,inputs, outputs, constraint);
 }
 
@@ -153,10 +155,12 @@ void sygus_parsert::setup_commands()
     }
     syntactic_templatet grammar = NTDef_seq();
 
-    id_map.emplace(
+    if(!id_map.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(id),
-      std::forward_as_tuple(idt::VARIABLE, nil_exprt()));
+      std::forward_as_tuple(idt::VARIABLE, nil_exprt())).second)
+        throw error() << "identifier '" << id << "' defined twice";
+
 
     synthesis_functions.insert( 
       std::pair<irep_idt, synth_functiont> 
@@ -187,10 +191,11 @@ void sygus_parsert::setup_commands()
     }
     syntactic_templatet grammar = NTDef_seq();
 
-    id_map.emplace(
+    if(!id_map.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(id),
-      std::forward_as_tuple(idt::VARIABLE, lambda_exprt(signature.binding_variables(), nil_exprt())));
+      std::forward_as_tuple(idt::VARIABLE, lambda_exprt(signature.binding_variables(), nil_exprt()))).second)
+        throw error() << "identifier '" << id << "' defined twice";
 
     synthesis_functions.insert( 
       std::pair<irep_idt, synth_functiont> 
