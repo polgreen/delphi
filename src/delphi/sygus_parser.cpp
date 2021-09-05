@@ -153,12 +153,12 @@ void sygus_parsert::setup_commands()
       // turn into () -> signature.type
       signature.type = mathematical_function_typet({}, signature.type);
     }
-    syntactic_templatet grammar = NTDef_seq();
+    syntactic_templatet grammar = NTDef_seq(signature);
 
     if(!id_map.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(id),
-      std::forward_as_tuple(idt::VARIABLE, nil_exprt())).second)
+      std::forward_as_tuple(idt::VARIABLE, signature.type)).second)
         throw error() << "identifier '" << id << "' defined twice";
 
 
@@ -189,7 +189,7 @@ void sygus_parsert::setup_commands()
       // turn into () -> signature.type
       signature.type = mathematical_function_typet({}, signature.type);
     }
-    syntactic_templatet grammar = NTDef_seq();
+    syntactic_templatet grammar = NTDef_seq(signature);
 
     if(!id_map.emplace(
       std::piecewise_construct,
@@ -422,7 +422,7 @@ void sygus_parsert::generate_invariant_constraints(
   alternative_constraints.push_back(post_condition2);
 }
 
-syntactic_templatet sygus_parsert::NTDef_seq()
+syntactic_templatet sygus_parsert::NTDef_seq(const signature_with_parameter_idst &signature)
 {
   syntactic_templatet result;
   std::vector<symbol_exprt> non_terminals;
@@ -441,16 +441,42 @@ syntactic_templatet sygus_parsert::NTDef_seq()
     non_terminals.push_back(next_nonterminal);
     result.nt_ids.push_back(next_nonterminal.get_identifier());
   }
+
   // eat the close
   smt2_tokenizer.next_token();
+
   // eat the open
   smt2_tokenizer.next_token();
+
+  // set up the function parameters as identifiers
+  std::vector<std::pair<irep_idt, idt>> hidden_ids;
+
+  for(const auto &pair : signature.ids_and_types())
+  {
+    auto insert_result =
+      id_map.insert({pair.first, idt{idt::PARAMETER, pair.second}});
+    if(!insert_result.second) // already there
+    {
+      auto &id_entry = *insert_result.first;
+      hidden_ids.emplace_back(id_entry.first, std::move(id_entry.second));
+      id_entry.second = idt{idt::PARAMETER, pair.second};
+    }
+  }
 
   for(const auto &nt: non_terminals)
   {
     std::vector<exprt> production_rule = GTerm_seq(nt);
     result.production_rules[nt.get_identifier()] = production_rule;
   }
+
+  // remove the parameter ids
+  for(auto &id : signature.parameters)
+    id_map.erase(id);
+
+  // restore the hidden ids, if any
+  for(auto &hidden_id : hidden_ids)
+    id_map.insert(std::move(hidden_id));
+
   smt2_tokenizer.next_token(); // eat the close
 
   return result;

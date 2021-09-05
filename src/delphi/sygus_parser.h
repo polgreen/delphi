@@ -52,7 +52,7 @@ protected:
   void setup_commands();
 
   // grammars
-  syntactic_templatet NTDef_seq();
+  syntactic_templatet NTDef_seq(const signature_with_parameter_idst &);
   std::vector<exprt> GTerm_seq(const symbol_exprt &nonterminal);
   symbol_exprt NTDef();
   void replace_higher_order_logic(exprt &expr);
