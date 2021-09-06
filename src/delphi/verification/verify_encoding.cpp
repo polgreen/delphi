@@ -12,9 +12,15 @@ void verify_encodingt::check_function_bodies(
     if(ID_bool == f.second.type().id())
       continue; // Synth encoding with just literal assignments as solution.
 
+    /*
     const auto &signature = to_mathematical_function_type(f.first.type());
     check_function_body(signature, f.second);
     if(f.second.type()!=signature.codomain())
+    {
+      throw "function body has wrong type";
+    }
+    */
+    if(f.second.type()!=f.first.type())
     {
       throw "function body has wrong type";
     }
@@ -102,8 +108,8 @@ exprt verify_encodingt::operator()(const exprt &expr) const
     else
     {
       exprt result = f_it->second;
-      // need to instantiate parameters with arguments
-      exprt instance=instantiate(result, e);
+
+      exprt instance = to_lambda_expr(result).application(e.arguments());
 
       return instance;
     }

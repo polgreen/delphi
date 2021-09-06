@@ -20,6 +20,8 @@
 #include "expr2sygus.h"
 #include <langapi/language_util.h>
 
+#include <util/format_expr.h>
+
 void output_expressions(
   const std::map<symbol_exprt, exprt> &expressions,
   const namespacet &ns,
@@ -28,8 +30,9 @@ void output_expressions(
   for(const auto &e : expressions)
   {
     out << e.first.get_identifier()
-        << " -> " << e.second.pretty()
+        << " -> " // << e.second.pretty()
         // << from_expr(ns, "", e.second)
+        << format(e.second)
         << '\n';
   }
 }

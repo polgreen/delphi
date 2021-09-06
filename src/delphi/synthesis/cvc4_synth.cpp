@@ -9,6 +9,8 @@
 #include "../expr2sygus.h"
 #include <algorithm>
 
+#include <iostream>
+
 void replace_local_var(exprt &expr, const irep_idt &target, exprt &replacement)
 {
   if (expr.id() == ID_symbol)
@@ -191,6 +193,7 @@ std::string cvc4_syntht::build_query(const problemt &problem)
     count++;  
   }
   query +="(check-synth)\n";
+  std::cout<<"QUERY\n"<<query<<std::endl;
   return query;
 }
 

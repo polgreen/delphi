@@ -1073,6 +1073,11 @@ std::string convert_expr(const exprt &expr)
     for(const auto &op: expr.operands())
       result += convert_expr(op);
   }
+  else if (expr.id() == ID_lambda)
+  {
+    const auto &l = to_lambda_expr(expr);
+    result += convert_expr(l.where());
+  }
   else
   {
     std::cout<<"Got id" << expr.id() <<std::endl;
