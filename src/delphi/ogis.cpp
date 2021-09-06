@@ -28,8 +28,8 @@ void output_expressions(
   for(const auto &e : expressions)
   {
     out << e.first.get_identifier()
-        << " -> "
-        << from_expr(ns, "", e.second)
+        << " -> " << e.second.pretty()
+        // << from_expr(ns, "", e.second)
         << '\n';
   }
 }
