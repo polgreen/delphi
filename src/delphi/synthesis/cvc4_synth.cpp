@@ -193,7 +193,6 @@ std::string cvc4_syntht::build_query(const problemt &problem)
     count++;  
   }
   query +="(check-synth)\n";
-  std::cout<<"QUERY\n"<<query<<std::endl;
   return query;
 }
 
@@ -205,15 +204,21 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
     std::cout << "Failed to open input file";
     return decision_proceduret::resultt::D_ERROR;
   }
-  std::string firstline;
-  std::getline(in, firstline);
-  if (firstline == "unknown")
-    return decision_proceduret::resultt::D_UNSATISFIABLE;
+
+  if(in.peek()!='(')
+  {
+    std::string firstline;
+    std::getline(in, firstline);
+    std::cout<<"First line of response "<< firstline<<std::endl;
+    if (firstline == "unknown" || firstline == "fail")
+      return decision_proceduret::resultt::D_UNSATISFIABLE;
+  }
 
   sygus_parsert result_parser(in);
   try
   {
     result_parser.parse();
+    std::cout<<"parsed response "<<std::endl;
   }
   catch (const sygus_parsert::smt2_errort &e)
   {

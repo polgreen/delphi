@@ -259,7 +259,7 @@ void oracle_interfacet::get_oracle_constraints(
   if (run_result != 0 && run_result != 10)
   {
     log.status() << "oracle " << oracle.binary_name << " has failed, run result "<< integer2string(run_result) << messaget::eom;
-    assert(0);
+    // assert(0);
   }
 
   // we assume that the oracle returns the result in SMT-LIB format,

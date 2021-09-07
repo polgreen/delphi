@@ -157,11 +157,16 @@ simple_syntht::resultt simple_syntht::operator()(const problemt &problem, decisi
     {
       for(const auto &f: problem.synthesis_functions)
       {
-        // if(to_mathematical_function_type(f.type()).codomain().id()==ID_bool)
-        //   solution.functions[f]=true_exprt();
-        // else
-          last_solution.functions[symbol_exprt(f.first, f.second.type)]=
-          from_integer(0, to_mathematical_function_type(f.second.type).codomain());
+        const auto &domain = to_mathematical_function_type(f.second.type).domain();
+        std::vector<symbol_exprt> parameters;
+        parameters.reserve(domain.size());
+        for(std::size_t i=0; i<domain.size(); i++)
+          parameters.push_back(symbol_exprt("synth::parameter"+integer2string(i),domain[i]));
+
+        last_solution.functions[symbol_exprt(f.first, f.second.type)]=
+          lambda_exprt(
+            parameters,
+            from_integer(0, to_mathematical_function_type(f.second.type).codomain()));
       }
     }
     return simple_syntht::resultt::CANDIDATE;

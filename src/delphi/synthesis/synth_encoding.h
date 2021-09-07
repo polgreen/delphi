@@ -81,7 +81,7 @@ public:
   // for a set of arguments
 
   symbol_exprt function_symbol = symbol_exprt::typeless(ID_empty_string);
-  std::vector<typet> parameter_types;
+  std::vector<symbol_exprt> parameters;
   typet return_type;
   typet word_type;
 

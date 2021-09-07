@@ -51,8 +51,8 @@ typet e_datat::compute_word_type()
 {
   typet result=return_type;
 
-  for(const auto & t : parameter_types)
-    result=promotion(result, t);
+ for(const auto & p : parameters)
+   result=promotion(result, p.type());
 
   return result;
 }
@@ -73,9 +73,12 @@ void e_datat::setup(
   return_type=e.type();
 
   const auto &arguments=e.arguments();
-  parameter_types.resize(arguments.size());
-  for(std::size_t i=0; i<parameter_types.size(); i++)
-    parameter_types[i]=arguments[i].type();
+  parameters.reserve(arguments.size());
+  for(std::size_t i=0; i<arguments.size(); i++)
+  {
+    irep_idt p_identifier="synth::parameter"+std::to_string(i);
+    parameters.push_back(symbol_exprt(p_identifier, arguments[i].type()));
+  }
 
   word_type=compute_word_type();
 
@@ -427,13 +430,11 @@ exprt e_datat::get_function(
         {
         case instructiont::optiont::PARAMETER: // a parameter
           {
-            const size_t num_params=parameter_types.size();
+            const size_t num_params=parameters.size();
             if(o_it->parameter_number < num_params)
             {
-              irep_idt p_identifier="synth::parameter"+
-                       std::to_string(o_it->parameter_number);
               result=promotion(
-                symbol_exprt(p_identifier, parameter_types[o_it->parameter_number]),
+                parameters[o_it->parameter_number],
                 word_type);
             }
             else // Constant
@@ -530,7 +531,10 @@ exprt e_datat::get_function(
     }
   }
 
-  return promotion(results.back(), return_type);
+  auto promoted_result =
+    promotion(results.back(), return_type);
+
+  return lambda_exprt(parameters, promoted_result);
 }
 
 exprt synth_encodingt::operator()(const exprt &expr)
