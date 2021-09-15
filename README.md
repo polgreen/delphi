@@ -1,6 +1,6 @@
 # Delphi
 
-Delphi is a prototype implementation of SyMO and SMTO (see https://www2.eecs.berkeley.edu/Pubs/TechRpts/2021/EECS-2021-10.html)
+Delphi is a prototype implementation of SyMO and SMTO (see https://www2.eecs.berkeley.edu/Pubs/TechRpts/2021/EECS-2021-10.html). Example benchmarks can be found here: https://github.com/polgreen/oracles
 
 ### Building
 Prerequisites: All prerequisties for CBMC must be installed (https://github.com/diffblue/cbmc/blob/develop/COMPILING.md). Plus Z3 and CVC4(version 1.8 or greater) must be added to $PATH.  
