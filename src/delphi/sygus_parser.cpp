@@ -605,3 +605,14 @@ void sygus_parsert::expand_function_applications(exprt &expr)
     }
   }
 }
+
+void sygus_parsert::parse_model()
+{
+
+
+  command_sequence();
+
+  if(smt2_tokenizer.peek()!=smt2_tokenizert::CLOSE)
+    throw error("model must end with CLOSE");
+  next_token();
+}

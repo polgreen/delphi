@@ -72,7 +72,6 @@ bool contains_synth_fun_app(const exprt &expr, const problemt &problem)
 
 bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, oracle_solvert &solver)
 {
-  // std::cout<<"replacing oracle in "<< expr2sygus(expr)<<std::endl;
   for (auto &op : expr.operands())
     if (!replace_oracles(op, problem, solver))
       return false;
@@ -100,7 +99,9 @@ bool oracle_interfacet::replace_oracles(exprt &expr, const problemt &problem, or
       }  
       exprt result = solver.get_oracle_value(func_app);
       if (result != nil_exprt())
+      {
         expr = result;
+      }
     }
   }
   return true;
@@ -188,7 +189,10 @@ void oracle_interfacet::build_counterexample_constraint(oracle_solvert &solver,
       // std::cout<<"warning adding counterexample into constraint did nothing \n";
 
     if(!replace_oracles(synthesis_constraint, problem, solver))
+    {
+      std::cout<<"Did not manage to replace oracles "<<std::endl;
       continue;
+    }
 
     if(synthesis_constraint.id()==ID_and)
     {

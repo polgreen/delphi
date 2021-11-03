@@ -47,6 +47,8 @@ public:
   std::vector<exprt> synth_fun_helpers;
   void replace_higher_order_logic();
 
+  void parse_model();
+
 protected:
   // commands
   void setup_commands();

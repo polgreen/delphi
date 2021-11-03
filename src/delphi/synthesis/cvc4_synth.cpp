@@ -194,7 +194,7 @@ std::string cvc4_syntht::build_query(const problemt &problem)
   return query;
 }
 
-
+#include <iostream>
 decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const problemt &problem)
 {
   if (!in)
@@ -202,12 +202,14 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
     std::cout << "Failed to open input file";
     return decision_proceduret::resultt::D_ERROR;
   }
-  std::string firstline;
-  std::getline(in, firstline);
-  if (firstline == "unknown")
+  if(in.peek()=='u') // is "unknown"
     return decision_proceduret::resultt::D_UNSATISFIABLE;
 
-  sygus_parsert result_parser(in);
+  // remove first and last parenthesis
+  std::ostringstream tmp_stream;
+  tmp_stream << in.rdbuf();
+  std::istringstream new_source(std::string(tmp_stream.str(), 1, tmp_stream.str().size()-3));  
+  sygus_parsert result_parser(new_source);
   try
   {
     result_parser.parse();
@@ -250,11 +252,11 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
 decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
 {
   const std::string query = build_query(problem);
-#ifdef DEBUGSYGUS
-  std::cout
-      << "Solving query:\n"
-      << query << std::endl;
-#endif
+
+  // std::cout
+  //     << "Solving query:\n"
+  //     << query << std::endl;
+
 
   temporary_filet
       temp_file_problem("sygus_problem_", ""),
