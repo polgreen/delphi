@@ -208,6 +208,9 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
   // remove first and last parenthesis
   std::ostringstream tmp_stream;
   tmp_stream << in.rdbuf();
+  if(tmp_stream.str().size() <=3)
+    return decision_proceduret::resultt::D_UNSATISFIABLE;
+
   std::istringstream new_source(std::string(tmp_stream.str(), 1, tmp_stream.str().size()-3));  
   sygus_parsert result_parser(new_source);
   try
