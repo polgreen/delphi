@@ -55,7 +55,7 @@ Input files must have the file extension '.smt' if the problem is an SMTO proble
 #### SMTO
 The following SMTO example checks whether there exist 3 prime factors fo 76:
 ~~~
-(declare-oracle-fun isPrime isprime ((x Int)) Bool)
+(declare-oracle-fun isPrime isprime (Int) Bool)
 (declare-fun f1 () Int)
 (declare-fun f2 () Int)
 (declare-fun f3 () Int)
