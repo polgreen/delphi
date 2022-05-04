@@ -20,6 +20,8 @@ public:
     setup_commands();
   }
 
+  void parse_model();
+
   using smt2_errort = smt2_tokenizert::smt2_errort;
 
   enum invariant_variablet { PRIMED, UNPRIMED };

@@ -202,15 +202,12 @@ decision_proceduret::resultt cvc4_syntht::read_result(std::istream &in, const pr
     std::cout << "Failed to open input file";
     return decision_proceduret::resultt::D_ERROR;
   }
-  std::string firstline;
-  std::getline(in, firstline);
-  if (firstline == "unknown")
-    return decision_proceduret::resultt::D_UNSATISFIABLE;
 
   sygus_parsert result_parser(in);
+
   try
   {
-    result_parser.parse();
+    result_parser.parse_model();
   }
   catch (const sygus_parsert::smt2_errort &e)
   {
@@ -271,15 +268,15 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
 
 // TODO pass these arguments via command line
   if(magic_constants)
-    argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--sygus-grammar-cons=any-const", "--no-sygus-pbe", "--sygus-repair-const", temp_file_problem()};
+    argv = {"cvc5", "--lang", "sygus2", "--sygus-enum=fast", "--sygus-grammar-cons=any-const", "--no-sygus-pbe", "--sygus-repair-const", temp_file_problem()};
   else if(usePBE)
   {
-    argv = {"cvc4", "--lang", "sygus2", temp_file_problem()};
+    argv = {"cvc5", "--lang", "sygus2", temp_file_problem()};
   }
   else if(FP)
-    argv = {"cvc4", "--lang", "sygus2", "--fp-exp",  temp_file_problem()};
+    argv = {"cvc5", "--lang", "sygus2", "--fp-exp",  temp_file_problem()};
   else
-    argv = {"cvc4", "--lang", "sygus2", "--sygus-active-gen=enum", "--no-sygus-pbe", temp_file_problem()};
+    argv = {"cvc5", "--lang", "sygus2", "--sygus-enum=fast", "--no-sygus-pbe", temp_file_problem()};
   
   int res =
       run(argv[0], argv, stdin_filename, temp_file_stdout(), temp_file_stderr());
@@ -287,6 +284,7 @@ decision_proceduret::resultt cvc4_syntht::solve(const problemt &problem)
     return decision_proceduret::resultt::D_ERROR;
   else
   {
+    
     std::ifstream in(temp_file_stdout());
     return read_result(in, problem);
   }
