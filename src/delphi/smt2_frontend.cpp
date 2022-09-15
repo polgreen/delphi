@@ -280,7 +280,7 @@ void smt2_solvert::setup_commands()
 
       bool first = true;
 
-      std::cout << "(\n";
+      std::cout << "(model \n";
       for(const auto &id : id_map)
       {
         const symbol_exprt name(id.first, id.second.type);
