@@ -2,6 +2,7 @@
 #include "synthesis/simple_synth.h"
 #include "synthesis/cvc4_synth.h"
 #include "verification/oracle_interface.h"
+#include "utils/dump_problems.h"
 #include "ogis.h"
 #include "sygus_parser.h"
 #include "expr2sygus.h"
@@ -82,6 +83,8 @@ problemt build_problem(sygus_parsert &parser)
   for(auto &h : problem.synth_fun_helpers)
     parser.expand_function_applications(h);
 
+  problem.logic = parser.logic;
+
   return problem;
 }
 
@@ -124,6 +127,22 @@ int sygus_frontend(const cmdlinet &cmdline, std::istream &in)
 
   // build problem
   problemt problem = build_problem(parser);
+
+  if(cmdline.isset("dump-problem-as-smt"))
+  {
+    print_smt_problem(problem);
+    return 0;
+  }
+  if(cmdline.isset("dump-problem"))
+  {
+    print_sygus_problem(problem);
+    return 0;
+  }
+
+  if(cmdline.isset("check-solution"))
+  {
+    print_smt_solution_check(problem);
+  }
 
   // get synthesiser and verifier
 

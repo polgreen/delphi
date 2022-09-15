@@ -235,15 +235,14 @@ void sygus_parsert::setup_commands()
     if(id_map.find(id_prime)!=id_map.end())
       throw error("variable declared twice");
 
-    id_map.emplace(
-      std::piecewise_construct,
-      std::forward_as_tuple(id),
-      std::forward_as_tuple(idt::VARIABLE, exprt(ID_nil, type)));
 
-    id_map.emplace(
-      std::piecewise_construct,
-      std::forward_as_tuple(id_prime),
-      std::forward_as_tuple(idt::VARIABLE, exprt(ID_nil, type)));
+    add_unique_id(id, exprt(ID_nil, type));
+    add_unique_id(id_prime, exprt(ID_nil, type));
+    if(type.id()!=ID_mathematical_function)
+    {
+      variable_set.insert(symbol_exprt(id, type)); 
+      variable_set.insert(symbol_exprt(id_prime, type)); 
+    } 
   };
 
   commands["constraint"] = [this] {

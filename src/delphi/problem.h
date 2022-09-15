@@ -36,6 +36,7 @@ public:
   std::set<constant_exprt> literals; ///
   std::size_t iteration;
   std::vector<exprt> synth_fun_helpers;
+  std::string logic;
 };
 
 class solutiont
