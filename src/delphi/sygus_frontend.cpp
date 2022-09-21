@@ -139,13 +139,14 @@ int sygus_frontend(const cmdlinet &cmdline, std::istream &in)
     return 0;
   }
 
-  if(cmdline.isset("check-solution"))
+  if(cmdline.isset("print-check-file"))
   {
-    print_smt_solution_check(problem);
+    std::string function=cmdline.get_value("print-check-file");    
+    print_smt_solution_check(problem, function);
+    return 0;
   }
 
   // get synthesiser and verifier
-
   symbol_tablet symbol_table;
   namespacet ns(symbol_table);
 

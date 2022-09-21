@@ -111,8 +111,40 @@ void print_smt_problem(const problemt &problem)
     std::cout<<"(get-model)"<<std::endl;
 }
 
-void print_smt_solution_check(const problemt &problem)
+void print_smt_solution_check(const problemt &problem, 
+                              const std::string &solution)
 {
+    std::cout<< "(set-logic " << problem.logic << ")" << std::endl;
+    std::cout<< "(set-option :produce-models true)" << std::endl;
 
+    std::cout<<solution<<std::endl;
+    
+    for(const auto &v: problem.free_variables)
+    {
+        std::cout<<"(declare-fun " << id2string(to_symbol_expr(v).get_identifier())
+            <<" () " <<convert_type(v.type()) << ")" << std::endl;
+    }
+
+    // constraints
+    std::cout<<"(assert (not  ";
+
+    const auto& problem_constraints = 
+        (problem.alternative_constraints.size()==0)?
+            problem.constraints:problem.alternative_constraints;
+        
+    if(problem_constraints.size()>1)
+        std::cout<<" (and ";
+    
+    for(const auto &c: problem_constraints)
+        std::cout<<" "<<expr2sygus(c)<<" "<<std::endl;
+
+
+    if(problem_constraints.size()>1)
+        std::cout<<" )";//close conjunction
+    
+    std::cout<<"))"<<std::endl;//close not and assert 
+
+    std::cout<<"(check-sat)"<<std::endl;
+    std::cout<<"(get-model)"<<std::endl;
 }
 
