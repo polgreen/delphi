@@ -5,6 +5,8 @@ verification/oracle_solver.cpp \
 verification/negation_oracle_solver.cpp \
 verification/oracle_response_parser.cpp \
 utils/dump_problems.cpp \
+utils/check_solution.cpp \
+utils/define_fun_parser.cpp \
 synthesis/synthesizer.cpp verification/verify_encoding.cpp literals.cpp synthesis/cvc4_synth.cpp
 
 OBJ+= ../../$(CPROVER_DIR)/src/ansi-c/ansi-c$(LIBEXT) \

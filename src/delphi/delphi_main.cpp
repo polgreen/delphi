@@ -27,6 +27,10 @@
   "(smt)"                                                                 \
   "(pbe)"                                                                 \
   "(fp)"                                                                  \
+  "(dump-problem-as-smt)"                                                 \
+  "(dump-problem)"                                                        \
+  "(print-check-file):"                                                   \
+  "(check-solution):"                                                     \
 /// File ending of SMT2 files. Used to determine the language frontend that
 /// shall be used.
 #define SMT2_FILE_ENDING ".smt2"
@@ -109,7 +113,13 @@ int main(int argc, const char *argv[])
     if(has_suffix(cmdline.args.back(), SYGUS_FILE_ENDING))
       return sygus_frontend(cmdline);
     else if(has_suffix(cmdline.args.back(), SMT2_FILE_ENDING))
+    {
+      if(cmdline.isset("dump-problem")|| cmdline.isset("dump-problem-as-smt") || cmdline.isset("print-check-file"))
+        std::cerr << "Cannot dump or print check file for SMT problem\n";
+        return 1;
+
       return smt2_frontend(cmdline);
+    }
     else
     {
       std::cerr<<"Unknown file type \n";
