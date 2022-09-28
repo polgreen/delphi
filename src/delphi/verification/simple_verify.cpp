@@ -90,7 +90,6 @@ simple_verifyt::resultt simple_verifyt::operator()(problemt &problem,
     const solutiont &solution,
     decision_proceduret &solver)
   {
-    display_solution(solution);
     add_problem(problem, solution, solver);
     decision_proceduret::resultt result = solver();
 
