@@ -2,6 +2,7 @@ SRC = delphi_main.cpp expr2sygus.cpp ogis.cpp sygus_parser.cpp sygus_frontend.cp
 synthesis/simple_synth.cpp synthesis/synth_encoding.cpp smt2_frontend.cpp \
 verification/oracle_interface.cpp \
 verification/oracle_solver.cpp \
+verification/simple_verify.cpp \
 verification/negation_oracle_solver.cpp \
 verification/oracle_response_parser.cpp \
 utils/dump_problems.cpp \
