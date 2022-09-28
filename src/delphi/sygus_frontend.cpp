@@ -2,7 +2,9 @@
 #include "synthesis/simple_synth.h"
 #include "synthesis/cvc4_synth.h"
 #include "verification/oracle_interface.h"
+#include "verification/simple_verify.h"
 #include "utils/dump_problems.h"
+#include "utils/check_solution.h"
 #include "ogis.h"
 #include "sygus_parser.h"
 #include "expr2sygus.h"
@@ -149,6 +151,14 @@ int sygus_frontend(const cmdlinet &cmdline, std::istream &in)
   // get synthesiser and verifier
   symbol_tablet symbol_table;
   namespacet ns(symbol_table);
+
+  if(cmdline.isset("check-solution"))
+  {
+    simple_verifyt verifier(ns, message_handler, cmdline.isset("bitblast"));
+    std::string function=cmdline.get_value("check-solution");    
+    check_solution(problem, function, ns, verifier);
+    return 0;
+  }
 
 
   if(!cmdline.isset("symbolic-synth"))
