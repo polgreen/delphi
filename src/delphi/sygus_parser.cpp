@@ -654,7 +654,8 @@ void sygus_parsert::expand_function_applications(exprt &expr)
       const auto &f=f_it->second;
 
       if(f.definition.is_not_nil() &&
-         f.type.id() != ID_mathematical_function)
+         f.type.id() != ID_mathematical_function 
+         && f.kind != smt2_parsert::idt::kindt::BINDING)
       {
         expr = f.definition;
         // recursively!
