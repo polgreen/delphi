@@ -18,6 +18,7 @@ std::size_t boolbv_width(const typet &expr_type)
     return to_bv_type(expr_type).get_width();
   else
     assert(0);
+  return 0;
 }
 
 std::string convert_constant(const constant_exprt &expr)

@@ -140,11 +140,12 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
 
 exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std::vector<std::string> &argv)
 {
+#ifdef DEBUG
   log.debug() << "Running oracle (verification) ";
   for (auto &arg : argv)
     log.debug() << ' ' << arg;
   log.debug() << messaget::eom;
-
+#endif
   // run the oracle binary
   std::ostringstream stdout_stream;
 
@@ -163,7 +164,7 @@ exprt oracle_solvert::make_oracle_call(const std::string &binary_name, const std
   }
   // we assume that the oracle returns the result in SMT-LIB format
   std::istringstream oracle_response_istream(stdout_stream.str());
-  log.debug() << "Oracle response is "<< stdout_stream.str() << messaget::eom;
+//  log.debug() << "Oracle response is "<< stdout_stream.str() << messaget::eom;
   return oracle_response_parser(oracle_response_istream);
 }
 

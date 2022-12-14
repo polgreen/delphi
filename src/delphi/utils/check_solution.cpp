@@ -29,4 +29,6 @@ int check_solution( problemt &problem,
         std::cout<<"Verification failed" <<std::endl; 
         return 0;    
     }
+// should not get here
+  return 0;
 }

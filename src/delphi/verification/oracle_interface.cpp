@@ -241,11 +241,12 @@ void oracle_interfacet::get_oracle_constraints(
     argv.push_back(stream.str());
   }
 
+#ifdef DEBUG
   log.debug() << "Running oracle (synthesis)";
   for (auto &arg : argv)
     log.debug() << ' ' << arg;
   log.debug() << messaget::eom;
-
+#endif
   // run the oracle binary
   std::ostringstream stdout_stream;
 
@@ -276,8 +277,10 @@ void oracle_interfacet::get_oracle_constraints(
     {
       try{
       auto response = oracle_response_parser(oracle_response_istream);
+#ifdef DEBUG
       log.debug() << "oracle response for " << format(return_parameter)
                   << ": " << expr2sygus(response) << messaget::eom;
+#endif  
       replace_symbol.set(to_symbol_expr(return_parameter), response);
       }
       catch(...){}
@@ -286,8 +289,8 @@ void oracle_interfacet::get_oracle_constraints(
     exprt constraint = oracle.constraint;
     replace_symbol(constraint);
 
-    log.status() << "oracle constraint: "
-              << expr2sygus(constraint) << messaget::eom;
+//    log.status() << "oracle constraint: "
+  //            << expr2sygus(constraint) << messaget::eom;
     problem.synthesis_constraints.insert(constraint);
   }
 

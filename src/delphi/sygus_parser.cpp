@@ -296,6 +296,7 @@ void sygus_parsert::setup_commands()
 
   commands["check-synth"] = [this] {
     action="check-synth";
+    exit=true;
   };
 }
 

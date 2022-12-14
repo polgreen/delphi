@@ -75,7 +75,7 @@ void display_solution(const solutiont &solution, std::vector<exprt> synth_fun_he
 // problem is dynamic
 ogist::resultt ogist::doit()
 {
-  std::cout<<"Start OGIS"<<std::endl;
+  //std::cout<<"Start OGIS"<<std::endl;
   // the actual synthesis loop
   std::size_t program_size=1;
   std::size_t iteration=0;
@@ -88,11 +88,11 @@ ogist::resultt ogist::doit()
 
     synthesizer.set_program_size(program_size);
     // synthesiser synthesise solution to problem so far
-    std::cout<<"SYNTH iteration "<<iteration<<std::endl;
+    //std::cout<<"SYNTH iteration "<<iteration<<std::endl;
     switch(synthesizer(problem))
     {
     case synthesizert::CANDIDATE:
-        std::cout<<"Got solution ";
+      //  std::cout<<"Got solution ";
         output_expressions(synthesizer.get_solution().functions, ns, std::cout);
         // got solution
         // check if solution is the same each time?
@@ -101,14 +101,14 @@ ogist::resultt ogist::doit()
       if(program_size<10 && increase_program_size)
       {
         program_size+=1;
-        std::cout<<"increase program size to "<< program_size << std::endl;
+        //std::cout<<"increase program size to "<< program_size << std::endl;
         synthesizer.set_program_size(program_size);
         continue; // do another attempt to synthesize
       }
       else if(problem.alternative_constraints.size()>0 
               && !switched_to_alternative_constraints)
       {
-        std::cout<<"switching to alternative constraints"<<std::endl;
+      //  std::cout<<"switching to alternative constraints"<<std::endl;
         problem.constraints = problem.alternative_constraints;
         problem.synthesis_constraints.clear();
         switched_to_alternative_constraints=true;
@@ -116,24 +116,24 @@ ogist::resultt ogist::doit()
       }
       else
       {
-        std::cout<<"No solution found"<<std::endl;
+      //  std::cout<<"No solution found"<<std::endl;
         return decision_proceduret::resultt::D_UNSATISFIABLE;
       }
 
       return ogist::resultt::D_ERROR;
     }
 
-    std::cout<<"VERIFY iteration "<< iteration<<std::endl;
+    //std::cout<<"VERIFY iteration "<< iteration<<std::endl;
     solutiont solution = synthesizer.get_solution();
-    std::size_t num_synth_constraints = problem.synthesis_constraints.size();
+    //std::size_t num_synth_constraints = problem.synthesis_constraints.size();
     switch(verify(problem, solution))
     {
     case verifyt::PASS:
-      std::cout<<"Verification passed" <<std::endl;
+      //std::cout<<"Verification passed" <<std::endl;
       display_solution(solution, problem.synth_fun_helpers);
       return decision_proceduret::resultt::D_SATISFIABLE;
     case verifyt::FAIL:
-      std::cout<<"Fail: got "<<problem.synthesis_constraints.size()-num_synth_constraints <<" new constraints"<<std::endl;
+      //std::cout<<"Fail: got "<<problem.synthesis_constraints.size()-num_synth_constraints <<" new constraints"<<std::endl;
       synthesizer.increment_synthesis_constraints();
       break;
     }
