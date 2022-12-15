@@ -53,21 +53,21 @@ ogist::ogist(
 }
 #include <iostream>
 
-void display_solution(const solutiont &solution, std::vector<exprt> synth_fun_helpers)
+void display_solution(const solutiont &solution, const problemt &problem)
 {
-  std::cout<<"SOLUTION:"<<std::endl;
   for(const auto & f: solution.functions)
   {
-    if(synth_fun_helpers.size()==0)
-      std::cout<<expr2sygus(f.first)<<"  =  "<<expr2sygus(f.second)<<std::endl;
+    const auto& synth_fun_id = f.first.get_identifier();
+    if(problem.synth_fun_helpers.size()==0)
+      std::cout<<expr2sygus_fun_def(f.first, f.second, problem.synthesis_functions.at(synth_fun_id).parameters) <<std::endl;
     else
     {
       exprt result = f.second;
-      for(const auto &h: synth_fun_helpers)
+      for(const auto &h: problem.synth_fun_helpers)
       {
         result = and_exprt(f.second, h);
       }
-      std::cout<<expr2sygus(f.first)<<"  =  "<<expr2sygus(result)<<std::endl;
+      std::cout<<expr2sygus_fun_def(f.first, result, problem.synthesis_functions.at(synth_fun_id).parameters) <<std::endl;
     }
   }
 }
@@ -93,7 +93,7 @@ ogist::resultt ogist::doit()
     {
     case synthesizert::CANDIDATE:
       //  std::cout<<"Got solution ";
-        output_expressions(synthesizer.get_solution().functions, ns, std::cout);
+        // output_expressions(synthesizer.get_solution().functions, ns, std::cout);
         // got solution
         // check if solution is the same each time?
       break;
@@ -130,7 +130,7 @@ ogist::resultt ogist::doit()
     {
     case verifyt::PASS:
       //std::cout<<"Verification passed" <<std::endl;
-      display_solution(solution, problem.synth_fun_helpers);
+      display_solution(solution, problem);
       return decision_proceduret::resultt::D_SATISFIABLE;
     case verifyt::FAIL:
       //std::cout<<"Fail: got "<<problem.synthesis_constraints.size()-num_synth_constraints <<" new constraints"<<std::endl;
