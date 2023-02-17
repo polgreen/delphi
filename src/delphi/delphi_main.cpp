@@ -113,12 +113,16 @@ int main(int argc, const char *argv[])
   try
   {
     if(has_suffix(cmdline.args.back(), SYGUS_FILE_ENDING))
+    {
       return sygus_frontend(cmdline);
+    }
     else if(has_suffix(cmdline.args.back(), SMT2_FILE_ENDING))
     {
       if(cmdline.isset("dump-problem")|| cmdline.isset("dump-problem-as-smt") || cmdline.isset("print-check-file"))
+      {
         std::cerr << "Cannot dump or print check file for SMT problem\n";
         return 1;
+      }
 
       return smt2_frontend(cmdline);
     }
