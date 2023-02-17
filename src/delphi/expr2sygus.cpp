@@ -1673,6 +1673,15 @@ std::string convert_div(const div_exprt &expr)
     // the rounding mode.  See smt2_convt::convert_floatbv_div.
     UNREACHABLE;
   }
+  else if(expr.type().id()==ID_real)
+  {
+    result ="(/ ";
+    result += convert_expr(expr.op0());
+    result += " ";
+    result += convert_expr(expr.op1());
+    result += ")";
+
+  }
   else
     UNEXPECTEDCASE("unsupported type for /: "+expr.type().id_string());
   return result;
