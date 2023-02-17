@@ -94,7 +94,9 @@ int main(int argc, const char *argv[])
     if(cmdline.isset("symo"))
       return sygus_frontend(cmdline, std::cin);
     else if(cmdline.isset("smto"))
+    {
       return smt2_frontend(cmdline, std::cin);
+    }
     else
     {
      help(std::cout);
