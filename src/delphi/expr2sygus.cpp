@@ -725,6 +725,12 @@ std::string convert_expr(const exprt &expr)
       result+= ")";
   
     }
+    else if(type.id()==ID_integer || type.id()==ID_rational || type.id()==ID_real)
+    {
+      result+= "(abs ";
+      result += convert_expr(abs_expr.op());
+      result+= ")";
+    }
     else
       UNREACHABLE;
   }
@@ -1314,7 +1320,8 @@ std::string convert_relation(const binary_relation_exprt &expr)
     //   result += convert_floatbv(expr);
   }
   else if(op_type.id()==ID_rational ||
-          op_type.id()==ID_integer)
+          op_type.id()==ID_integer ||
+          op_type.id()==ID_real)
   {
     result +="(";
     if(expr.id()==ID_le)
@@ -1549,7 +1556,7 @@ std::string convert_floatbv_plus(const ieee_float_op_exprt &expr)
 std::string convert_minus(const minus_exprt &expr)
 {
   std::string result;
-  if(expr.type().id()==ID_integer)
+  if(expr.type().id()==ID_integer || expr.type().id()==ID_real)
   {
     result += "(- ";
     result += convert_expr(expr.op0());
