@@ -59,10 +59,12 @@ protected:
   messaget log;
   std::size_t number_of_solver_calls = 0;
   std::size_t handle_counter = 0;
+  std::vector<exprt> assump_lits;
 
   using check_resultt = enum { INCONSISTENT, CONSISTENT, ERROR };
   check_resultt check_oracles();
   check_resultt check_oracle(const function_application_exprt &, const applicationt &);
+  check_resultt feas_check();
   exprt call_oracle(const applicationt &application, const std::vector<exprt> &inputs);
   exprt call_oracle(const applicationt &application, const std::vector<exprt> &inputs, bool &isnew);
 

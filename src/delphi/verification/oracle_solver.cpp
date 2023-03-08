@@ -11,6 +11,10 @@
 
 #include <sstream>
 #include <iostream>
+#include <cmath>
+
+#include <solvers/smt2/smt2_dec.h>
+
 
 oracle_solvert::oracle_solvert(
   decision_proceduret &__sub_solver,
@@ -134,7 +138,24 @@ oracle_solvert::check_resultt oracle_solvert::check_oracles()
       return ERROR; // abort
     }
   }
+  if (result == INCONSISTENT)
+      return feas_check();
 
+  return result;
+}
+
+oracle_solvert::check_resultt oracle_solvert::feas_check()
+{
+  oracle_solvert::check_resultt result = CONSISTENT;
+  smt2_dect *dec_solver = dynamic_cast<smt2_dect*>(&sub_solver);
+  dec_solver->push(assump_lits);
+  switch ((*dec_solver)()) {
+    case resultt::D_SATISFIABLE: result = CONSISTENT; break;
+    case resultt::D_UNSATISFIABLE: result = INCONSISTENT; break;
+    case resultt::D_ERROR: result = ERROR; break;
+  }
+  dec_solver->pop();
+  assump_lits.clear();
   return result;
 }
 
